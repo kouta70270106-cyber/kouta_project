@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>永遠の旅人 - 放置系RPG</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="wrapper">
+
+  <!-- Top HUD -->
+  <div id="top-hud">
+    <div id="player-block">
+      <span id="player-name-hud">勇者</span>
+      <span id="player-level-hud" class="level-badge">Lv.1</span>
+      <div class="bar-wrap">
+        <div class="bar-label">HP</div>
+        <div class="bar-bg"><div id="hp-bar" class="bar hp-fill"></div></div>
+        <div id="hp-text" class="bar-text">100/100</div>
+      </div>
+      <div class="bar-wrap">
+        <div class="bar-label">EXP</div>
+        <div class="bar-bg"><div id="exp-bar" class="bar exp-fill"></div></div>
+        <div id="exp-text" class="bar-text">0/100</div>
+      </div>
+    </div>
+    <div id="time-block">
+      <div class="time-item">📅 <span id="day-display">Day 1</span></div>
+      <div class="time-item">🌙 <span id="month-display">月 1</span></div>
+      <div class="time-item boss-timer">⚡ボス: <span id="boss-timer-display">10日後</span></div>
+    </div>
+    <div id="stat-block">
+      <div class="stat-item">⚔️ <span id="atk-display">10</span></div>
+      <div class="stat-item">🛡️ <span id="def-display">5</span></div>
+      <div class="stat-item">💰 <span id="gold-display">0</span></div>
+      <div class="stat-item">📍 <span id="area-display">草原</span></div>
+    </div>
+  </div>
+
+  <!-- Main area -->
+  <div id="main-area">
+    <!-- Game canvas container -->
+    <div id="game-container"></div>
+
+    <!-- Battle log -->
+    <div id="battle-log">
+      <div id="log-inner"></div>
+    </div>
+  </div>
+
+  <!-- Side panel -->
+  <div id="side-panel">
+    <div id="panel-tabs">
+      <button class="tab-btn active" data-tab="equipment">装備</button>
+      <button class="tab-btn" data-tab="inventory">荷物</button>
+      <button class="tab-btn" data-tab="quests">依頼</button>
+      <button class="tab-btn" data-tab="guild">ギルド</button>
+      <button class="tab-btn" data-tab="multi">マルチ</button>
+    </div>
+
+    <!-- Equipment Tab -->
+    <div id="tab-equipment" class="tab-content active">
+      <div class="section-title">装備中</div>
+      <div class="equip-slot">
+        <span class="slot-icon">⚔️</span>
+        <span class="slot-name">武器</span>
+        <span class="slot-item" id="eq-weapon">なし</span>
+      </div>
+      <div class="equip-slot">
+        <span class="slot-icon">🛡️</span>
+        <span class="slot-name">防具</span>
+        <span class="slot-item" id="eq-armor">なし</span>
+      </div>
+      <div class="equip-slot">
+        <span class="slot-icon">💍</span>
+        <span class="slot-name">装飾</span>
+        <span class="slot-item" id="eq-accessory">なし</span>
+      </div>
+      <div class="section-title" style="margin-top:12px">詳細ステータス</div>
+      <div id="stats-detail"></div>
+    </div>
+
+    <!-- Inventory Tab -->
+    <div id="tab-inventory" class="tab-content">
+      <div class="section-title">所持アイテム <span id="inv-count">(0/20)</span></div>
+      <div id="inventory-list"></div>
+    </div>
+
+    <!-- Quests Tab -->
+    <div id="tab-quests" class="tab-content">
+      <div class="section-title">受注中の依頼</div>
+      <div id="quest-active"></div>
+      <div class="section-title" style="margin-top:10px">完了した依頼</div>
+      <div id="quest-completed"></div>
+    </div>
+
+    <!-- Guild Tab -->
+    <div id="tab-guild" class="tab-content">
+      <div id="guild-joined-view">
+        <div class="section-title">所属ギルド</div>
+        <div id="guild-display-name">未所属</div>
+        <div id="guild-bonus-text"></div>
+        <div id="guild-desc-text" style="font-size:11px;color:#aaa;margin-top:6px"></div>
+      </div>
+      <div class="section-title" style="margin-top:12px">統計</div>
+      <div id="guild-stats"></div>
+    </div>
+
+    <!-- Multi Tab -->
+    <div id="tab-multi" class="tab-content">
+      <div class="section-title">マルチプレイ</div>
+      <div id="multi-status-area">
+        <div id="multi-status-text" class="multi-status offline">● オフライン</div>
+      </div>
+      <div id="multi-controls">
+        <input type="text" id="passphrase-input" placeholder="合言葉（例: sakura123）" maxlength="20">
+        <button id="join-btn" class="btn btn-primary">参加 / 部屋を作る</button>
+        <button id="leave-btn" class="btn btn-danger" style="display:none">退出する</button>
+      </div>
+      <div id="partner-area" style="display:none">
+        <div class="section-title" style="margin-top:12px">パートナー</div>
+        <div id="partner-info"></div>
+      </div>
+      <div class="multi-hint">
+        ※ 同じ合言葉を使うと一緒に旅ができます
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Guild Selection Modal (shown at month start) -->
+<div id="guild-modal" class="modal-overlay" style="display:none">
+  <div class="modal-box">
+    <div class="modal-title">⚜️ ギルド選択</div>
+    <div class="modal-subtitle">今月参加するギルドを選んでください</div>
+    <div id="guild-choices" class="guild-choice-list"></div>
+  </div>
+</div>
+
+<!-- Item Drop Modal -->
+<div id="item-modal" class="modal-overlay" style="display:none">
+  <div class="modal-box small">
+    <div class="modal-title">💎 アイテム入手！</div>
+    <div id="item-modal-content"></div>
+    <button class="btn btn-primary" onclick="document.getElementById('item-modal').style.display='none'">閉じる</button>
+  </div>
+</div>
+
+<!-- Name Input Modal (first launch) -->
+<div id="name-modal" class="modal-overlay">
+  <div class="modal-box small">
+    <div class="modal-title">⚔️ 永遠の旅人</div>
+    <div class="modal-subtitle">あなたの名前を入力してください</div>
+    <input type="text" id="hero-name-input" placeholder="勇者" maxlength="10" value="勇者">
+    <button class="btn btn-primary" id="start-game-btn">旅を始める</button>
+  </div>
+</div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser.min.js"></script>
+<script src="js/data.js"></script>
+<script src="js/GameState.js"></script>
+<script src="js/MultiplayerManager.js"></script>
+<script src="js/scenes/BootScene.js"></script>
+<script src="js/scenes/JourneyScene.js"></script>
+<script src="js/scenes/DungeonScene.js"></script>
+<script src="js/scenes/BossScene.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>

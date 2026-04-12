@@ -49,3 +49,7 @@ gradle/wrapper/gradle-wrapper.jar
 
 ### Claude Code local settings ###
 settings.json
+
+### Node.js ###
+node_modules/
+npm-debug.log*

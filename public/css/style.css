@@ -1,0 +1,493 @@
+/* ===== Base ===== */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: #060610;
+  color: #d4c8a8;
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  font-size: 13px;
+  overflow: hidden;
+  height: 100vh;
+}
+
+/* ===== Layout ===== */
+#wrapper {
+  display: grid;
+  grid-template-columns: 1fr 260px;
+  grid-template-rows: 64px 1fr;
+  height: 100vh;
+  max-width: 1100px;
+  min-width: 800px;
+  margin: 0 auto;
+  gap: 4px;
+  padding: 4px;
+}
+
+#top-hud {
+  grid-column: 1 / 3;
+  background: linear-gradient(135deg, #0f0f1e 0%, #1a1a30 100%);
+  border: 1px solid #2a2a4a;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  padding: 6px 12px;
+  gap: 20px;
+}
+
+#main-area {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-height: 0;
+}
+
+#game-container {
+  flex: 1;
+  border: 1px solid #2a2a4a;
+  border-radius: 6px;
+  overflow: hidden;
+  background: #08080f;
+}
+
+#game-container canvas {
+  display: block;
+}
+
+#battle-log {
+  height: 130px;
+  background: #080812;
+  border: 1px solid #2a2a4a;
+  border-radius: 6px;
+  overflow-y: auto;
+  padding: 6px 10px;
+}
+
+#log-inner {
+  display: flex;
+  flex-direction: column-reverse;
+}
+
+.log-entry {
+  font-size: 12px;
+  line-height: 1.6;
+  padding: 1px 0;
+  border-bottom: 1px solid #11111f;
+  color: #b0a890;
+}
+
+.log-entry.highlight { color: #ffd700; }
+.log-entry.danger { color: #ff6644; }
+.log-entry.success { color: #44ff88; }
+.log-entry.rare { color: #44aaff; }
+.log-entry.legendary { color: #ffaa22; }
+
+#side-panel {
+  background: #0c0c1a;
+  border: 1px solid #2a2a4a;
+  border-radius: 6px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  grid-column: 2;
+  grid-row: 2;
+}
+
+/* ===== Top HUD ===== */
+#player-block {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+}
+
+#player-name-hud {
+  font-size: 15px;
+  font-weight: bold;
+  color: #ffd700;
+  white-space: nowrap;
+}
+
+.level-badge {
+  background: #2a1a4a;
+  border: 1px solid #6644aa;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 12px;
+  color: #cc99ff;
+  white-space: nowrap;
+}
+
+.bar-wrap {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.bar-label {
+  font-size: 11px;
+  color: #888;
+  width: 28px;
+}
+
+.bar-bg {
+  width: 100px;
+  height: 10px;
+  background: #1a1a2a;
+  border-radius: 5px;
+  overflow: hidden;
+  border: 1px solid #2a2a4a;
+}
+
+.bar {
+  height: 100%;
+  border-radius: 5px;
+  transition: width 0.3s ease;
+}
+
+.hp-fill { background: linear-gradient(90deg, #cc2222, #ff4444); }
+.exp-fill { background: linear-gradient(90deg, #2255cc, #4488ff); }
+
+.bar-text {
+  font-size: 10px;
+  color: #888;
+  white-space: nowrap;
+}
+
+#time-block {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.time-item {
+  font-size: 12px;
+  color: #a090c0;
+  white-space: nowrap;
+}
+
+.boss-timer { color: #ff8844; font-weight: bold; }
+
+#stat-block {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.stat-item {
+  font-size: 13px;
+  color: #c0b080;
+  white-space: nowrap;
+}
+
+/* ===== Tabs ===== */
+#panel-tabs {
+  display: flex;
+  border-bottom: 1px solid #2a2a4a;
+  background: #080812;
+}
+
+.tab-btn {
+  flex: 1;
+  padding: 8px 2px;
+  background: none;
+  border: none;
+  color: #666;
+  cursor: pointer;
+  font-size: 11px;
+  transition: all 0.2s;
+  border-bottom: 2px solid transparent;
+}
+
+.tab-btn:hover { color: #aaa; background: #111120; }
+.tab-btn.active { color: #ffd700; border-bottom-color: #ffd700; }
+
+.tab-content { display: none; padding: 10px; overflow-y: auto; flex: 1; }
+.tab-content.active { display: block; }
+
+/* ===== Equipment ===== */
+.section-title {
+  font-size: 11px;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 8px;
+  border-bottom: 1px solid #1a1a2a;
+  padding-bottom: 4px;
+}
+
+.equip-slot {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  background: #0f0f1e;
+  border: 1px solid #1a1a2a;
+  border-radius: 4px;
+  margin-bottom: 4px;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+.equip-slot:hover { border-color: #3a3a6a; }
+
+.slot-icon { font-size: 14px; }
+.slot-name { font-size: 11px; color: #666; width: 28px; }
+.slot-item { font-size: 12px; color: #c8a84b; flex: 1; }
+
+.stat-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 3px 0;
+  font-size: 12px;
+  color: #9090b0;
+}
+
+.stat-row span { color: #e0d0a0; }
+
+/* ===== Inventory ===== */
+.inv-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 8px;
+  background: #0f0f1e;
+  border: 1px solid #1a1a2a;
+  border-radius: 4px;
+  margin-bottom: 3px;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+.inv-item:hover { border-color: #3a3a6a; }
+
+.inv-item-name { flex: 1; font-size: 12px; }
+.inv-item-type { font-size: 10px; color: #666; }
+
+.rarity-common { color: #d4c8a8; }
+.rarity-uncommon { color: #44ff88; }
+.rarity-rare { color: #4488ff; }
+.rarity-legendary { color: #ffaa22; }
+
+/* ===== Quests ===== */
+.quest-card {
+  background: #0f0f1e;
+  border: 1px solid #1a1a2a;
+  border-radius: 4px;
+  padding: 8px;
+  margin-bottom: 6px;
+  font-size: 12px;
+}
+
+.quest-title { color: #ffd700; font-weight: bold; margin-bottom: 4px; }
+.quest-desc { color: #aaa; margin-bottom: 4px; }
+.quest-progress { color: #44aaff; font-size: 11px; }
+.quest-reward { color: #44ff88; font-size: 11px; margin-top: 4px; }
+.quest-done { border-color: #224422; opacity: 0.6; }
+
+/* ===== Guild ===== */
+#guild-display-name {
+  font-size: 15px;
+  font-weight: bold;
+  color: #ffd700;
+  padding: 8px;
+  background: #0f0f1e;
+  border: 1px solid #2a2a1a;
+  border-radius: 4px;
+  margin-bottom: 8px;
+}
+
+#guild-bonus-text {
+  font-size: 12px;
+  color: #44ff88;
+  margin-bottom: 4px;
+}
+
+.guild-stat-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  padding: 2px 0;
+  color: #9090b0;
+}
+
+/* ===== Multiplayer ===== */
+.multi-status {
+  padding: 6px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+  margin-bottom: 8px;
+}
+
+.multi-status.online { background: #0a2a0a; border: 1px solid #224422; color: #44ff88; }
+.multi-status.offline { background: #1a0a0a; border: 1px solid #442222; color: #ff6644; }
+
+#passphrase-input {
+  width: 100%;
+  padding: 8px;
+  background: #0f0f1e;
+  border: 1px solid #2a2a4a;
+  color: #d4c8a8;
+  border-radius: 4px;
+  font-size: 13px;
+  margin-bottom: 6px;
+}
+
+#passphrase-input:focus { outline: none; border-color: #4444aa; }
+
+.multi-hint {
+  font-size: 10px;
+  color: #555;
+  margin-top: 10px;
+  line-height: 1.5;
+}
+
+#partner-info {
+  background: #0f0f1e;
+  border: 1px solid #2a2a4a;
+  border-radius: 4px;
+  padding: 8px;
+  font-size: 12px;
+}
+
+/* ===== Buttons ===== */
+.btn {
+  width: 100%;
+  padding: 8px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: bold;
+  margin-bottom: 4px;
+  transition: all 0.2s;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #1a1a4a, #2a2a6a);
+  border: 1px solid #4444aa;
+  color: #aaaaff;
+}
+
+.btn-primary:hover { background: linear-gradient(135deg, #2a2a6a, #3a3a8a); color: #ffffff; }
+
+.btn-danger {
+  background: linear-gradient(135deg, #4a1a1a, #6a2a2a);
+  border: 1px solid #aa4444;
+  color: #ffaaaa;
+}
+
+.btn-gold {
+  background: linear-gradient(135deg, #3a2a0a, #5a4a1a);
+  border: 1px solid #aa8822;
+  color: #ffd700;
+}
+
+.btn-gold:hover { background: linear-gradient(135deg, #5a4a1a, #7a6a2a); }
+
+/* ===== Modals ===== */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+.modal-box {
+  background: linear-gradient(135deg, #0f0f1e, #1a1a30);
+  border: 2px solid #4444aa;
+  border-radius: 10px;
+  padding: 24px;
+  min-width: 320px;
+  max-width: 500px;
+  text-align: center;
+  box-shadow: 0 0 40px rgba(68,68,170,0.4);
+}
+
+.modal-box.small { min-width: 280px; }
+
+.modal-title {
+  font-size: 20px;
+  font-weight: bold;
+  color: #ffd700;
+  margin-bottom: 8px;
+  text-shadow: 0 0 10px rgba(255,215,0,0.5);
+}
+
+.modal-subtitle {
+  font-size: 13px;
+  color: #888;
+  margin-bottom: 16px;
+}
+
+#hero-name-input {
+  width: 100%;
+  padding: 10px;
+  background: #0a0a18;
+  border: 1px solid #4444aa;
+  color: #ffd700;
+  border-radius: 4px;
+  font-size: 16px;
+  text-align: center;
+  margin-bottom: 12px;
+}
+
+#hero-name-input:focus { outline: none; border-color: #8888ff; }
+
+/* ===== Guild Choice ===== */
+.guild-choice-list {
+  display: flex;
+  gap: 12px;
+  margin-top: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.guild-choice-card {
+  background: #0f0f1e;
+  border: 2px solid #2a2a4a;
+  border-radius: 8px;
+  padding: 16px;
+  width: 140px;
+  cursor: pointer;
+  transition: all 0.3s;
+  text-align: left;
+}
+
+.guild-choice-card:hover {
+  border-color: #6666cc;
+  background: #1a1a30;
+  transform: translateY(-2px);
+}
+
+.guild-choice-card.warriors { border-color: #4a1a1a; }
+.guild-choice-card.warriors:hover { border-color: #cc4444; }
+.guild-choice-card.mages { border-color: #1a1a4a; }
+.guild-choice-card.mages:hover { border-color: #4444cc; }
+.guild-choice-card.thieves { border-color: #1a3a1a; }
+.guild-choice-card.thieves:hover { border-color: #44cc44; }
+
+.guild-card-title { font-size: 14px; font-weight: bold; color: #ffd700; margin-bottom: 6px; }
+.guild-card-desc { font-size: 11px; color: #888; line-height: 1.5; }
+.guild-card-bonus { font-size: 11px; color: #44ff88; margin-top: 6px; }
+
+/* ===== Item Equip Actions ===== */
+.item-actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.item-equip-btn {
+  padding: 3px 8px;
+  font-size: 11px;
+  border-radius: 3px;
+  border: 1px solid #4444aa;
+  background: #1a1a3a;
+  color: #aaaaff;
+  cursor: pointer;
+}
+
+.item-equip-btn:hover { background: #2a2a5a; }
