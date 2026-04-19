@@ -20,6 +20,7 @@ class JourneyScene extends Phaser.Scene {
 
     // ---- Characters ----
     this.playerGfx   = this.add.graphics();
+    this.compGfx     = this.add.graphics();
     this.partnerGfx  = this.add.graphics().setVisible(false);
     this.monsterGfx  = this.add.graphics();
     this.hpBarsGfx   = this.add.graphics();
@@ -193,11 +194,44 @@ class JourneyScene extends Phaser.Scene {
     this.monsterHp -= pDmg;
     this._addFloat(this.monsterX, GROUND_Y - 60, `-${pDmg}`, '#ff4444');
 
-    // Monster → Player
+    // Companions → Monster
+    for (let i = 0; i < gs.companions.length; i++) {
+      const c = gs.companions[i];
+      if (c.hp > 0 && c.downTimer === 0) {
+        const cDmg = Math.max(1, gs.getCompanionAtk(i) - Math.floor(this.currentMonster.def * 0.5));
+        this.monsterHp -= cDmg;
+        const cx = PLAYER_X - 42 * (i + 1);
+        this._addFloat(cx, GROUND_Y - 60, `-${cDmg}`, '#ffaa44');
+      }
+    }
+
+    // Monster → random living party member
     if (this.monsterHp > 0) {
-      const mDmg = Math.max(1, this.currentMonster.atk - pStats.def);
-      gs.player.hp = Math.max(0, gs.player.hp - mDmg);
-      this._addFloat(PLAYER_X, GROUND_Y - 60, `-${mDmg}`, '#ff8844');
+      const targets = [{ type: 'player' }];
+      for (let i = 0; i < gs.companions.length; i++) {
+        if (gs.companions[i].hp > 0 && gs.companions[i].downTimer === 0) {
+          targets.push({ type: 'companion', idx: i });
+        }
+      }
+      const target = targets[Math.floor(Math.random() * targets.length)];
+
+      if (target.type === 'player') {
+        const mDmg = Math.max(1, this.currentMonster.atk - pStats.def);
+        gs.player.hp = Math.max(0, gs.player.hp - mDmg);
+        this._addFloat(PLAYER_X, GROUND_Y - 60, `-${mDmg}`, '#ff8844');
+      } else {
+        const ci = target.idx;
+        const c = gs.companions[ci];
+        const cDef = Math.floor(pStats.def * D.COMPANIONS[ci].defRatio);
+        const mDmg = Math.max(1, this.currentMonster.atk - cDef);
+        c.hp = Math.max(0, c.hp - mDmg);
+        const cx = PLAYER_X - 42 * (ci + 1);
+        this._addFloat(cx, GROUND_Y - 60, `-${mDmg}`, '#ff8844');
+        if (c.hp <= 0) {
+          c.downTimer = 12;
+          gs.addLog(`💀 ${D.COMPANIONS[ci].name}がやられた！ しばらく戦線離脱...`, 'danger');
+        }
+      }
     }
 
     if (this.monsterHp <= 0) {
@@ -357,10 +391,43 @@ class JourneyScene extends Phaser.Scene {
     // Player
     this._drawPlayer();
 
+    // Companions
+    this._drawCompanions();
+
     // Partner
     if (window.multiManager.partnerState) {
       this.partnerGfx.setVisible(true);
       this._drawPartner();
+    }
+  }
+
+  _drawCompanions() {
+    const g = this.compGfx;
+    g.clear();
+    const gs = window.gameState;
+    const bob = this.state === 'walking' ? Math.sin(this.playerBobT * 0.9) * 3 : 0;
+
+    for (let i = 0; i < gs.companions.length; i++) {
+      const c = gs.companions[i];
+      const def = D.COMPANIONS[i];
+      const cx = PLAYER_X - 42 * (i + 1);
+      const y = GROUND_Y - bob;
+
+      if (c.downTimer > 0) {
+        g.fillStyle(0x444444, 0.5);
+        g.fillCircle(cx, GROUND_Y - 10, 12);
+        continue;
+      }
+
+      this._drawHumanoid(g, cx, y, def.color, 0.88);
+
+      // Companion HP bar above head
+      const maxHp = gs.getCompanionMaxHp(i);
+      const pct = Math.max(0, c.hp / maxHp);
+      g.fillStyle(0x111111, 1);
+      g.fillRect(cx - 18, y - 52, 36, 5);
+      g.fillStyle(i === 0 ? 0x5588aa : 0x8866cc, 1);
+      g.fillRect(cx - 18, y - 52, Math.floor(36 * pct), 5);
     }
   }
 

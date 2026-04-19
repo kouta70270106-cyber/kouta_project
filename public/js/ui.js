@@ -31,6 +31,15 @@ function updateUI() {
   document.getElementById('gold-display').textContent = p.gold.toLocaleString();
   document.getElementById('area-display').textContent = D.getArea(gs.journey.distance).name;
 
+  // Companion HP bars
+  for (let i = 0; i < gs.companions.length; i++) {
+    const c = gs.companions[i];
+    const maxHp = gs.getCompanionMaxHp(i);
+    const pct = c.downTimer > 0 ? 0 : Math.round((c.hp / maxHp) * 100);
+    const bar = document.getElementById(`comp-hp-bar-${i}`);
+    if (bar) bar.style.width = pct + '%';
+  }
+
   // Update active tab content
   const activeTab = document.querySelector('.tab-btn.active')?.dataset.tab;
   switch (activeTab) {

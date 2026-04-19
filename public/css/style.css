@@ -144,8 +144,11 @@ body {
   transition: width 0.3s ease;
 }
 
-.hp-fill { background: linear-gradient(90deg, #2a7a38, #44aa55); }
-.exp-fill { background: linear-gradient(90deg, #2a5870, #4a8090); }
+.hp-fill   { background: linear-gradient(90deg, #2a7a38, #44aa55); }
+.exp-fill  { background: linear-gradient(90deg, #2a5870, #4a8090); }
+.comp0-fill { background: linear-gradient(90deg, #335577, #5588aa); }
+.comp1-fill { background: linear-gradient(90deg, #553388, #8866cc); }
+.comp-label { font-size: 9px; width: 28px; }
 
 .bar-text {
   font-size: 10px;

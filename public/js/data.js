@@ -20,6 +20,12 @@ const D = {
     return areas.find(a => dist >= a.minDist) || D.AREAS[0];
   },
 
+  // ===== 仲間 =====
+  COMPANIONS: [
+    { id: 'ern',   name: 'エルン', role: '戦士', color: 0xaa7755, atkRatio: 0.45, defRatio: 0.60, hpRatio: 0.90 },
+    { id: 'saria', name: 'サリア', role: '術師', color: 0x8866cc, atkRatio: 0.35, defRatio: 0.40, hpRatio: 0.65 },
+  ],
+
   // ===== ギルド =====
   GUILDS: {
     warriors: {

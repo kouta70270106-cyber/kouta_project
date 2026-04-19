@@ -28,7 +28,12 @@ class GameState {
       distTraveled: 0,
     };
     this.log = [];
-    this.partner = null;  // multiplayer partner state
+    this.partner = null;
+    this.companions = D.COMPANIONS.map(c => ({
+      id: c.id,
+      hp: Math.floor(100 * c.hpRatio),
+      downTimer: 0,
+    }));
   }
 
   // ===== Stats with equipment =====
@@ -83,6 +88,10 @@ class GameState {
     p.baseAtk = Math.floor(10 + (p.level - 1) * 3);
     p.baseDef = Math.floor(5 + (p.level - 1) * 2);
     this.addLog(`🎉 レベルアップ！ Lv.${p.level} になった！`, 'highlight');
+    for (let i = 0; i < this.companions.length; i++) {
+      this.companions[i].hp = this.getCompanionMaxHp(i);
+      this.companions[i].downTimer = 0;
+    }
   }
 
   // ===== Gold =====
@@ -170,12 +179,34 @@ class GameState {
     };
   }
 
+  // ===== Companion helpers =====
+  getCompanionMaxHp(i) {
+    return Math.floor(this.getStats().maxHp * D.COMPANIONS[i].hpRatio);
+  }
+
+  getCompanionAtk(i) {
+    return Math.max(1, Math.floor(this.getStats().atk * D.COMPANIONS[i].atkRatio));
+  }
+
   // ===== HP Regen =====
   regenHp() {
     const stats = this.getStats();
     const maxHp = stats.maxHp;
     if (this.player.hp < maxHp) {
       this.player.hp = Math.min(maxHp, this.player.hp + Math.ceil(maxHp * 0.005));
+    }
+    for (let i = 0; i < this.companions.length; i++) {
+      const c = this.companions[i];
+      if (c.downTimer > 0) {
+        c.downTimer--;
+        if (c.downTimer === 0) {
+          c.hp = Math.floor(this.getCompanionMaxHp(i) * 0.5);
+          this.addLog(`💙 ${D.COMPANIONS[i].name}が戦線に復帰した！`, 'success');
+        }
+      } else {
+        const cMax = this.getCompanionMaxHp(i);
+        if (c.hp < cMax) c.hp = Math.min(cMax, c.hp + Math.ceil(cMax * 0.005));
+      }
     }
   }
 
@@ -190,6 +221,7 @@ class GameState {
         journey: this.journey,
         gameTime: this.gameTime,
         stats: this.stats,
+        companions: this.companions,
       }));
     } catch(e) { /* ignore */ }
   }
@@ -206,6 +238,7 @@ class GameState {
       this.journey = data.journey || { distance: 0, area: 'plains' };
       this.gameTime = data.gameTime || { day: 1, month: 1, tick: 0 };
       this.stats = data.stats || this.stats;
+      if (data.companions) this.companions = data.companions;
       return true;
     } catch(e) {
       return false;
