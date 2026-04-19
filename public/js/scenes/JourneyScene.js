@@ -63,7 +63,7 @@ class JourneyScene extends Phaser.Scene {
   //  UPDATE LOOP
   // =========================================================
   update(time, delta) {
-    const dt = delta / 1000;
+    const dt = (delta / 1000) * window.gameSpeed;
 
     if (this.state === 'walking' || this.state === 'battle') {
       this.scrollX += dt * 55;

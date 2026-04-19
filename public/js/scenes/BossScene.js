@@ -47,7 +47,7 @@ class BossScene extends Phaser.Scene {
   }
 
   update(time, delta) {
-    const dt = delta / 1000;
+    const dt = (delta / 1000) * window.gameSpeed;
     this.bgAnimT += dt;
     this.flashT += dt * 3;
 

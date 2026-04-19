@@ -47,7 +47,7 @@ class DungeonScene extends Phaser.Scene {
   }
 
   update(time, delta) {
-    const dt = delta / 1000;
+    const dt = (delta / 1000) * window.gameSpeed;
     if (this.state === 'battle') {
       this.battleFlashT += dt * 4;
       this.battleDmgTimer -= dt;

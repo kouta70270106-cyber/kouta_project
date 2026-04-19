@@ -170,6 +170,21 @@ body {
 
 .boss-timer { color: #c09040; font-weight: bold; }
 
+.speed-btn {
+  background: #0c1810;
+  border: 1px solid #2a4030;
+  color: #7aaa88;
+  padding: 3px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.speed-btn:hover { border-color: #3a7050; color: #aaddbb; }
+.speed-btn.active { background: #1a3a20; border-color: #5aaa70; color: #88ffaa; }
+
 #stat-block {
   display: flex;
   gap: 12px;
