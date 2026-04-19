@@ -317,7 +317,7 @@ class JourneyScene extends Phaser.Scene {
   _onMonthEnd() {
     const gs = window.gameState;
     const boss = D.pickBoss(gs.gameTime.month - 1);
-    gs.addLog(`⚡ 月の終わり！ 魔王「${boss.name}」が現れた！`, 'legendary');
+    gs.addLog(`⚡ 月の終わり！ 大魔族「${boss.name}」が現れた！`, 'legendary');
     this.state = 'boss_enter';
 
     showGuildModal(() => {
