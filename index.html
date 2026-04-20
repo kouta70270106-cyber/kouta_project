@@ -6,7 +6,6 @@
   <title>冒険者ギルド 登録所</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-
     body {
       background: radial-gradient(ellipse at center, #0a1a0a 0%, #040a04 100%);
       min-height: 100vh;
@@ -17,7 +16,6 @@
       justify-content: center;
       padding: 20px;
     }
-
     .guild-card {
       background: linear-gradient(135deg, #0c1810 0%, #142018 100%);
       border: 2px solid #3a6a48;
@@ -28,186 +26,78 @@
       box-shadow: 0 0 60px rgba(58,106,72,0.25), inset 0 0 40px rgba(0,0,0,0.4);
       position: relative;
     }
-
-    .corner {
-      position: absolute;
-      width: 18px; height: 18px;
-      border-color: #c0a850;
-      border-style: solid;
-    }
+    .corner { position: absolute; width: 18px; height: 18px; border-color: #c0a850; border-style: solid; }
     .corner-tl { top: 10px; left: 10px; border-width: 2px 0 0 2px; }
     .corner-tr { top: 10px; right: 10px; border-width: 2px 2px 0 0; }
     .corner-bl { bottom: 10px; left: 10px; border-width: 0 0 2px 2px; }
     .corner-br { bottom: 10px; right: 10px; border-width: 0 2px 2px 0; }
-
     .guild-emblem { text-align: center; font-size: 48px; margin-bottom: 8px; }
-    .guild-title {
-      text-align: center;
-      font-size: 26px;
-      font-weight: bold;
-      color: #c0a850;
-      text-shadow: 0 0 20px rgba(192,168,80,0.4);
-      margin-bottom: 4px;
-    }
-    .guild-sub {
-      text-align: center;
-      font-size: 11px;
-      color: #5a7a62;
-      letter-spacing: 3px;
-      margin-bottom: 8px;
-    }
-    .divider {
-      text-align: center;
-      color: #3a6a48;
-      font-size: 11px;
-      letter-spacing: 5px;
-      margin-bottom: 28px;
-    }
-
+    .guild-title { text-align: center; font-size: 26px; font-weight: bold; color: #c0a850; text-shadow: 0 0 20px rgba(192,168,80,0.4); margin-bottom: 4px; }
+    .guild-sub { text-align: center; font-size: 11px; color: #5a7a62; letter-spacing: 3px; margin-bottom: 8px; }
+    .divider { text-align: center; color: #3a6a48; font-size: 11px; letter-spacing: 5px; margin-bottom: 28px; }
     .form-group { margin-bottom: 18px; }
-    .form-label {
-      display: block;
-      font-size: 10px;
-      color: #7a9a82;
-      text-transform: uppercase;
-      letter-spacing: 2px;
-      margin-bottom: 6px;
-    }
+    .form-label { display: block; font-size: 10px; color: #7a9a82; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 6px; }
     .form-input, .form-select, .form-textarea {
-      width: 100%;
-      padding: 10px 14px;
-      background: #060e08;
-      border: 1px solid #1e3020;
-      border-radius: 6px;
-      color: #c0d4c0;
-      font-size: 14px;
-      font-family: inherit;
+      width: 100%; padding: 10px 14px;
+      background: #060e08; border: 1px solid #1e3020; border-radius: 6px;
+      color: #c0d4c0; font-size: 14px; font-family: inherit;
       transition: border-color 0.2s, box-shadow 0.2s;
     }
     .form-input::placeholder, .form-textarea::placeholder { color: #3a4a3c; }
-    .form-input:focus, .form-select:focus, .form-textarea:focus {
-      outline: none;
-      border-color: #4a8a60;
-      box-shadow: 0 0 12px rgba(74,138,96,0.18);
-    }
+    .form-input:focus, .form-select:focus, .form-textarea:focus { outline: none; border-color: #4a8a60; box-shadow: 0 0 12px rgba(74,138,96,0.18); }
     .form-select { cursor: pointer; }
     .form-select option { background: #0c1810; }
     .form-textarea { resize: vertical; min-height: 90px; }
-
-    .char-count {
-      font-size: 10px;
-      color: #445544;
-      text-align: right;
-      margin-top: 3px;
-    }
-
+    .char-count { font-size: 10px; color: #445544; text-align: right; margin-top: 3px; }
     .submit-btn {
-      width: 100%;
-      padding: 13px;
+      width: 100%; padding: 13px;
       background: linear-gradient(135deg, #162a1e, #223a28);
-      border: 1px solid #4a8a60;
-      border-radius: 6px;
-      color: #88cc99;
-      font-size: 15px;
-      font-weight: bold;
-      cursor: pointer;
-      transition: all 0.2s;
-      letter-spacing: 1px;
-      margin-top: 6px;
+      border: 1px solid #4a8a60; border-radius: 6px;
+      color: #88cc99; font-size: 15px; font-weight: bold;
+      cursor: pointer; transition: all 0.2s; letter-spacing: 1px; margin-top: 6px;
     }
-    .submit-btn:hover {
-      background: linear-gradient(135deg, #223a28, #2e4e34);
-      box-shadow: 0 0 18px rgba(74,138,96,0.3);
-      color: #aaddbb;
-    }
-
-    /* Result */
+    .submit-btn:hover { background: linear-gradient(135deg, #223a28, #2e4e34); box-shadow: 0 0 18px rgba(74,138,96,0.3); color: #aaddbb; }
     .result-section { display: none; text-align: center; }
     .result-section.show { display: block; }
-
-    .success-title {
-      font-size: 20px;
-      color: #c0a850;
-      font-weight: bold;
-      margin-bottom: 4px;
-    }
-    .success-sub {
-      font-size: 12px;
-      color: #5a7a62;
-      margin-bottom: 24px;
-      letter-spacing: 1px;
-    }
-
+    .success-title { font-size: 20px; color: #c0a850; font-weight: bold; margin-bottom: 4px; }
+    .success-sub { font-size: 12px; color: #5a7a62; margin-bottom: 24px; letter-spacing: 1px; }
     .adv-card {
       background: linear-gradient(160deg, #0a1a10, #142018);
-      border: 2px solid #c0a850;
-      border-radius: 10px;
-      padding: 28px 24px 20px;
-      position: relative;
-      margin-bottom: 20px;
+      border: 2px solid #c0a850; border-radius: 10px;
+      padding: 28px 24px 20px; position: relative; margin-bottom: 20px;
     }
     .adv-rank {
-      position: absolute;
-      top: -13px;
-      left: 50%;
-      transform: translateX(-50%);
+      position: absolute; top: -13px; left: 50%; transform: translateX(-50%);
       background: linear-gradient(90deg, #a08030, #c0a850, #a08030);
-      color: #0c0c08;
-      font-size: 10px;
-      font-weight: bold;
-      padding: 3px 14px;
-      border-radius: 10px;
-      white-space: nowrap;
-      letter-spacing: 1px;
+      color: #0c0c08; font-size: 10px; font-weight: bold;
+      padding: 3px 14px; border-radius: 10px; white-space: nowrap; letter-spacing: 1px;
     }
     .adv-icon { font-size: 56px; margin-bottom: 10px; }
-    .adv-name {
-      font-size: 26px;
-      font-weight: bold;
-      color: #ffd700;
-      text-shadow: 0 0 12px rgba(255,215,0,0.3);
-      margin-bottom: 4px;
+    .adv-name { font-size: 26px; font-weight: bold; color: #ffd700; text-shadow: 0 0 12px rgba(255,215,0,0.3); margin-bottom: 4px; }
+    .adv-job { font-size: 14px; color: #88cc99; margin-bottom: 14px; }
+    .adv-divider { border: none; border-top: 1px solid #1e3020; margin-bottom: 14px; }
+    .adv-bio { font-size: 13px; color: #a0b098; line-height: 1.7; font-style: italic; }
+    .adv-id { margin-top: 16px; font-size: 10px; color: #3a5040; letter-spacing: 1px; }
+    .game-btn {
+      display: block; width: 100%; padding: 16px;
+      background: linear-gradient(135deg, #2a4a1e, #3a6a28);
+      border: 2px solid #6aaa50; border-radius: 8px;
+      color: #ccff99; font-size: 17px; font-weight: bold;
+      cursor: pointer; transition: all 0.2s; letter-spacing: 1px;
+      text-decoration: none; text-align: center; margin-bottom: 12px;
+      box-shadow: 0 0 20px rgba(100,200,80,0.2);
     }
-    .adv-job {
-      font-size: 14px;
-      color: #88cc99;
-      margin-bottom: 14px;
-    }
-    .adv-divider {
-      border: none;
-      border-top: 1px solid #1e3020;
-      margin-bottom: 14px;
-    }
-    .adv-bio {
-      font-size: 13px;
-      color: #a0b098;
-      line-height: 1.7;
-      font-style: italic;
-    }
-    .adv-id {
-      margin-top: 16px;
-      font-size: 10px;
-      color: #3a5040;
-      letter-spacing: 1px;
-    }
-
+    .game-btn:hover { background: linear-gradient(135deg, #3a6a28, #4a8a38); box-shadow: 0 0 30px rgba(100,200,80,0.4); color: #ddffbb; }
     .back-btn {
-      background: none;
-      border: 1px solid #2a4a32;
-      color: #5a7a62;
-      padding: 8px 20px;
-      border-radius: 4px;
-      cursor: pointer;
-      font-size: 12px;
-      transition: all 0.2s;
+      background: none; border: 1px solid #2a4a32;
+      color: #5a7a62; padding: 8px 20px; border-radius: 4px;
+      cursor: pointer; font-size: 12px; transition: all 0.2s;
     }
     .back-btn:hover { border-color: #4a8a60; color: #88cc99; }
-
-    .stars { color: #c0a850; font-size: 12px; margin-top: 8px; }
+    .stars { color: #c0a850; font-size: 12px; margin-bottom: 16px; }
   </style>
 </head>
 <body>
-
 <div class="guild-card">
   <div class="corner corner-tl"></div>
   <div class="corner corner-tr"></div>
@@ -220,16 +110,11 @@
     <div class="guild-title">冒険者ギルド</div>
     <div class="guild-sub">ADVENTURER GUILD</div>
     <div class="divider">✦ &nbsp; 登録所 &nbsp; ✦</div>
-
     <form id="reg-form" novalidate>
-
       <div class="form-group">
         <label class="form-label">⚔ 冒険者名</label>
-        <input type="text" id="f-name" class="form-input"
-          placeholder="例: アレン、ミア、ゼファー..."
-          maxlength="20" autocomplete="off">
+        <input type="text" id="f-name" class="form-input" placeholder="例: アレン、ミア、ゼファー..." maxlength="20" autocomplete="off">
       </div>
-
       <div class="form-group">
         <label class="form-label">🎭 職業</label>
         <select id="f-job" class="form-select">
@@ -246,15 +131,11 @@
           <option value="🔥 魔王">🔥 魔王</option>
         </select>
       </div>
-
       <div class="form-group">
         <label class="form-label">📜 自己紹介</label>
-        <textarea id="f-bio" class="form-textarea"
-          placeholder="あなたの冒険への想い、得意なこと、仲間への一言など..."
-          maxlength="150"></textarea>
+        <textarea id="f-bio" class="form-textarea" placeholder="あなたの冒険への想い、得意なこと、仲間への一言など..." maxlength="150"></textarea>
         <div class="char-count"><span id="bio-count">0</span> / 150</div>
       </div>
-
       <button type="submit" class="submit-btn">📜 ギルドに登録する</button>
     </form>
   </div>
@@ -263,7 +144,6 @@
   <div id="result-section" class="result-section">
     <div class="success-title">🎉 登録完了！</div>
     <div class="success-sub">ようこそ、ギルドへ</div>
-
     <div class="adv-card">
       <div class="adv-rank">⭐ 新人冒険者 / RANK F</div>
       <div class="adv-icon" id="r-icon">⚔️</div>
@@ -273,8 +153,8 @@
       <div class="adv-bio" id="r-bio"></div>
       <div class="adv-id" id="r-id"></div>
     </div>
-
     <div class="stars">★ ★ ★ 冒険の始まりだ！ ★ ★ ★</div>
+    <a href="https://kouta-project.onrender.com" target="_blank" class="game-btn">⚔️ さあ、冒険を始めよう！</a>
     <br>
     <button class="back-btn" onclick="resetForm()">← 別の冒険者を登録する</button>
   </div>
@@ -286,34 +166,26 @@
     '🏹 弓使い':'🏹','🛡️ 騎士':'🛡️','🗝️ 盗賊':'🗝️',
     '✨ 賢者':'✨','⚡ 魔導士':'⚡','🌿 僧侶':'🌿','🔥 魔王':'🔥'
   };
-
-  // 文字数カウント
   document.getElementById('f-bio').addEventListener('input', function() {
     document.getElementById('bio-count').textContent = this.value.length;
   });
-
   document.getElementById('reg-form').addEventListener('submit', function(e) {
     e.preventDefault();
     const name = document.getElementById('f-name').value.trim();
     const job  = document.getElementById('f-job').value;
     const bio  = document.getElementById('f-bio').value.trim();
-
     if (!name) { alert('冒険者名を入力してください'); return; }
     if (!job)  { alert('職業を選択してください'); return; }
     if (!bio)  { alert('自己紹介を入力してください'); return; }
-
     const id = 'ADV-' + Date.now().toString(36).toUpperCase();
-
     document.getElementById('r-icon').textContent = JOB_ICONS[job] || '⚔️';
     document.getElementById('r-name').textContent = name;
     document.getElementById('r-job').textContent  = job;
     document.getElementById('r-bio').textContent  = '「' + bio + '」';
     document.getElementById('r-id').textContent   = 'ギルドID: ' + id;
-
     document.getElementById('form-section').style.display = 'none';
     document.getElementById('result-section').classList.add('show');
   });
-
   function resetForm() {
     document.getElementById('reg-form').reset();
     document.getElementById('bio-count').textContent = '0';
@@ -321,6 +193,5 @@
     document.getElementById('result-section').classList.remove('show');
   }
 </script>
-
 </body>
 </html>
