@@ -215,6 +215,9 @@ function updateGuildTab() {
     descEl.textContent = '';
   }
 
+  const bioEl = document.getElementById('player-bio-text');
+  if (bioEl) bioEl.textContent = gs.player.bio ? `「${gs.player.bio}」` : '';
+
   const statsEl = document.getElementById('guild-stats');
   statsEl.innerHTML = `
     <div class="guild-stat-row">討伐数<span>${gs.stats.monstersKilled}</span></div>

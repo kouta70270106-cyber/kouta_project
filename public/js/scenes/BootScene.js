@@ -23,6 +23,7 @@ class BootScene extends Phaser.Scene {
       // 登録ページから名前が来ていたらモーダルをスキップして自動開始
       document.getElementById('name-modal').style.display = 'none';
       gs.player.name = urlName;
+      if (urlBio) gs.player.bio = urlBio;
       gs.addItem(D.EQUIPMENT.wooden_sword);
       gs.addItem(D.EQUIPMENT.cloth_robe);
       gs.player.hp = gs.player.maxHp;

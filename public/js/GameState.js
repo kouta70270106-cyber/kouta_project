@@ -4,6 +4,7 @@ class GameState {
   constructor() {
     this.player = {
       name: '勇者',
+      bio: '',
       level: 1,
       exp: 0,
       expToNext: 100,
