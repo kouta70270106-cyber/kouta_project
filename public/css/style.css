@@ -23,6 +23,94 @@ body {
   padding: 4px;
 }
 
+/* ===== Mobile Layout ===== */
+@media (max-width: 767px) {
+  body {
+    overflow-y: auto;
+    height: auto;
+  }
+
+  #wrapper {
+    display: flex;
+    flex-direction: column;
+    height: auto;
+    min-width: unset;
+    max-width: 100%;
+    gap: 3px;
+    padding: 3px;
+  }
+
+  #top-hud {
+    grid-column: unset;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 5px 8px;
+    min-height: unset;
+  }
+
+  #player-block {
+    flex-wrap: wrap;
+    gap: 5px;
+    width: 100%;
+  }
+
+  .bar-bg { width: 70px; }
+
+  #time-block {
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  #stat-block {
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .time-item, .stat-item { font-size: 11px; }
+
+  #main-area {
+    gap: 3px;
+  }
+
+  #game-container {
+    width: 100%;
+    aspect-ratio: 750 / 480;
+    height: auto;
+    flex: unset;
+  }
+
+  #battle-log {
+    height: 80px;
+  }
+
+  #side-panel {
+    grid-column: unset;
+    grid-row: unset;
+    height: 260px;
+    min-height: unset;
+  }
+
+  .modal-box {
+    min-width: unset;
+    width: 90vw;
+    max-width: 400px;
+    padding: 16px;
+  }
+
+  .guild-choice-card { width: 120px; padding: 10px; }
+}
+
+/* ===== Tablet (768px〜900px) ===== */
+@media (min-width: 768px) and (max-width: 900px) {
+  #wrapper {
+    min-width: unset;
+    grid-template-columns: 1fr 210px;
+  }
+  .bar-bg { width: 70px; }
+  #time-block { gap: 8px; }
+  #stat-block { gap: 8px; }
+}
+
 #top-hud {
   grid-column: 1 / 3;
   background: linear-gradient(135deg, #0c1810 0%, #142218 100%);
