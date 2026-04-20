@@ -23,7 +23,7 @@
       padding: 40px 36px;
       max-width: 480px;
       width: 100%;
-      box-shadow: 0 0 60px rgba(58,106,72,0.25), inset 0 0 40px rgba(0,0,0,0.4);
+      box-shadow: 0 0 60px rgba(58,106,72,0.25);
       position: relative;
     }
     .corner { position: absolute; width: 18px; height: 18px; border-color: #c0a850; border-style: solid; }
@@ -32,7 +32,7 @@
     .corner-bl { bottom: 10px; left: 10px; border-width: 0 0 2px 2px; }
     .corner-br { bottom: 10px; right: 10px; border-width: 0 2px 2px 0; }
     .guild-emblem { text-align: center; font-size: 48px; margin-bottom: 8px; }
-    .guild-title { text-align: center; font-size: 26px; font-weight: bold; color: #c0a850; text-shadow: 0 0 20px rgba(192,168,80,0.4); margin-bottom: 4px; }
+    .guild-title { text-align: center; font-size: 26px; font-weight: bold; color: #c0a850; margin-bottom: 4px; }
     .guild-sub { text-align: center; font-size: 11px; color: #5a7a62; letter-spacing: 3px; margin-bottom: 8px; }
     .divider { text-align: center; color: #3a6a48; font-size: 11px; letter-spacing: 5px; margin-bottom: 28px; }
     .form-group { margin-bottom: 18px; }
@@ -41,11 +41,10 @@
       width: 100%; padding: 10px 14px;
       background: #060e08; border: 1px solid #1e3020; border-radius: 6px;
       color: #c0d4c0; font-size: 14px; font-family: inherit;
-      transition: border-color 0.2s, box-shadow 0.2s;
+      transition: border-color 0.2s;
     }
     .form-input::placeholder, .form-textarea::placeholder { color: #3a4a3c; }
-    .form-input:focus, .form-select:focus, .form-textarea:focus { outline: none; border-color: #4a8a60; box-shadow: 0 0 12px rgba(74,138,96,0.18); }
-    .form-select { cursor: pointer; }
+    .form-input:focus, .form-select:focus, .form-textarea:focus { outline: none; border-color: #4a8a60; }
     .form-select option { background: #0c1810; }
     .form-textarea { resize: vertical; min-height: 90px; }
     .char-count { font-size: 10px; color: #445544; text-align: right; margin-top: 3px; }
@@ -54,13 +53,14 @@
       background: linear-gradient(135deg, #162a1e, #223a28);
       border: 1px solid #4a8a60; border-radius: 6px;
       color: #88cc99; font-size: 15px; font-weight: bold;
-      cursor: pointer; transition: all 0.2s; letter-spacing: 1px; margin-top: 6px;
+      cursor: pointer; letter-spacing: 1px; margin-top: 6px;
     }
-    .submit-btn:hover { background: linear-gradient(135deg, #223a28, #2e4e34); box-shadow: 0 0 18px rgba(74,138,96,0.3); color: #aaddbb; }
-    .result-section { display: none; text-align: center; }
-    .result-section.show { display: block; }
+    .submit-btn:hover { background: linear-gradient(135deg, #223a28, #2e4e34); }
+
+    /* result */
+    #result-section { display: none; text-align: center; }
     .success-title { font-size: 20px; color: #c0a850; font-weight: bold; margin-bottom: 4px; }
-    .success-sub { font-size: 12px; color: #5a7a62; margin-bottom: 24px; letter-spacing: 1px; }
+    .success-sub { font-size: 12px; color: #5a7a62; margin-bottom: 24px; }
     .adv-card {
       background: linear-gradient(160deg, #0a1a10, #142018);
       border: 2px solid #c0a850; border-radius: 10px;
@@ -70,55 +70,53 @@
       position: absolute; top: -13px; left: 50%; transform: translateX(-50%);
       background: linear-gradient(90deg, #a08030, #c0a850, #a08030);
       color: #0c0c08; font-size: 10px; font-weight: bold;
-      padding: 3px 14px; border-radius: 10px; white-space: nowrap; letter-spacing: 1px;
+      padding: 3px 14px; border-radius: 10px; white-space: nowrap;
     }
     .adv-icon { font-size: 56px; margin-bottom: 10px; }
-    .adv-name { font-size: 26px; font-weight: bold; color: #ffd700; text-shadow: 0 0 12px rgba(255,215,0,0.3); margin-bottom: 4px; }
+    .adv-name { font-size: 26px; font-weight: bold; color: #ffd700; margin-bottom: 4px; }
     .adv-job { font-size: 14px; color: #88cc99; margin-bottom: 14px; }
     .adv-divider { border: none; border-top: 1px solid #1e3020; margin-bottom: 14px; }
     .adv-bio { font-size: 13px; color: #a0b098; line-height: 1.7; font-style: italic; }
-    .adv-id { margin-top: 16px; font-size: 10px; color: #3a5040; letter-spacing: 1px; }
+    .adv-id { margin-top: 16px; font-size: 10px; color: #3a5040; }
+    .stars { color: #c0a850; font-size: 13px; margin-bottom: 20px; }
     .game-btn {
-      display: block; width: 100%; padding: 16px;
-      background: linear-gradient(135deg, #2a4a1e, #3a6a28);
-      border: 2px solid #6aaa50; border-radius: 8px;
-      color: #ccff99; font-size: 17px; font-weight: bold;
-      cursor: pointer; transition: all 0.2s; letter-spacing: 1px;
-      text-decoration: none; text-align: center; margin-bottom: 12px;
-      box-shadow: 0 0 20px rgba(100,200,80,0.2);
+      display: block; width: 100%; padding: 18px;
+      background: linear-gradient(135deg, #1a4a10, #2a6a18);
+      border: 2px solid #5aaa40; border-radius: 8px;
+      color: #ccff99; font-size: 18px; font-weight: bold;
+      text-decoration: none; text-align: center;
+      margin-bottom: 14px;
+      box-shadow: 0 0 24px rgba(90,170,60,0.35);
     }
-    .game-btn:hover { background: linear-gradient(135deg, #3a6a28, #4a8a38); box-shadow: 0 0 30px rgba(100,200,80,0.4); color: #ddffbb; }
+    .game-btn:hover { background: linear-gradient(135deg, #2a6a18, #3a8a28); }
     .back-btn {
       background: none; border: 1px solid #2a4a32;
       color: #5a7a62; padding: 8px 20px; border-radius: 4px;
-      cursor: pointer; font-size: 12px; transition: all 0.2s;
+      cursor: pointer; font-size: 12px;
     }
     .back-btn:hover { border-color: #4a8a60; color: #88cc99; }
-    .stars { color: #c0a850; font-size: 12px; margin-bottom: 16px; }
   </style>
 </head>
 <body>
 <div class="guild-card">
-  <div class="corner corner-tl"></div>
-  <div class="corner corner-tr"></div>
-  <div class="corner corner-bl"></div>
-  <div class="corner corner-br"></div>
+  <div class="corner corner-tl"></div><div class="corner corner-tr"></div>
+  <div class="corner corner-bl"></div><div class="corner corner-br"></div>
 
-  <!-- 登録フォーム -->
+  <!-- フォーム -->
   <div id="form-section">
     <div class="guild-emblem">⚜️</div>
     <div class="guild-title">冒険者ギルド</div>
     <div class="guild-sub">ADVENTURER GUILD</div>
-    <div class="divider">✦ &nbsp; 登録所 &nbsp; ✦</div>
+    <div class="divider">✦ 登録所 ✦</div>
     <form id="reg-form" novalidate>
       <div class="form-group">
         <label class="form-label">⚔ 冒険者名</label>
-        <input type="text" id="f-name" class="form-input" placeholder="例: アレン、ミア、ゼファー..." maxlength="20" autocomplete="off">
+        <input type="text" id="f-name" class="form-input" placeholder="例: アレン、ミア..." maxlength="20" autocomplete="off">
       </div>
       <div class="form-group">
         <label class="form-label">🎭 職業</label>
         <select id="f-job" class="form-select">
-          <option value="">── 職業を選んでください ──</option>
+          <option value="">── 職業を選択 ──</option>
           <option value="⚔️ 勇者">⚔️ 勇者</option>
           <option value="🗡️ 戦士">🗡️ 戦士</option>
           <option value="🧙 魔法使い">🧙 魔法使い</option>
@@ -133,15 +131,15 @@
       </div>
       <div class="form-group">
         <label class="form-label">📜 自己紹介</label>
-        <textarea id="f-bio" class="form-textarea" placeholder="あなたの冒険への想い、得意なこと、仲間への一言など..." maxlength="150"></textarea>
+        <textarea id="f-bio" class="form-textarea" placeholder="冒険への想い、得意なことなど..." maxlength="150"></textarea>
         <div class="char-count"><span id="bio-count">0</span> / 150</div>
       </div>
       <button type="submit" class="submit-btn">📜 ギルドに登録する</button>
     </form>
   </div>
 
-  <!-- 登録完了カード -->
-  <div id="result-section" class="result-section">
+  <!-- 完了画面 -->
+  <div id="result-section">
     <div class="success-title">🎉 登録完了！</div>
     <div class="success-sub">ようこそ、ギルドへ</div>
     <div class="adv-card">
@@ -155,7 +153,6 @@
     </div>
     <div class="stars">★ ★ ★ 冒険の始まりだ！ ★ ★ ★</div>
     <a href="https://kouta-project.onrender.com" target="_blank" class="game-btn">⚔️ さあ、冒険を始めよう！</a>
-    <br>
     <button class="back-btn" onclick="resetForm()">← 別の冒険者を登録する</button>
   </div>
 </div>
@@ -166,9 +163,11 @@
     '🏹 弓使い':'🏹','🛡️ 騎士':'🛡️','🗝️ 盗賊':'🗝️',
     '✨ 賢者':'✨','⚡ 魔導士':'⚡','🌿 僧侶':'🌿','🔥 魔王':'🔥'
   };
+
   document.getElementById('f-bio').addEventListener('input', function() {
     document.getElementById('bio-count').textContent = this.value.length;
   });
+
   document.getElementById('reg-form').addEventListener('submit', function(e) {
     e.preventDefault();
     const name = document.getElementById('f-name').value.trim();
@@ -184,13 +183,14 @@
     document.getElementById('r-bio').textContent  = '「' + bio + '」';
     document.getElementById('r-id').textContent   = 'ギルドID: ' + id;
     document.getElementById('form-section').style.display = 'none';
-    document.getElementById('result-section').classList.add('show');
+    document.getElementById('result-section').style.display = 'block';
   });
+
   function resetForm() {
     document.getElementById('reg-form').reset();
     document.getElementById('bio-count').textContent = '0';
     document.getElementById('form-section').style.display = 'block';
-    document.getElementById('result-section').classList.remove('show');
+    document.getElementById('result-section').style.display = 'none';
   }
 </script>
 </body>
