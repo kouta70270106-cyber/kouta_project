@@ -497,17 +497,17 @@ function _drawDragon(ctx) {
 //  メインエクスポート
 // ============================================================
 function createGameSprites(scene) {
-  // キャラクター
-  _sprite(scene, 'hero',     12, 22, _drawHero);
-  _sprite(scene, 'ern',      12, 22, _drawErn);
-  _sprite(scene, 'saria',    12, 22, _drawSaria);
-  _sprite(scene, 'npc',      12, 22, _drawNpc);
+  // キャラクター (武器分のpxを含む幅)
+  _sprite(scene, 'hero',     16, 22, _drawHero);
+  _sprite(scene, 'ern',      16, 22, _drawErn);
+  _sprite(scene, 'saria',    16, 22, _drawSaria);
+  _sprite(scene, 'npc',      14, 22, _drawNpc);
 
   // モンスター
   _sprite(scene, 'slime',    14, 12, _drawSlime);
   _sprite(scene, 'goblin',   10, 16, _drawGoblin);
   _sprite(scene, 'skeleton', 12, 22, _drawSkeleton);
-  _sprite(scene, 'orc',      14, 24, _drawOrc);
+  _sprite(scene, 'orc',      17, 24, _drawOrc);
   _sprite(scene, 'bat',      20, 12, _drawBat);
   _sprite(scene, 'spider',   18, 12, _drawSpider);
   _sprite(scene, 'dragon',   24, 18, _drawDragon);

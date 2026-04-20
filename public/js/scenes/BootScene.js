@@ -6,7 +6,7 @@ class BootScene extends Phaser.Scene {
   preload() {}
 
   create() {
-    createGameSprites(this);
+    try { createGameSprites(this); } catch(e) { console.error('Sprite init error:', e); }
     // Try to load save
     const gs = window.gameState;
     const hasSave = gs.load();
