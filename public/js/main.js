@@ -3,10 +3,10 @@
 window.gameSpeed = 1;
 
 function toggleSpeed() {
-  window.gameSpeed = window.gameSpeed === 1 ? 2 : 1;
+  window.gameSpeed = window.gameSpeed === 1 ? 2 : window.gameSpeed === 2 ? 3 : 1;
   const btn = document.getElementById('speed-btn');
-  btn.textContent = window.gameSpeed === 2 ? '⚡ ×2' : '▶ ×1';
-  btn.classList.toggle('active', window.gameSpeed === 2);
+  btn.textContent = window.gameSpeed === 1 ? '▶ ×1' : window.gameSpeed === 2 ? '⚡ ×2' : '⚡ ×3';
+  btn.classList.toggle('active', window.gameSpeed > 1);
 
   const game = window.game;
   if (!game) return;
