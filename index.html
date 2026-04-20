@@ -56,8 +56,6 @@
       cursor: pointer; letter-spacing: 1px; margin-top: 6px;
     }
     .submit-btn:hover { background: linear-gradient(135deg, #223a28, #2e4e34); }
-
-    /* result */
     #result-section { display: none; text-align: center; }
     .success-title { font-size: 20px; color: #c0a850; font-weight: bold; margin-bottom: 4px; }
     .success-sub { font-size: 12px; color: #5a7a62; margin-bottom: 24px; }
@@ -102,7 +100,6 @@
   <div class="corner corner-tl"></div><div class="corner corner-tr"></div>
   <div class="corner corner-bl"></div><div class="corner corner-br"></div>
 
-  <!-- フォーム -->
   <div id="form-section">
     <div class="guild-emblem">⚜️</div>
     <div class="guild-title">冒険者ギルド</div>
@@ -138,7 +135,6 @@
     </form>
   </div>
 
-  <!-- 完了画面 -->
   <div id="result-section">
     <div class="success-title">🎉 登録完了！</div>
     <div class="success-sub">ようこそ、ギルドへ</div>
@@ -152,7 +148,7 @@
       <div class="adv-id" id="r-id"></div>
     </div>
     <div class="stars">★ ★ ★ 冒険の始まりだ！ ★ ★ ★</div>
-    <a href="https://kouta-project.onrender.com" target="_blank" class="game-btn">⚔️ さあ、冒険を始めよう！</a>
+    <a id="game-link" href="#" target="_blank" class="game-btn">⚔️ さあ、冒険を始めよう！</a>
     <button class="back-btn" onclick="resetForm()">← 別の冒険者を登録する</button>
   </div>
 </div>
@@ -176,12 +172,19 @@
     if (!name) { alert('冒険者名を入力してください'); return; }
     if (!job)  { alert('職業を選択してください'); return; }
     if (!bio)  { alert('自己紹介を入力してください'); return; }
+
     const id = 'ADV-' + Date.now().toString(36).toUpperCase();
     document.getElementById('r-icon').textContent = JOB_ICONS[job] || '⚔️';
     document.getElementById('r-name').textContent = name;
     document.getElementById('r-job').textContent  = job;
     document.getElementById('r-bio').textContent  = '「' + bio + '」';
     document.getElementById('r-id').textContent   = 'ギルドID: ' + id;
+
+    // 名前・自己紹介をURLパラメータでゲームに渡す
+    const params = new URLSearchParams({ name: name, bio: bio });
+    document.getElementById('game-link').href =
+      'https://kouta-project.onrender.com/?' + params.toString();
+
     document.getElementById('form-section').style.display = 'none';
     document.getElementById('result-section').style.display = 'block';
   });
