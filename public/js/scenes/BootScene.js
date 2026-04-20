@@ -7,25 +7,38 @@ class BootScene extends Phaser.Scene {
 
   create() {
     try { createGameSprites(this); } catch(e) { console.error('Sprite init error:', e); }
-    // Try to load save
+
     const gs = window.gameState;
     const hasSave = gs.load();
 
+    // 登録ページからのURLパラメータを取得
+    const params = new URLSearchParams(window.location.search);
+    const urlName = params.get('name');
+    const urlBio  = params.get('bio');
+
     if (hasSave) {
-      // Skip name modal, go straight to journey
       document.getElementById('name-modal').style.display = 'none';
       this._startGame();
     } else {
-      // Show name modal
       const modal = document.getElementById('name-modal');
       modal.style.display = 'flex';
 
+      // 登録ページから名前が来ていたら自動入力
+      const input = document.getElementById('hero-name-input');
+      if (urlName) {
+        input.value = urlName;
+      }
+
+      // bioがあれば紹介文を表示
+      if (urlBio) {
+        const sub = modal.querySelector('.modal-subtitle');
+        if (sub) sub.textContent = `「${urlBio}」`;
+      }
+
       const btn = document.getElementById('start-game-btn');
       btn.onclick = () => {
-        const input = document.getElementById('hero-name-input');
         const name = input.value.trim() || '勇者';
         gs.player.name = name;
-        // Give starter gear
         gs.addItem(D.EQUIPMENT.wooden_sword);
         gs.addItem(D.EQUIPMENT.cloth_robe);
         gs.player.hp = gs.player.maxHp;
@@ -36,12 +49,9 @@ class BootScene extends Phaser.Scene {
   }
 
   _startGame() {
-    // Show guild modal if no guild set
     const gs = window.gameState;
     if (!gs.guild) {
-      showGuildModal(() => {
-        this.scene.start('JourneyScene');
-      });
+      showGuildModal(() => { this.scene.start('JourneyScene'); });
     } else {
       this.scene.start('JourneyScene');
     }
