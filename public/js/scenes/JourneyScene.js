@@ -5,27 +5,36 @@ const CANVAS_H = 480;
 const GROUND_Y = 360;
 const PLAYER_X = 180;
 
+const SHAPE_SPRITE = {
+  blob:'slime', small:'goblin', human:'skeleton',
+  large:'orc', quad:'dragon', fly:'bat', multi:'spider',
+};
+
 class JourneyScene extends Phaser.Scene {
   constructor() { super({ key: 'JourneyScene' }); }
 
   create() {
-    this.state = 'walking'; // walking | pre_battle | battle | event | dungeon_enter | boss_enter
+    this.state = 'walking';
 
     // ---- Background layers ----
-    this.bgSky   = this.add.graphics();
-    this.bgFar   = this.add.graphics();
-    this.bgMid   = this.add.graphics();
-    this.bgGround= this.add.graphics();
-    this.bgDeco  = this.add.graphics();  // stars, trees, rocks etc
+    this.bgSky    = this.add.graphics();
+    this.bgClouds = this.add.graphics();
+    this.bgFar    = this.add.graphics();
+    this.bgMid    = this.add.graphics();
+    this.bgGround = this.add.graphics();
 
-    // ---- Characters ----
-    this.playerGfx   = this.add.graphics();
-    this.compGfx     = this.add.graphics();
-    this.partnerGfx  = this.add.graphics().setVisible(false);
-    this.monsterGfx  = this.add.graphics();
-    this.hpBarsGfx   = this.add.graphics();
-    this.npcGfx      = this.add.graphics().setVisible(false);
-    this.dungeonGfx  = this.add.graphics().setVisible(false);
+    // ---- Character sprites ----
+    this.comp1Img   = this.add.image(PLAYER_X - 84,  GROUND_Y, 'saria').setOrigin(0.5, 1);
+    this.comp0Img   = this.add.image(PLAYER_X - 42,  GROUND_Y, 'ern').setOrigin(0.5, 1);
+    this.partnerImg = this.add.image(PLAYER_X - 130, GROUND_Y, 'hero').setOrigin(0.5, 1).setVisible(false);
+    this.playerImg  = this.add.image(PLAYER_X,       GROUND_Y, 'hero').setOrigin(0.5, 1);
+    this.npcImg     = this.add.image(350,             GROUND_Y, 'npc').setOrigin(0.5, 1).setVisible(false);
+    this.monsterImg = this.add.image(CANVAS_W + 80,  GROUND_Y, 'slime').setOrigin(0.5, 1).setVisible(false);
+    this.dungeonGfx = this.add.graphics().setVisible(false);
+
+    // ---- HP bars ----
+    this.compBarGfx = this.add.graphics();
+    this.hpBarsGfx  = this.add.graphics().setVisible(false);
 
     // ---- Floating texts ----
     this.floatTexts = [];
@@ -78,9 +87,9 @@ class JourneyScene extends Phaser.Scene {
       if (this.monsterX <= 520) {
         this.monsterX = 520;
         this.state = 'battle';
-        this.battleDmgTimer = 1.5; // first hit after 1.5s
+        this.battleDmgTimer = 1.5;
       }
-      this._drawMonster(this.monsterX);
+      this._updateMonsterSprite();
       this._drawHpBars();
     }
 
@@ -91,7 +100,7 @@ class JourneyScene extends Phaser.Scene {
         this._doBattleTick();
         this.battleDmgTimer = 1.0;
       }
-      this._drawMonster(this.monsterX);
+      this._updateMonsterSprite();
       this._drawHpBars();
     }
 
@@ -178,7 +187,9 @@ class JourneyScene extends Phaser.Scene {
     this.monsterHp = this.currentMonster.hp;
     this.monsterX = CANVAS_W + 80;
     this.state = 'pre_battle';
-    this.monsterGfx.setVisible(true);
+    const key = SHAPE_SPRITE[this.currentMonster.shape] || 'slime';
+    const groundY = this.currentMonster.shape === 'fly' ? GROUND_Y - 30 : GROUND_Y;
+    this.monsterImg.setTexture(key).setPosition(this.monsterX, groundY).clearTint().setVisible(true);
     this.hpBarsGfx.setVisible(true);
     gs.addLog(`⚠️ ${this.currentMonster.name}が現れた！ [${this.currentMonster.rarity}]`);
   }
@@ -295,7 +306,7 @@ class JourneyScene extends Phaser.Scene {
   _endBattle() {
     this.currentMonster = null;
     this.monsterHp = 0;
-    this.monsterGfx.setVisible(false);
+    this.monsterImg.setVisible(false);
     this.hpBarsGfx.setVisible(false);
     this.state = 'walking';
     updateUI();
@@ -312,8 +323,7 @@ class JourneyScene extends Phaser.Scene {
     this.npcData = quest;
     this.state = 'event';
 
-    this.npcGfx.setVisible(true);
-    this._drawNPC();
+    this.npcImg.setVisible(true);
     this._showDialog(
       `${quest.npcName}「${quest.title}を頼む！\n完了報酬: EXP+${quest.reward.exp} Gold+${quest.reward.gold}」`,
       [
@@ -325,7 +335,7 @@ class JourneyScene extends Phaser.Scene {
 
   _closeEvent() {
     this.state = 'walking';
-    this.npcGfx.setVisible(false);
+    this.npcImg.setVisible(false);
     this.dialogBox.setVisible(false);
   }
 
@@ -365,91 +375,127 @@ class JourneyScene extends Phaser.Scene {
   //  DRAWING
   // =========================================================
   _drawScene() {
-    const gs = window.gameState;
     const area = this.currentArea || D.AREAS[0];
 
-    // Sky
     this.bgSky.clear();
-    const skyGrad = this.bgSky.fillGradientStyle(
-      area.skyA, area.skyA, area.skyB, area.skyB, 1
-    );
+    this.bgSky.fillGradientStyle(area.skyA, area.skyA, area.skyB, area.skyB, 1);
     this.bgSky.fillRect(0, 0, CANVAS_W, CANVAS_H);
 
-    // Stars (only in dark areas)
+    this._drawClouds(area);
+
     this.bgFar.clear();
-    this._drawStars(this.bgFar, area);
     this._drawFarLayer(this.bgFar, area);
 
-    // Mid layer (trees/rocks)
     this.bgMid.clear();
     this._drawMidLayer(this.bgMid, area);
 
-    // Ground
     this.bgGround.clear();
     this._drawGroundLayer(this.bgGround, area);
 
-    // Player
-    this._drawPlayer();
+    // Bob animation for sprites
+    const bob = this.state === 'walking' ? Math.sin(this.playerBobT) * 3 : 0;
+    const compBob = this.state === 'walking' ? Math.sin(this.playerBobT * 0.9) * 3 : 0;
 
-    // Companions
-    this._drawCompanions();
+    // Player sprite
+    this.playerImg.y = GROUND_Y - bob;
+    const playerFlash = this.state === 'battle' && Math.sin(this.battleFlashT) > 0.5;
+    playerFlash ? this.playerImg.setTint(0xaaaaff) : this.playerImg.clearTint();
 
-    // Partner
+    // Companion sprites
+    this._updateCompanionSprites(compBob);
+
+    // Partner sprite
     if (window.multiManager.partnerState) {
-      this.partnerGfx.setVisible(true);
-      this._drawPartner();
+      this.partnerImg.setVisible(true);
+      this.partnerImg.y = GROUND_Y - bob;
+    } else {
+      this.partnerImg.setVisible(false);
+    }
+
+    // Companion HP bars
+    this._drawCompanionBars();
+  }
+
+  _updateCompanionSprites(bob) {
+    const gs = window.gameState;
+    const imgs = [this.comp0Img, this.comp1Img];
+    for (let i = 0; i < gs.companions.length; i++) {
+      const c = gs.companions[i];
+      const img = imgs[i];
+      if (c.downTimer > 0) {
+        img.setAlpha(0.3).setTint(0x555555);
+      } else {
+        img.setAlpha(1).clearTint();
+        img.y = GROUND_Y - bob;
+      }
     }
   }
 
-  _drawCompanions() {
-    const g = this.compGfx;
+  _drawCompanionBars() {
+    const g = this.compBarGfx;
     g.clear();
     const gs = window.gameState;
-    const bob = this.state === 'walking' ? Math.sin(this.playerBobT * 0.9) * 3 : 0;
-
     for (let i = 0; i < gs.companions.length; i++) {
       const c = gs.companions[i];
-      const def = D.COMPANIONS[i];
+      if (c.downTimer > 0) continue;
       const cx = PLAYER_X - 42 * (i + 1);
-      const y = GROUND_Y - bob;
-
-      if (c.downTimer > 0) {
-        g.fillStyle(0x444444, 0.5);
-        g.fillCircle(cx, GROUND_Y - 10, 12);
-        continue;
-      }
-
-      this._drawHumanoid(g, cx, y, def.color, 0.88);
-
-      // Companion HP bar above head
       const maxHp = gs.getCompanionMaxHp(i);
       const pct = Math.max(0, c.hp / maxHp);
       g.fillStyle(0x111111, 1);
-      g.fillRect(cx - 18, y - 52, 36, 5);
+      g.fillRect(cx - 18, GROUND_Y - 72, 36, 5);
       g.fillStyle(i === 0 ? 0x5588aa : 0x8866cc, 1);
-      g.fillRect(cx - 18, y - 52, Math.floor(36 * pct), 5);
+      g.fillRect(cx - 18, GROUND_Y - 72, Math.floor(36 * pct), 5);
     }
   }
 
-  _drawStars(g, area) {
-    if (area.skyA > 0x101010) return; // not dark enough
-    // Pseudo-random fixed stars using sin
-    g.fillStyle(0xffffff, 0.7);
-    for (let i = 0; i < 40; i++) {
-      const sx = (Math.sin(i * 137.5) * 0.5 + 0.5) * CANVAS_W;
-      const sy = (Math.sin(i * 97.3) * 0.5 + 0.5) * GROUND_Y * 0.7;
-      g.fillCircle(sx, sy, 0.8);
+  _updateMonsterSprite() {
+    if (!this.monsterImg.visible || !this.currentMonster) return;
+    const groundY = this.currentMonster.shape === 'fly' ? GROUND_Y - 30 : GROUND_Y;
+    this.monsterImg.setPosition(this.monsterX, groundY);
+    const flash = this.state === 'battle' && Math.sin(this.battleFlashT) < -0.5;
+    flash ? this.monsterImg.setTint(0xffffff) : this.monsterImg.clearTint();
+  }
+
+  _drawClouds(area) {
+    const g = this.bgClouds;
+    g.clear();
+    if (area.skyA <= 0x223355) {
+      // Stars for dark areas
+      g.fillStyle(0xffffff, 0.7);
+      for (let i = 0; i < 40; i++) {
+        const sx = (Math.sin(i * 137.5) * 0.5 + 0.5) * CANVAS_W;
+        const sy = (Math.sin(i * 97.3)  * 0.5 + 0.5) * GROUND_Y * 0.7;
+        g.fillCircle(sx, sy, 0.8);
+      }
+      return;
     }
+    const ox = (this.scrollX * 0.08) % CANVAS_W;
+    g.fillStyle(0xffffff, 0.88);
+    const clouds = [
+      { bx: 80,  y: 60, w: 90,  h: 30 },
+      { bx: 280, y: 42, w: 120, h: 36 },
+      { bx: 500, y: 68, w: 80,  h: 26 },
+      { bx: 680, y: 50, w: 100, h: 32 },
+    ];
+    clouds.forEach(({ bx, y, w, h }) => {
+      [-CANVAS_W, 0, CANVAS_W].forEach(offset => {
+        const cx = bx - ox + offset;
+        if (cx + w < -20 || cx - w > CANVAS_W + 20) return;
+        g.fillEllipse(cx,          y,     w,       h);
+        g.fillEllipse(cx - w*0.22, y + 5, w * 0.6, h * 0.8);
+        g.fillEllipse(cx + w*0.22, y + 5, w * 0.6, h * 0.8);
+      });
+    });
   }
 
   _drawFarLayer(g, area) {
     const ox = (this.scrollX * 0.15) % CANVAS_W;
-    // Mountains silhouette
-    g.fillStyle(Phaser.Display.Color.IntegerToColor(area.skyB).darken(20).color, 1);
+    const hillCol = Phaser.Display.Color.IntegerToColor(area.skyB).lighten(8).color;
+    g.fillStyle(hillCol, 1);
     for (let i = -1; i <= 2; i++) {
       const bx = i * 400 - ox;
-      g.fillTriangle(bx + 50, GROUND_Y - 20, bx + 200, GROUND_Y - 100, bx + 350, GROUND_Y - 20);
-      g.fillTriangle(bx + 150, GROUND_Y - 20, bx + 260, GROUND_Y - 70, bx + 380, GROUND_Y - 20);
+      g.fillEllipse(bx + 100, GROUND_Y - 10, 320, 130);
+      g.fillEllipse(bx + 280, GROUND_Y - 10, 240,  90);
     }
   }
 
@@ -466,14 +512,14 @@ class JourneyScene extends Phaser.Scene {
 
   _getMidShapes(areaId) {
     const treeShape = (g, bx) => {
-      g.fillStyle(0x0a2a08, 1);
+      g.fillStyle(0x1a5a14, 1);
       g.fillTriangle(bx + 20, GROUND_Y - 20, bx + 50, GROUND_Y - 90, bx + 80, GROUND_Y - 20);
       g.fillTriangle(bx + 10, GROUND_Y - 10, bx + 45, GROUND_Y - 70, bx + 80, GROUND_Y - 10);
-      g.fillStyle(0x0a1a08, 1);
+      g.fillStyle(0x3a2a10, 1);
       g.fillRect(bx + 42, GROUND_Y - 20, 6, 20);
     };
     const rockShape = (g, bx) => {
-      g.fillStyle(0x303040, 1);
+      g.fillStyle(0x707080, 1);
       g.fillEllipse(bx + 60, GROUND_Y - 8, 40, 20);
       g.fillEllipse(bx + 80, GROUND_Y - 10, 30, 16);
     };
@@ -512,141 +558,29 @@ class JourneyScene extends Phaser.Scene {
   }
 
   _drawGroundLayer(g, area) {
-    // Main ground
-    g.fillStyle(area.ground || 0x1a3a10, 1);
+    g.fillStyle(area.ground || 0x2a6a14, 1);
     g.fillRect(0, GROUND_Y, CANVAS_W, CANVAS_H - GROUND_Y);
 
     // Ground line detail
     const ox = (this.scrollX * 1.0) % 80;
-    g.fillStyle(Phaser.Display.Color.IntegerToColor(area.ground || 0x1a3a10).darken(15).color, 0.5);
+    g.fillStyle(Phaser.Display.Color.IntegerToColor(area.ground || 0x2a6a14).darken(15).color, 0.5);
     for (let x = -ox; x < CANVAS_W; x += 80) {
       g.fillRect(x, GROUND_Y, 40, 3);
-    }
-  }
-
-  _drawPlayer() {
-    const g = this.playerGfx;
-    g.clear();
-    const bob = this.state === 'walking' ? Math.sin(this.playerBobT) * 3 : 0;
-    const y = GROUND_Y - bob;
-    const x = PLAYER_X;
-    const flash = this.state === 'battle' && Math.sin(this.battleFlashT) > 0.5;
-
-    this._drawHumanoid(g, x, y, flash ? 0x8888ff : 0x5566ff, 1.0, true);
-
-    // Weapon
-    const eq = window.gameState.player.equipment;
-    if (eq.weapon) {
-      g.fillStyle(0xcccc66, 1);
-      g.fillRect(x + 14, y - 30, 4, 28); // sword
-    }
-    // Shield (if armor with def)
-    if (eq.armor && (eq.armor.def || 0) > 10) {
-      g.fillStyle(0x6688aa, 1);
-      g.fillRect(x - 20, y - 25, 6, 18);
-    }
-
-    // Name + level tag
-    const gs = window.gameState;
-    const nameTag = this.add.text ? null : null;
-    // Using graphics text-like indicator
-    g.fillStyle(0xffd700, 1);
-    g.fillRect(x - 18, y - 52, 36, 3);
-  }
-
-  _drawHumanoid(g, x, y, color, scale = 1, isPlayer = false) {
-    const s = scale;
-    g.fillStyle(color, 1);
-    // Head
-    g.fillCircle(x, y - 32 * s, 10 * s);
-    // Body
-    g.fillRect(x - 9 * s, y - 22 * s, 18 * s, 22 * s);
-    // Left leg
-    g.fillRect(x - 9 * s, y, 7 * s, 16 * s);
-    // Right leg
-    g.fillRect(x + 2 * s, y, 7 * s, 16 * s);
-    // Left arm
-    g.fillRect(x - 16 * s, y - 20 * s, 7 * s, 16 * s);
-    // Right arm
-    g.fillRect(x + 9 * s, y - 20 * s, 7 * s, 16 * s);
-  }
-
-  _drawMonster(mx) {
-    const g = this.monsterGfx;
-    g.clear();
-    if (!this.currentMonster) return;
-
-    const m = this.currentMonster;
-    const flash = this.state === 'battle' && Math.sin(this.battleFlashT) < -0.5;
-    const col = flash ? 0xffffff : (m.color || 0xff4444);
-
-    switch (m.shape) {
-      case 'blob':
-        g.fillStyle(col, 1);
-        g.fillEllipse(mx, GROUND_Y - 14, 40, 30);
-        g.fillStyle(0x000000, 0.5);
-        g.fillCircle(mx - 8, GROUND_Y - 18, 4);
-        g.fillCircle(mx + 8, GROUND_Y - 18, 4);
-        break;
-      case 'small':
-        this._drawHumanoid(g, mx, GROUND_Y, col, 0.7);
-        break;
-      case 'human':
-        this._drawHumanoid(g, mx, GROUND_Y, col, 1.0);
-        break;
-      case 'large':
-        this._drawHumanoid(g, mx, GROUND_Y, col, 1.4);
-        break;
-      case 'quad':
-        g.fillStyle(col, 1);
-        g.fillRect(mx - 22, GROUND_Y - 22, 44, 22);
-        g.fillRect(mx - 22, GROUND_Y, 10, 14);
-        g.fillRect(mx - 5, GROUND_Y, 10, 12);
-        g.fillRect(mx + 5, GROUND_Y, 10, 12);
-        g.fillRect(mx + 12, GROUND_Y, 10, 14);
-        g.fillRect(mx + 18, GROUND_Y - 30, 14, 14);
-        break;
-      case 'fly':
-        g.fillStyle(col, 1);
-        g.fillEllipse(mx, GROUND_Y - 40, 30, 22);
-        g.fillTriangle(mx - 30, GROUND_Y - 50, mx - 10, GROUND_Y - 40, mx - 10, GROUND_Y - 25);
-        g.fillTriangle(mx + 10, GROUND_Y - 40, mx + 30, GROUND_Y - 50, mx + 10, GROUND_Y - 25);
-        break;
-      case 'multi':
-        g.fillStyle(col, 1);
-        g.fillCircle(mx, GROUND_Y - 20, 18);
-        for (let i = 0; i < 8; i++) {
-          const a = (i / 8) * Math.PI * 2;
-          g.fillRect(mx + Math.cos(a) * 18, GROUND_Y - 20 + Math.sin(a) * 18, 3, 14);
-        }
-        break;
-      default:
-        this._drawHumanoid(g, mx, GROUND_Y, col, 1.0);
-    }
-
-    // Rarity glow
-    if (m.rarity === 'rare' || m.rarity === 'legendary') {
-      const glowCol = m.rarity === 'legendary' ? 0xffaa00 : 0x4488ff;
-      g.lineStyle(2, glowCol, 0.6);
-      g.strokeCircle(mx, GROUND_Y - 20, 40);
     }
   }
 
   _drawHpBars() {
     const g = this.hpBarsGfx;
     g.clear();
-
     const gs = window.gameState;
     const stats = gs.getStats();
 
-    // Player HP
     const pPct = gs.player.hp / stats.maxHp;
     g.fillStyle(0x220000, 1);
     g.fillRect(PLAYER_X - 30, GROUND_Y - 75, 60, 8);
     g.fillStyle(0xcc2222, 1);
     g.fillRect(PLAYER_X - 30, GROUND_Y - 75, Math.floor(60 * pPct), 8);
 
-    // Monster HP
     if (this.currentMonster) {
       const mPct = Math.max(0, this.monsterHp / this.currentMonster.hp);
       const mx = this.monsterX;
@@ -655,13 +589,13 @@ class JourneyScene extends Phaser.Scene {
       const hpCol = mPct > 0.5 ? 0x22cc22 : mPct > 0.25 ? 0xcccc22 : 0xcc2222;
       g.fillStyle(hpCol, 1);
       g.fillRect(mx - 35, GROUND_Y - 80, Math.floor(70 * mPct), 8);
-    }
-  }
 
-  _drawNPC() {
-    const g = this.npcGfx;
-    g.clear();
-    this._drawHumanoid(g, 350, GROUND_Y, 0xddcc66, 1.0);
+      if (this.currentMonster.rarity === 'rare' || this.currentMonster.rarity === 'legendary') {
+        const glowCol = this.currentMonster.rarity === 'legendary' ? 0xffaa00 : 0x4488ff;
+        g.lineStyle(2, glowCol, 0.6);
+        g.strokeCircle(mx, GROUND_Y - 30, 44);
+      }
+    }
   }
 
   _drawDungeonEntrance(dx) {
@@ -681,17 +615,6 @@ class JourneyScene extends Phaser.Scene {
     // Sign
     g.fillStyle(0x664422, 1);
     g.fillRect(dx - 20, GROUND_Y - 95, 40, 18);
-  }
-
-  _drawPartner() {
-    const g = this.partnerGfx;
-    g.clear();
-    const state = window.multiManager.partnerState;
-    if (!state) return;
-    // Partner walks slightly behind player
-    this._drawHumanoid(g, PLAYER_X - 40, GROUND_Y, 0x44aaff, 1.0);
-    g.fillStyle(0x44aaff, 1);
-    g.fillRect(PLAYER_X - 58, GROUND_Y - 75, 36, 3);
   }
 
   // =========================================================
