@@ -36,6 +36,14 @@ class JourneyScene extends Phaser.Scene {
     this.compBarGfx = this.add.graphics();
     this.hpBarsGfx  = this.add.graphics().setVisible(false);
 
+    // ---- Name labels ----
+    const nameSty = { fontSize: '11px', color: '#ffffff', stroke: '#000000', strokeThickness: 3 };
+    const gs0 = window.gameState;
+    this.playerNameTxt  = this.add.text(PLAYER_X,      GROUND_Y - 82, gs0.player.name, nameSty).setOrigin(0.5, 1);
+    this.comp0NameTxt   = this.add.text(PLAYER_X - 42, GROUND_Y - 78, D.COMPANIONS[0].name, nameSty).setOrigin(0.5, 1);
+    this.comp1NameTxt   = this.add.text(PLAYER_X - 84, GROUND_Y - 78, D.COMPANIONS[1].name, nameSty).setOrigin(0.5, 1);
+    this.monsterNameTxt = this.add.text(0, 0, '', nameSty).setOrigin(0.5, 1).setVisible(false);
+
     // ---- Floating texts ----
     this.floatTexts = [];
 
@@ -191,6 +199,7 @@ class JourneyScene extends Phaser.Scene {
     const groundY = this.currentMonster.shape === 'fly' ? GROUND_Y - 30 : GROUND_Y;
     this.monsterImg.setTexture(key).setPosition(this.monsterX, groundY).clearTint().setVisible(true);
     this.hpBarsGfx.setVisible(true);
+    this.monsterNameTxt.setText(this.currentMonster.name).setPosition(this.monsterX, GROUND_Y - 88).setVisible(true);
     gs.addLog(`⚠️ ${this.currentMonster.name}が現れた！ [${this.currentMonster.rarity}]`);
   }
 
@@ -307,6 +316,7 @@ class JourneyScene extends Phaser.Scene {
     this.currentMonster = null;
     this.monsterHp = 0;
     this.monsterImg.setVisible(false);
+    this.monsterNameTxt.setVisible(false);
     this.hpBarsGfx.setVisible(false);
     this.state = 'walking';
     updateUI();
@@ -414,6 +424,19 @@ class JourneyScene extends Phaser.Scene {
 
     // Companion HP bars
     this._drawCompanionBars();
+
+    // Sync player name (may change after load)
+    const gs = window.gameState;
+    this.playerNameTxt.setText(gs.player.name);
+
+    // Companion name visibility (hide when downed)
+    this.comp0NameTxt.setVisible(gs.companions[0]?.downTimer === 0);
+    this.comp1NameTxt.setVisible(gs.companions[1]?.downTimer === 0);
+
+    // Monster name follows sprite position
+    if (this.monsterNameTxt.visible) {
+      this.monsterNameTxt.setPosition(this.monsterX, GROUND_Y - 88);
+    }
   }
 
   _updateCompanionSprites(bob) {
