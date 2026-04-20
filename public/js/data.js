@@ -4,15 +4,15 @@ const D = {
 
   // ===== エリア =====
   AREAS: [
-    { id: 'plains',     name: '旅路の草原',   skyA: 0x0a1020, skyB: 0x1a2840, ground: 0x1a3a10, fog: 0x0a1a08,  minDist: 0     },
-    { id: 'forest',     name: '古エルフの森', skyA: 0x080c10, skyB: 0x101820, ground: 0x0a2008, fog: 0x050e05,  minDist: 300   },
-    { id: 'mountains',  name: '北の山脈',     skyA: 0x101018, skyB: 0x202030, ground: 0x303040, fog: 0x181820,  minDist: 800   },
-    { id: 'desert',     name: '砂塵の荒野',   skyA: 0x201810, skyB: 0x402a18, ground: 0x50401a, fog: 0x281808,  minDist: 1600  },
-    { id: 'swamp',      name: '瘴気の沼地',   skyA: 0x080c08, skyB: 0x101808, ground: 0x0a1808, fog: 0x040804,  minDist: 2800  },
-    { id: 'volcano',    name: '炎の峡谷',     skyA: 0x180808, skyB: 0x301008, ground: 0x200808, fog: 0x100404,  minDist: 4500  },
-    { id: 'tundra',     name: '果ての凍土',   skyA: 0x0a1420, skyB: 0x182a3a, ground: 0x203040, fog: 0x0a1828,  minDist: 6500  },
-    { id: 'ruins',      name: '魔族の廃城',   skyA: 0x0c0c10, skyB: 0x181820, ground: 0x282820, fog: 0x0c0c08,  minDist: 9000  },
-    { id: 'demon_realm',name: '魔王の残滓',   skyA: 0x0a0010, skyB: 0x180020, ground: 0x100010, fog: 0x080008,  minDist: 13000 },
+    { id: 'plains',     name: '旅路の草原',   skyA: 0x44AAEE, skyB: 0x88CCFF, ground: 0x2A8A18, fog: 0x2A8A18,  minDist: 0     },
+    { id: 'forest',     name: '古エルフの森', skyA: 0x336699, skyB: 0x6699CC, ground: 0x1A6010, fog: 0x1A6010,  minDist: 300   },
+    { id: 'mountains',  name: '北の山脈',     skyA: 0x6699BB, skyB: 0xAADDEE, ground: 0x887766, fog: 0x887766,  minDist: 800   },
+    { id: 'desert',     name: '砂塵の荒野',   skyA: 0xDDAA44, skyB: 0xFFDD88, ground: 0xBB9944, fog: 0xBB9944,  minDist: 1600  },
+    { id: 'swamp',      name: '瘴気の沼地',   skyA: 0x334422, skyB: 0x556633, ground: 0x1A3010, fog: 0x1A3010,  minDist: 2800  },
+    { id: 'volcano',    name: '炎の峡谷',     skyA: 0x663311, skyB: 0xAA4422, ground: 0x442211, fog: 0x442211,  minDist: 4500  },
+    { id: 'tundra',     name: '果ての凍土',   skyA: 0x99BBCC, skyB: 0xCCEEFF, ground: 0xC8DDE8, fog: 0xC8DDE8,  minDist: 6500  },
+    { id: 'ruins',      name: '魔族の廃城',   skyA: 0x443344, skyB: 0x664466, ground: 0x443322, fog: 0x443322,  minDist: 9000  },
+    { id: 'demon_realm',name: '魔王の残滓',   skyA: 0x220011, skyB: 0x440022, ground: 0x220011, fog: 0x220011,  minDist: 13000 },
   ],
 
   getArea(dist) {

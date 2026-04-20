@@ -3,11 +3,10 @@
 class BootScene extends Phaser.Scene {
   constructor() { super({ key: 'BootScene' }); }
 
-  preload() {
-    // No external assets – all graphics drawn via Phaser.GameObjects.Graphics
-  }
+  preload() {}
 
   create() {
+    createGameSprites(this);
     // Try to load save
     const gs = window.gameState;
     const hasSave = gs.load();
