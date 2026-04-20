@@ -19,22 +19,19 @@ class BootScene extends Phaser.Scene {
     if (hasSave) {
       document.getElementById('name-modal').style.display = 'none';
       this._startGame();
+    } else if (urlName) {
+      // 登録ページから名前が来ていたらモーダルをスキップして自動開始
+      document.getElementById('name-modal').style.display = 'none';
+      gs.player.name = urlName;
+      gs.addItem(D.EQUIPMENT.wooden_sword);
+      gs.addItem(D.EQUIPMENT.cloth_robe);
+      gs.player.hp = gs.player.maxHp;
+      this._startGame();
     } else {
       const modal = document.getElementById('name-modal');
       modal.style.display = 'flex';
 
-      // 登録ページから名前が来ていたら自動入力
       const input = document.getElementById('hero-name-input');
-      if (urlName) {
-        input.value = urlName;
-      }
-
-      // bioがあれば紹介文を表示
-      if (urlBio) {
-        const sub = modal.querySelector('.modal-subtitle');
-        if (sub) sub.textContent = `「${urlBio}」`;
-      }
-
       const btn = document.getElementById('start-game-btn');
       btn.onclick = () => {
         const name = input.value.trim() || '勇者';
