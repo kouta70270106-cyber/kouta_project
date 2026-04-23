@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ギルド本部</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: radial-gradient(ellipse at center, #0a1a0a 0%, #040a04 100%);
+      min-height: 100vh;
+      color: #c8d4c0;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      font-size: 13px;
+      padding: 16px;
+    }
+
+    /* ===== Header ===== */
+    .page-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      max-width: 900px;
+      margin: 0 auto 20px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #1e3020;
+    }
+    .page-header h1 {
+      font-size: 20px;
+      color: #c0a850;
+      letter-spacing: 2px;
+    }
+    .page-header a {
+      font-size: 11px;
+      color: #5a7a62;
+      text-decoration: none;
+      border: 1px solid #2a4a32;
+      padding: 4px 12px;
+      border-radius: 4px;
+    }
+    .page-header a:hover { color: #88cc99; border-color: #4a8a60; }
+
+    /* ===== Layout ===== */
+    .board {
+      max-width: 900px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    /* ===== Section Card ===== */
+    .section-card {
+      background: linear-gradient(135deg, #0c1810 0%, #142018 100%);
+      border: 1px solid #1e3020;
+      border-radius: 10px;
+      padding: 24px;
+      position: relative;
+    }
+    .section-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, #c0a850, transparent);
+      border-radius: 10px 10px 0 0;
+    }
+    .section-title {
+      font-size: 11px;
+      color: #7a9a82;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .section-title::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: #1e3020;
+    }
+
+    /* ===== Character Panel ===== */
+    .char-panel {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 20px;
+      align-items: start;
+    }
+    .char-avatar {
+      width: 80px;
+      height: 80px;
+      background: linear-gradient(135deg, #0a1a10, #1a3020);
+      border: 2px solid #c0a850;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 40px;
+    }
+    .char-info-main .char-name {
+      font-size: 22px;
+      font-weight: bold;
+      color: #ffd700;
+      margin-bottom: 2px;
+    }
+    .char-info-main .char-job {
+      font-size: 13px;
+      color: #88cc99;
+      margin-bottom: 12px;
+    }
+    .char-stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+      gap: 8px;
+      margin-top: 4px;
+    }
+    .stat-chip {
+      background: #0a1408;
+      border: 1px solid #1e3020;
+      border-radius: 6px;
+      padding: 6px 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .stat-chip .s-label {
+      font-size: 9px;
+      color: #5a7a62;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .stat-chip .s-value {
+      font-size: 15px;
+      font-weight: bold;
+      color: #c8d4c0;
+    }
+    .stat-chip .s-bar {
+      height: 3px;
+      background: #1e3020;
+      border-radius: 2px;
+      margin-top: 3px;
+      overflow: hidden;
+    }
+    .stat-chip .s-bar-fill {
+      height: 100%;
+      border-radius: 2px;
+      transition: width 0.5s ease;
+    }
+    .bar-hp   { background: linear-gradient(90deg, #2a7a38, #44aa55); }
+    .bar-mp   { background: linear-gradient(90deg, #2a5870, #4a80c0); }
+    .bar-atk  { background: linear-gradient(90deg, #7a3020, #cc5040); }
+    .bar-def  { background: linear-gradient(90deg, #3a5070, #5a80aa); }
+    .bar-spd  { background: linear-gradient(90deg, #5a7020, #88aa30); }
+    .char-level-badge {
+      display: inline-block;
+      background: #162a1c;
+      border: 1px solid #3a6a48;
+      color: #8abf9a;
+      font-size: 11px;
+      padding: 2px 10px;
+      border-radius: 10px;
+      margin-bottom: 10px;
+    }
+    .char-bio {
+      font-size: 11px;
+      color: #6a8a72;
+      font-style: italic;
+      margin-top: 8px;
+    }
+    .no-profile {
+      text-align: center;
+      padding: 20px;
+      color: #5a7a62;
+    }
+    .no-profile a {
+      color: #88cc99;
+      text-decoration: underline;
+    }
+
+    /* ===== Quest Log ===== */
+    .quest-input-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+    .quest-input {
+      flex: 1;
+      padding: 9px 12px;
+      background: #060e08;
+      border: 1px solid #1e3020;
+      border-radius: 6px;
+      color: #c0d4c0;
+      font-size: 13px;
+      font-family: inherit;
+    }
+    .quest-input:focus { outline: none; border-color: #4a8a60; }
+    .quest-add-btn {
+      padding: 9px 16px;
+      background: linear-gradient(135deg, #162a1e, #223a28);
+      border: 1px solid #3a6a48;
+      border-radius: 6px;
+      color: #88cc99;
+      font-size: 13px;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .quest-add-btn:hover { background: linear-gradient(135deg, #223a28, #2e4e34); }
+    .quest-list { display: flex; flex-direction: column; gap: 6px; }
+    .quest-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 12px;
+      background: #0a1408;
+      border: 1px solid #1a2a18;
+      border-radius: 6px;
+      transition: border-color 0.2s;
+    }
+    .quest-item:hover { border-color: #2a4a28; }
+    .quest-item.done { opacity: 0.5; }
+    .quest-item.done .quest-text { text-decoration: line-through; color: #5a7a62; }
+    .quest-check {
+      width: 18px; height: 18px;
+      border: 1px solid #3a6a48;
+      border-radius: 4px;
+      background: #060e08;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px;
+      flex-shrink: 0;
+      transition: background 0.2s;
+    }
+    .quest-item.done .quest-check { background: #1a4a28; border-color: #3a8a50; }
+    .quest-text { flex: 1; font-size: 13px; color: #c0d4c0; }
+    .quest-del {
+      background: none; border: none;
+      color: #3a4a38; font-size: 14px; cursor: pointer;
+      padding: 2px 6px; border-radius: 3px;
+      transition: color 0.2s;
+    }
+    .quest-del:hover { color: #cc5040; }
+    .quest-empty {
+      text-align: center;
+      padding: 20px;
+      color: #3a5040;
+      font-size: 12px;
+    }
+    .quest-footer {
+      margin-top: 10px;
+      font-size: 10px;
+      color: #3a5040;
+      text-align: right;
+    }
+
+    /* ===== Adventure Locations ===== */
+    .locations-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 12px;
+    }
+    .location-card {
+      background: #0a1408;
+      border: 1px solid #1a2a18;
+      border-radius: 8px;
+      padding: 18px 14px;
+      text-align: center;
+      text-decoration: none;
+      color: inherit;
+      transition: all 0.2s;
+      position: relative;
+    }
+    .location-card.unlocked {
+      border-color: #2a4a28;
+      cursor: pointer;
+    }
+    .location-card.unlocked:hover {
+      border-color: #4a8a60;
+      background: #0e1e0e;
+      transform: translateY(-2px);
+    }
+    .location-card.locked {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+    .loc-icon { font-size: 32px; margin-bottom: 8px; }
+    .loc-name {
+      font-size: 13px;
+      font-weight: bold;
+      color: #c0a850;
+      margin-bottom: 4px;
+    }
+    .location-card.locked .loc-name { color: #5a6a58; }
+    .loc-desc { font-size: 10px; color: #5a7a62; line-height: 1.5; }
+    .loc-badge {
+      position: absolute;
+      top: 8px; right: 8px;
+      font-size: 9px;
+      padding: 2px 6px;
+      border-radius: 8px;
+    }
+    .badge-new { background: #1a4a10; color: #5aaa40; border: 1px solid #3a8a30; }
+    .badge-lock { background: #1a1a1a; color: #5a5a5a; }
+
+    /* ===== Responsive ===== */
+    @media (max-width: 600px) {
+      .char-panel { grid-template-columns: 1fr; }
+      .char-avatar { width: 60px; height: 60px; font-size: 30px; }
+      .locations-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body>
+
+<header class="page-header">
+  <h1>🏰 ギルド本部</h1>
+  <a href="index.html">← 登録ページに戻る</a>
+</header>
+
+<main class="board">
+
+  <!-- ===== キャラクター情報 ===== -->
+  <section class="section-card">
+    <div class="section-title">⚔️ 冒険者情報</div>
+    <div id="char-panel-content"></div>
+  </section>
+
+  <!-- ===== 個人クエストログ ===== -->
+  <section class="section-card">
+    <div class="section-title">📜 個人クエストログ</div>
+    <div class="quest-input-row">
+      <input type="text" id="quest-input" class="quest-input" placeholder="タスクを入力した Enter で追加" maxlength="60">
+      <button class="quest-add-btn" onclick="addQuest()">+ 追加</button>
+    </div>
+    <div id="quest-list" class="quest-list"></div>
+    <div class="quest-footer" id="quest-footer"></div>
+  </section>
+
+  <!-- ===== 冒険の場所 ===== -->
+  <section class="section-card">
+    <div class="section-title">🗺️ 冒険の場所</div>
+    <div class="locations-grid">
+      <a href="https://kouta-project.onrender.com" target="_blank" class="location-card unlocked">
+        <div class="loc-badge badge-new">OPEN</div>
+        <div class="loc-icon">🌍</div>
+        <div class="loc-name">永遠の旅人</div>
+        <div class="loc-desc">メインゲーム。放置系 RPG で魔物を倒し続ける</div>
+      </a>
+      <div class="location-card locked">
+        <div class="loc-badge badge-lock">🔒</div>
+        <div class="loc-icon">🏛️</div>
+        <div class="loc-name">装備工房</div>
+        <div class="loc-desc">武器・防具を鉱造・強化する（封印中）</div>
+      </div>
+      <div class="location-card locked">
+        <div class="loc-badge badge-lock">🔒</div>
+        <div class="loc-icon">📖</div>
+        <div class="loc-name">魔物図鑑</div>
+        <div class="loc-desc">勘んた魔物の記録を閲覧する（封印中）</div>
+      </div>
+      <div class="location-card locked">
+        <div class="loc-badge badge-lock">🔒</div>
+        <div class="loc-icon">✨</div>
+        <div class="loc-name">呼文工房</div>
+        <div class="loc-desc">強力なスキルを習得する（封印中）</div>
+      </div>
+      <div class="location-card locked">
+        <div class="loc-badge badge-lock">🔒</div>
+        <div class="loc-icon">⚔️</div>
+        <div class="loc-name">バトルアリーナ</div>
+        <div class="loc-desc">他の冒険者と対戦する（封印中）</div>
+      </div>
+      <div class="location-card locked">
+        <div class="loc-badge badge-lock">🔒</div>
+        <div class="loc-icon">🌆</div>
+        <div class="loc-name">冒険者街</div>
+        <div class="loc-desc">安息してステータスを回復（封印中）</div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<script>
+  const JOB_ICONS = {
+    '⚔️ 勇者':'⚔️','🗡️ 戦士':'🗡️','🧙 魔法使い':'🧙',
+    '🏹 弓使い':'🏹','🛡️ 騎士':'🛡️','🗝️ 盗賊':'🗝️',
+    '✨ 賢者':'✨','⚡ 魔導士':'⚡','🌿 僧侶':'🌿','🔥 魔王':'🔥'
+  };
+  const JOB_STATS = {
+    '⚔️ 勇者':  { hp:120, mp:60,  atk:14, def:8,  spd:10 },
+    '🗡️ 戦士':  { hp:150, mp:30,  atk:18, def:14, spd:7  },
+    '🧙 魔法使い':{ hp:80,  mp:120, atk:22, def:5,  spd:9  },
+    '🏹 弓使い':  { hp:90,  mp:70,  atk:16, def:7,  spd:14 },
+    '🛡️ 騎士':  { hp:160, mp:40,  atk:15, def:18, spd:6  },
+    '🗝️ 盗賊':  { hp:100, mp:80,  atk:17, def:9,  spd:16 },
+    '✨ 賢者':   { hp:100, mp:110, atk:20, def:10, spd:11 },
+    '⚡ 魔導士':  { hp:85,  mp:130, atk:24, def:4,  spd:10 },
+    '🌿 僧侶':   { hp:110, mp:100, atk:12, def:12, spd:9  },
+    '🔥 魔王':   { hp:130, mp:90,  atk:25, def:12, spd:12 },
+  };
+  const DEFAULT_STATS = { hp:100, mp:50, atk:10, def:5, spd:8 };
+
+  // ===== キャラクターパネル =====
+  function renderCharPanel() {
+    const el = document.getElementById('char-panel-content');
+    const raw = localStorage.getItem('guild_profile');
+    if (!raw) {
+      el.innerHTML = `<div class="no-profile">🔑 未登録です。<a href="index.html">冒険者登録</a>を先に行ってください</div>`;
+      return;
+    }
+    const p = JSON.parse(raw);
+    const saved = JSON.parse(localStorage.getItem('guild_char_stats') || 'null');
+    const base  = JOB_STATS[p.job] || DEFAULT_STATS;
+    const stats = saved || base;
+    const lv    = stats.lv || 1;
+    const icon  = JOB_ICONS[p.job] || '⚔️';
+
+    el.innerHTML = `
+      <div class="char-panel">
+        <div class="char-avatar">${icon}</div>
+        <div class="char-info-main">
+          <div class="char-name">${esc(p.name)}</div>
+          <div class="char-job">${esc(p.job)}</div>
+          <span class="char-level-badge">Lv. ${lv}</span>
+          <div class="char-stats-grid">
+            ${statChip('HP', stats.hp, stats.hp, 'hp')}
+            ${statChip('MP', stats.mp, stats.mp, 'mp')}
+            ${statChip('ATK', stats.atk, 30, 'atk')}
+            ${statChip('DEF', stats.def, 25, 'def')}
+            ${statChip('SPD', stats.spd, 20, 'spd')}
+          </div>
+          ${p.bio ? `<div class="char-bio">「${esc(p.bio)}」</div>` : ''}
+        </div>
+      </div>`;
+  }
+
+  function statChip(label, val, max, cls) {
+    const pct = Math.min(100, Math.round(val / max * 100));
+    return `<div class="stat-chip">
+      <span class="s-label">${label}</span>
+      <span class="s-value">${val}</span>
+      <div class="s-bar"><div class="s-bar-fill bar-${cls}" style="width:${pct}%"></div></div>
+    </div>`;
+  }
+
+  function esc(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  // ===== クエストログ CRUD =====
+  function loadQuests() {
+    try { return JSON.parse(localStorage.getItem('guild_quests') || '[]'); }
+    catch(e) { return []; }
+  }
+  function saveQuests(qs) {
+    localStorage.setItem('guild_quests', JSON.stringify(qs));
+  }
+
+  function renderQuests() {
+    const qs = loadQuests();
+    const el = document.getElementById('quest-list');
+    const footer = document.getElementById('quest-footer');
+    if (qs.length === 0) {
+      el.innerHTML = '<div class="quest-empty">📜 タスクはまだありません</div>';
+      footer.textContent = '';
+      return;
+    }
+    el.innerHTML = qs.map(q => `
+      <div class="quest-item${q.done ? ' done' : ''}" data-id="${q.id}">
+        <div class="quest-check" onclick="toggleQuest('${q.id}')">${q.done ? '✓' : ''}</div>
+        <div class="quest-text">${esc(q.text)}</div>
+        <button class="quest-del" onclick="deleteQuest('${q.id}')" title="削除">✕</button>
+      </div>`).join('');
+    const done = qs.filter(q => q.done).length;
+    footer.textContent = `${done} / ${qs.length} 完了`;
+  }
+
+  function addQuest() {
+    const input = document.getElementById('quest-input');
+    const text = input.value.trim();
+    if (!text) return;
+    const qs = loadQuests();
+    qs.unshift({ id: Date.now().toString(36), text, done: false, createdAt: new Date().toISOString() });
+    saveQuests(qs);
+    renderQuests();
+    input.value = '';
+    input.focus();
+  }
+
+  function toggleQuest(id) {
+    const qs = loadQuests();
+    const q = qs.find(x => x.id === id);
+    if (q) q.done = !q.done;
+    saveQuests(qs);
+    renderQuests();
+  }
+
+  function deleteQuest(id) {
+    saveQuests(loadQuests().filter(x => x.id !== id));
+    renderQuests();
+  }
+
+  document.getElementById('quest-input').addEventListener('keydown', e => {
+    if (e.key === 'Enter') addQuest();
+  });
+
+  // ===== Init =====
+  renderCharPanel();
+  renderQuests();
+</script>
+</body>
+</html>
