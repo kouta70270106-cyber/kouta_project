@@ -83,16 +83,36 @@
       border: 2px solid #5aaa40; border-radius: 8px;
       color: #ccff99; font-size: 18px; font-weight: bold;
       text-decoration: none; text-align: center;
-      margin-bottom: 14px;
+      margin-bottom: 12px;
       box-shadow: 0 0 24px rgba(90,170,60,0.35);
     }
     .game-btn:hover { background: linear-gradient(135deg, #2a6a18, #3a8a28); }
+    .board-btn {
+      display: block; width: 100%; padding: 14px;
+      background: linear-gradient(135deg, #1a1a3a, #2a2a5a);
+      border: 2px solid #5a6aaa; border-radius: 8px;
+      color: #aabbff; font-size: 16px; font-weight: bold;
+      text-decoration: none; text-align: center;
+      margin-bottom: 12px;
+      cursor: pointer;
+    }
+    .board-btn:hover { background: linear-gradient(135deg, #2a2a5a, #3a3a7a); }
     .back-btn {
       background: none; border: 1px solid #2a4a32;
       color: #5a7a62; padding: 8px 20px; border-radius: 4px;
       cursor: pointer; font-size: 12px;
     }
     .back-btn:hover { border-color: #4a8a60; color: #88cc99; }
+    .existing-banner {
+      background: #0a1a10; border: 1px solid #3a6a48; border-radius: 6px;
+      padding: 10px 14px; margin-bottom: 20px;
+      font-size: 12px; color: #88cc99;
+      display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    }
+    .existing-banner button {
+      background: #162a1e; border: 1px solid #3a6a48; border-radius: 4px;
+      color: #88cc99; font-size: 11px; padding: 4px 10px; cursor: pointer; white-space: nowrap;
+    }
   </style>
 </head>
 <body>
@@ -105,6 +125,12 @@
     <div class="guild-title">冒険者ギルド</div>
     <div class="guild-sub">ADVENTURER GUILD</div>
     <div class="divider">✦ 登録所 ✦</div>
+
+    <div id="existing-banner" class="existing-banner" style="display:none">
+      <span id="existing-text"></span>
+      <button onclick="goToBoard()">本部へ →</button>
+    </div>
+
     <form id="reg-form" novalidate>
       <div class="form-group">
         <label class="form-label">⚔ 冒険者名</label>
@@ -149,6 +175,7 @@
     </div>
     <div class="stars">★ ★ ★ 冒険の始まりだ！ ★ ★ ★</div>
     <a id="game-link" href="#" target="_blank" class="game-btn">⚔️ さあ、冒険を始めよう！</a>
+    <a href="board.html" class="board-btn">🏰 ギルド本部へ行く</a>
     <button class="back-btn" onclick="resetForm()">← 別の冒険者を登録する</button>
   </div>
 </div>
@@ -159,6 +186,29 @@
     '🏹 弓使い':'🏹','🛡️ 騎士':'🛡️','🗝️ 盗賊':'🗝️',
     '✨ 賢者':'✨','⚡ 魔導士':'⚡','🌿 僧侶':'🌿','🔥 魔王':'🔥'
   };
+
+  function goToBoard() {
+    window.location.href = 'board.html';
+  }
+
+  // ページ読み込み時：既存プロフィールがあればバナー表示
+  window.addEventListener('DOMContentLoaded', () => {
+    const saved = localStorage.getItem('guild_profile');
+    if (saved) {
+      try {
+        const p = JSON.parse(saved);
+        const banner = document.getElementById('existing-banner');
+        document.getElementById('existing-text').textContent =
+          `${p.name}（${p.job}）として登録済みです`;
+        banner.style.display = 'flex';
+        // フォームに既存値を復元
+        document.getElementById('f-name').value = p.name || '';
+        document.getElementById('f-job').value  = p.job  || '';
+        document.getElementById('f-bio').value  = p.bio  || '';
+        document.getElementById('bio-count').textContent = (p.bio || '').length;
+      } catch(e) {}
+    }
+  });
 
   document.getElementById('f-bio').addEventListener('input', function() {
     document.getElementById('bio-count').textContent = this.value.length;
@@ -174,13 +224,19 @@
     if (!bio)  { alert('自己紹介を入力してください'); return; }
 
     const id = 'ADV-' + Date.now().toString(36).toUpperCase();
+
+    // localStorage に保存
+    localStorage.setItem('guild_profile', JSON.stringify({
+      name, job, bio, id,
+      registeredAt: new Date().toISOString()
+    }));
+
     document.getElementById('r-icon').textContent = JOB_ICONS[job] || '⚔️';
     document.getElementById('r-name').textContent = name;
     document.getElementById('r-job').textContent  = job;
     document.getElementById('r-bio').textContent  = '「' + bio + '」';
     document.getElementById('r-id').textContent   = 'ギルドID: ' + id;
 
-    // 名前・自己紹介をURLパラメータでゲームに渡す
     const params = new URLSearchParams({ name: name, bio: bio });
     document.getElementById('game-link').href =
       'https://kouta-project.onrender.com/?' + params.toString();
