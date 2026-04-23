@@ -118,8 +118,10 @@ body {
   border-radius: 6px;
   display: flex;
   align-items: center;
-  padding: 6px 12px;
-  gap: 20px;
+  padding: 6px 10px;
+  gap: 10px;
+  min-width: 0;
+  overflow: hidden;
 }
 
 #main-area {
@@ -184,12 +186,13 @@ body {
 #player-block {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 6px;
   flex: 1;
+  min-width: 0;
 }
 
 #player-name-hud {
-  font-size: 15px;
+  font-size: 13px;
   font-weight: bold;
   color: #c8b040;
   white-space: nowrap;
@@ -198,9 +201,9 @@ body {
 .level-badge {
   background: #162a1c;
   border: 1px solid #3a6a48;
-  padding: 2px 8px;
+  padding: 2px 6px;
   border-radius: 10px;
-  font-size: 12px;
+  font-size: 11px;
   color: #8abf9a;
   white-space: nowrap;
 }
@@ -208,18 +211,18 @@ body {
 .bar-wrap {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 3px;
 }
 
 .bar-label {
-  font-size: 11px;
+  font-size: 10px;
   color: #888;
-  width: 28px;
+  width: 22px;
 }
 
 .bar-bg {
-  width: 100px;
-  height: 10px;
+  width: 75px;
+  height: 9px;
   background: #121e14;
   border-radius: 5px;
   overflow: hidden;
@@ -236,7 +239,7 @@ body {
 .exp-fill  { background: linear-gradient(90deg, #2a5870, #4a8090); }
 .comp0-fill { background: linear-gradient(90deg, #335577, #5588aa); }
 .comp1-fill { background: linear-gradient(90deg, #553388, #8866cc); }
-.comp-label { font-size: 9px; width: 28px; }
+.comp-label { font-size: 9px; width: 22px; }
 
 .bar-text {
   font-size: 10px;
@@ -246,12 +249,13 @@ body {
 
 #time-block {
   display: flex;
-  gap: 12px;
+  gap: 8px;
   align-items: center;
+  flex-shrink: 0;
 }
 
 .time-item {
-  font-size: 12px;
+  font-size: 11px;
   color: #88a892;
   white-space: nowrap;
 }
@@ -262,9 +266,9 @@ body {
   background: #0c1810;
   border: 1px solid #2a4030;
   color: #7aaa88;
-  padding: 3px 10px;
+  padding: 2px 8px;
   border-radius: 4px;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: bold;
   cursor: pointer;
   transition: all 0.2s;
@@ -275,12 +279,13 @@ body {
 
 #stat-block {
   display: flex;
-  gap: 12px;
+  gap: 8px;
   align-items: center;
+  flex-shrink: 0;
 }
 
 .stat-item {
-  font-size: 13px;
+  font-size: 12px;
   color: #a8b8a0;
   white-space: nowrap;
 }
