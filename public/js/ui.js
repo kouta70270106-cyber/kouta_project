@@ -335,3 +335,19 @@ document.addEventListener('DOMContentLoaded', () => {
     if (e.key === 'Enter') document.getElementById('join-btn')?.click();
   });
 });
+
+// ギルド本部へ — 現在のゲームステータスをURLパラメータで渡す
+function openGuildHQ() {
+  const BOARD_URL = 'https://kouta70270106-cyber.github.io/kouta_project/board.html';
+  const gs = window.gameState;
+  if (!gs) { window.open(BOARD_URL, '_blank'); return; }
+  const stats = gs.getStats();
+  const p = gs.player;
+  const params = new URLSearchParams({
+    lv:  p.level,
+    hp:  stats.maxHp,
+    atk: stats.atk,
+    def: stats.def,
+  });
+  window.open(`${BOARD_URL}?${params}`, '_blank');
+}
