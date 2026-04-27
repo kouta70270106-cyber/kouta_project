@@ -158,6 +158,26 @@ const D = {
     void_blade:    { id:'void_blade',      name:'虚無の剣',         type:'weapon',    atk:220,           rarity:'legendary', icon:'🌌'  },
     void_crown:    { id:'void_crown',      name:'虚無の王冠',       type:'accessory', atk:60,def:60,hp:350,rarity:'legendary',icon:'👑' },
     void_ring:     { id:'void_ring',       name:'虚無の指輪',       type:'accessory', atk:45,def:45,     rarity:'legendary', icon:'💍'  },
+
+    // ===== 装備セット（武器5・盾3・鎧3・アクセサリ3 / 説明付き） =====
+    // 武器
+    sword_iron:      { id:'sword_iron',      name:'鉄の剣',           type:'weapon',    atk:18,           rarity:'common',    icon:'⚔️', desc:'錬鉄で鍛えた頼もしい剣。冒険者の定番。' },
+    sword_steel:     { id:'sword_steel',     name:'鋼の剣',           type:'weapon',    atk:35,           rarity:'uncommon',  icon:'⚔️', desc:'精錬鋼で鍛えた重厚な剣。切れ味は鋭い。' },
+    sword_mithril:   { id:'sword_mithril',   name:'ミスリルの剣',     type:'weapon',    atk:55,           rarity:'rare',      icon:'⚔️', desc:'幻の金属ミスリルで鍛えた名剣。魔力を帯びる。' },
+    sword_demon:     { id:'sword_demon',     name:'魔剣デモンエッジ', type:'weapon',    atk:65,           rarity:'rare',      icon:'🗡️', desc:'魔族が鍛えた邪悪な剣。使い手に問わず力を与える。' },
+    sword_dragon:    { id:'sword_dragon',    name:'ドラゴンスレイヤー',type:'weapon',   atk:110,          rarity:'legendary', icon:'🗡️', desc:'龍を屠るために生まれた伝説の剣。龍特攻を持つ。' },
+    // 盾
+    shield_wood:     { id:'shield_wood',     name:'木の盾',           type:'shield',    def:8,            rarity:'common',    icon:'🛡️', desc:'村人が使う素朴な木盾。軽くて扱いやすい。' },
+    shield_iron:     { id:'shield_iron',     name:'鉄の盾',           type:'shield',    def:22, hp:30,    rarity:'uncommon',  icon:'🛡️', desc:'頑丈な鉄製の丸盾。矢や刃を確実に受け止める。' },
+    shield_dragon:   { id:'shield_dragon',   name:'龍盾',             type:'shield',    def:90, hp:200,   rarity:'legendary', icon:'🛡️', desc:'龍の鱗を素材にした究極の盾。炎すら弾く。' },
+    // 鎧
+    armor_leather:   { id:'armor_leather',   name:'革の胴当て',       type:'armor',     def:10,           rarity:'common',    icon:'🥋', desc:'軽くて動きやすい革製の鎧。旅の定番装備。' },
+    armor_chain:     { id:'armor_chain',     name:'チェインメイル',   type:'armor',     def:28,           rarity:'uncommon',  icon:'🥋', desc:'鎖を細かく編んだ鎧。斬撃に対して高い防御を誇る。' },
+    armor_mithril:   { id:'armor_mithril',   name:'ミスリルプレート', type:'armor',     def:45, hp:50,    rarity:'rare',      icon:'🥋', desc:'ミスリルの板金鎧。軽量ながら最高水準の防御力。' },
+    // アクセサリ
+    acc_charm:       { id:'acc_charm',       name:'幸運のお守り',     type:'accessory', atk:2,  def:2,    rarity:'common',    icon:'🍀', desc:'旅人が守護を願うお守り。運を少し上げてくれる。' },
+    acc_power_ring:  { id:'acc_power_ring',  name:'力の指輪',         type:'accessory', atk:15,           rarity:'uncommon',  icon:'💍', desc:'装着すると力が漲る魔法の指輪。攻撃力が増す。' },
+    acc_life_amulet: { id:'acc_life_amulet', name:'命のアミュレット', type:'accessory', hp:100, def:10,   rarity:'rare',      icon:'💎', desc:'生命力を高める古代のアミュレット。HP上限が増える。' },
   },
 
   // ===== クエスト =====

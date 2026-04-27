@@ -13,7 +13,7 @@ class GameState {
       baseAtk: 10,
       baseDef: 5,
       gold: 0,
-      equipment: { weapon: null, armor: null, accessory: null },
+      equipment: { weapon: null, shield: null, armor: null, accessory: null },
     };
     this.inventory = [];   // max 20 items
     this.guild = null;     // { id, name, ... }
@@ -44,7 +44,7 @@ class GameState {
     let def = p.baseDef;
     let bonusHp = 0;
 
-    const slots = ['weapon', 'armor', 'accessory'];
+    const slots = ['weapon', 'shield', 'armor', 'accessory'];
     for (const slot of slots) {
       const eq = p.equipment[slot];
       if (eq) {
@@ -122,7 +122,7 @@ class GameState {
 
   equip(item) {
     const slot = item.type;
-    if (!['weapon','armor','accessory'].includes(slot)) return;
+    if (!['weapon','shield','armor','accessory'].includes(slot)) return;
     const prev = this.player.equipment[slot];
     this.player.equipment[slot] = item;
     // recalculate HP bounds
