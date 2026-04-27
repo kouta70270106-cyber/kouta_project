@@ -62,8 +62,9 @@ function updateEquipmentTab() {
   const stats = gs.getStats();
 
   const fmt = item => item ? `<span class="rarity-${item.rarity}">${item.icon || ''} ${item.name}</span>` : '<span style="color:#444">なし</span>';
-  document.getElementById('eq-weapon').innerHTML = fmt(eq.weapon);
-  document.getElementById('eq-armor').innerHTML = fmt(eq.armor);
+  document.getElementById('eq-weapon').innerHTML    = fmt(eq.weapon);
+  document.getElementById('eq-shield').innerHTML    = fmt(eq.shield);
+  document.getElementById('eq-armor').innerHTML     = fmt(eq.armor);
   document.getElementById('eq-accessory').innerHTML = fmt(eq.accessory);
 
   const det = document.getElementById('stats-detail');
