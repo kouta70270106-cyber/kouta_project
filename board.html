@@ -4,15 +4,46 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ギルド本部</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DotGothic16&display=swap" rel="stylesheet">
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
+
     body {
-      background: radial-gradient(ellipse at center, #0a1a0a 0%, #040a04 100%);
+      background: #000828;
       min-height: 100vh;
-      color: #c8d4c0;
-      font-family: 'Segoe UI', system-ui, sans-serif;
-      font-size: 13px;
+      color: #c8d4ff;
+      font-family: 'DotGothic16', 'Segoe UI', system-ui, sans-serif;
+      font-size: 14px;
       padding: 16px;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    /* ===== 星空背景 ===== */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        radial-gradient(1px 1px at 10% 15%, #fff 0%, transparent 100%),
+        radial-gradient(1px 1px at 25% 40%, rgba(255,255,255,.7) 0%, transparent 100%),
+        radial-gradient(1px 1px at 40%  8%, #fff 0%, transparent 100%),
+        radial-gradient(1px 1px at 55% 55%, rgba(255,255,255,.6) 0%, transparent 100%),
+        radial-gradient(1px 1px at 70% 20%, #fff 0%, transparent 100%),
+        radial-gradient(1px 1px at 80% 70%, rgba(255,255,255,.8) 0%, transparent 100%),
+        radial-gradient(1px 1px at 90% 35%, #fff 0%, transparent 100%),
+        radial-gradient(1px 1px at 15% 75%, rgba(255,255,255,.5) 0%, transparent 100%),
+        radial-gradient(1px 1px at 35% 90%, rgba(255,255,255,.7) 0%, transparent 100%),
+        radial-gradient(1px 1px at 60% 80%, #fff 0%, transparent 100%),
+        radial-gradient(1px 1px at 5%  50%, rgba(255,255,255,.6) 0%, transparent 100%),
+        radial-gradient(1px 1px at 48% 30%, rgba(255,255,255,.4) 0%, transparent 100%),
+        radial-gradient(1.5px 1.5px at 72% 5%, #fff 0%, transparent 100%),
+        radial-gradient(1.5px 1.5px at 20% 60%, rgba(255,255,255,.9) 0%, transparent 100%),
+        radial-gradient(2px 2px at 85% 90%, rgba(200,200,255,.8) 0%, transparent 100%);
+      pointer-events: none;
+      z-index: 0;
     }
 
     /* ===== Header ===== */
@@ -23,22 +54,25 @@
       max-width: 900px;
       margin: 0 auto 20px;
       padding-bottom: 12px;
-      border-bottom: 1px solid #1e3020;
+      border-bottom: 1px solid #1e2860;
+      position: relative;
+      z-index: 1;
     }
     .page-header h1 {
-      font-size: 20px;
-      color: #c0a850;
-      letter-spacing: 2px;
+      font-size: 22px;
+      color: #f0c840;
+      letter-spacing: 3px;
+      text-shadow: 0 0 12px rgba(240,200,64,.5);
     }
     .page-header a {
-      font-size: 11px;
-      color: #5a7a62;
+      font-size: 12px;
+      color: #6080cc;
       text-decoration: none;
-      border: 1px solid #2a4a32;
+      border: 1px solid #2a3a80;
       padding: 4px 12px;
       border-radius: 4px;
     }
-    .page-header a:hover { color: #88cc99; border-color: #4a8a60; }
+    .page-header a:hover { color: #aabbff; border-color: #4a60cc; }
 
     /* ===== Layout ===== */
     .board {
@@ -47,13 +81,15 @@
       display: flex;
       flex-direction: column;
       gap: 20px;
+      position: relative;
+      z-index: 1;
     }
 
     /* ===== Section Card ===== */
     .section-card {
-      background: linear-gradient(135deg, #0c1810 0%, #142018 100%);
-      border: 1px solid #1e3020;
-      border-radius: 10px;
+      background: linear-gradient(135deg, #050d28 0%, #08122a 100%);
+      border: 1px solid #1e2e70;
+      border-radius: 8px;
       padding: 24px;
       position: relative;
     }
@@ -62,13 +98,12 @@
       position: absolute;
       top: 0; left: 0; right: 0;
       height: 2px;
-      background: linear-gradient(90deg, transparent, #c0a850, transparent);
-      border-radius: 10px 10px 0 0;
+      background: linear-gradient(90deg, transparent, #3a6aff, transparent);
+      border-radius: 8px 8px 0 0;
     }
     .section-title {
-      font-size: 11px;
-      color: #7a9a82;
-      text-transform: uppercase;
+      font-size: 13px;
+      color: #8899dd;
       letter-spacing: 2px;
       margin-bottom: 16px;
       display: flex;
@@ -79,7 +114,7 @@
       content: '';
       flex: 1;
       height: 1px;
-      background: #1e3020;
+      background: #1e2e60;
     }
 
     /* ===== Character Panel ===== */
@@ -90,225 +125,170 @@
       align-items: start;
     }
     .char-avatar {
-      width: 80px;
-      height: 80px;
-      background: linear-gradient(135deg, #0a1a10, #1a3020);
-      border: 2px solid #c0a850;
-      border-radius: 10px;
+      width: 80px; height: 80px;
+      background: linear-gradient(135deg, #050a20, #0a1540);
+      border: 2px solid #f0c840;
+      border-radius: 8px;
       display: flex;
       align-items: center;
       justify-content: center;
       font-size: 40px;
+      box-shadow: 0 0 16px rgba(240,200,64,.3);
     }
     .char-info-main .char-name {
       font-size: 22px;
-      font-weight: bold;
-      color: #ffd700;
+      color: #f0c840;
       margin-bottom: 2px;
+      text-shadow: 0 0 8px rgba(240,200,64,.4);
     }
-    .char-info-main .char-job {
-      font-size: 13px;
-      color: #88cc99;
-      margin-bottom: 12px;
-    }
+    .char-info-main .char-job { font-size: 13px; color: #88aaff; margin-bottom: 12px; }
     .char-stats-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
       gap: 8px;
       margin-top: 4px;
     }
     .stat-chip {
-      background: #0a1408;
-      border: 1px solid #1e3020;
+      background: #030918;
+      border: 1px solid #1a2860;
       border-radius: 6px;
       padding: 6px 10px;
       display: flex;
       flex-direction: column;
       gap: 2px;
     }
-    .stat-chip .s-label {
-      font-size: 9px;
-      color: #5a7a62;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-    }
-    .stat-chip .s-value {
-      font-size: 15px;
-      font-weight: bold;
-      color: #c8d4c0;
-    }
+    .stat-chip .s-label { font-size: 9px; color: #4a6aaa; letter-spacing: 1px; }
+    .stat-chip .s-value { font-size: 15px; color: #c8d4ff; }
     .stat-chip .s-bar {
-      height: 3px;
-      background: #1e3020;
-      border-radius: 2px;
-      margin-top: 3px;
-      overflow: hidden;
+      height: 3px; background: #0a1440; border-radius: 2px;
+      margin-top: 3px; overflow: hidden;
     }
-    .stat-chip .s-bar-fill {
-      height: 100%;
-      border-radius: 2px;
-      transition: width 0.5s ease;
-    }
-    .bar-hp   { background: linear-gradient(90deg, #2a7a38, #44aa55); }
-    .bar-mp   { background: linear-gradient(90deg, #2a5870, #4a80c0); }
-    .bar-atk  { background: linear-gradient(90deg, #7a3020, #cc5040); }
-    .bar-def  { background: linear-gradient(90deg, #3a5070, #5a80aa); }
-    .bar-spd  { background: linear-gradient(90deg, #5a7020, #88aa30); }
+    .stat-chip .s-bar-fill { height: 100%; border-radius: 2px; transition: width 0.5s ease; }
+    .bar-hp  { background: linear-gradient(90deg, #2a7a38, #44aa55); }
+    .bar-mp  { background: linear-gradient(90deg, #2a4880, #4a70c0); }
+    .bar-atk { background: linear-gradient(90deg, #7a2020, #cc4030); }
+    .bar-def { background: linear-gradient(90deg, #2a4070, #4a70aa); }
+    .bar-spd { background: linear-gradient(90deg, #5a6020, #88aa30); }
     .char-level-badge {
       display: inline-block;
-      background: #162a1c;
-      border: 1px solid #3a6a48;
-      color: #8abf9a;
+      background: #0a1440;
+      border: 1px solid #2a4aaa;
+      color: #7a9aff;
       font-size: 11px;
       padding: 2px 10px;
       border-radius: 10px;
       margin-bottom: 10px;
     }
-    .char-bio {
-      font-size: 11px;
-      color: #6a8a72;
-      font-style: italic;
-      margin-top: 8px;
-    }
-    .no-profile {
-      text-align: center;
-      padding: 20px;
-      color: #5a7a62;
-    }
-    .no-profile a {
-      color: #88cc99;
-      text-decoration: underline;
-    }
+    .char-bio { font-size: 11px; color: #5a70aa; font-style: italic; margin-top: 8px; }
+    .no-profile { text-align: center; padding: 20px; color: #4a60aa; }
+    .no-profile a { color: #88aaff; text-decoration: underline; }
 
     /* ===== Quest Log ===== */
-    .quest-input-row {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 14px;
-    }
+    .quest-input-row { display: flex; gap: 8px; margin-bottom: 14px; }
     .quest-input {
-      flex: 1;
-      padding: 9px 12px;
-      background: #060e08;
-      border: 1px solid #1e3020;
-      border-radius: 6px;
-      color: #c0d4c0;
-      font-size: 13px;
-      font-family: inherit;
+      flex: 1; padding: 9px 12px;
+      background: #030818; border: 1px solid #1a2a60;
+      border-radius: 6px; color: #c0d0ff; font-size: 13px;
+      font-family: 'DotGothic16', system-ui, sans-serif;
     }
-    .quest-input:focus { outline: none; border-color: #4a8a60; }
+    .quest-input:focus { outline: none; border-color: #4a6acc; }
+    .quest-input::placeholder { color: #3a4a80; }
     .quest-add-btn {
       padding: 9px 16px;
-      background: linear-gradient(135deg, #162a1e, #223a28);
-      border: 1px solid #3a6a48;
-      border-radius: 6px;
-      color: #88cc99;
-      font-size: 13px;
-      cursor: pointer;
+      background: linear-gradient(135deg, #0a1440, #142060);
+      border: 1px solid #2a4aaa; border-radius: 6px;
+      color: #88aaff; font-size: 13px; cursor: pointer;
+      font-family: 'DotGothic16', system-ui, sans-serif;
       white-space: nowrap;
     }
-    .quest-add-btn:hover { background: linear-gradient(135deg, #223a28, #2e4e34); }
+    .quest-add-btn:hover { background: linear-gradient(135deg, #142060, #1e2e80); }
     .quest-list { display: flex; flex-direction: column; gap: 6px; }
     .quest-item {
-      display: flex;
-      align-items: center;
-      gap: 10px;
+      display: flex; align-items: center; gap: 10px;
       padding: 9px 12px;
-      background: #0a1408;
-      border: 1px solid #1a2a18;
-      border-radius: 6px;
-      transition: border-color 0.2s;
+      background: #030818; border: 1px solid #131f50;
+      border-radius: 6px; transition: border-color 0.2s;
     }
-    .quest-item:hover { border-color: #2a4a28; }
+    .quest-item:hover { border-color: #2a3a80; }
     .quest-item.done { opacity: 0.5; }
-    .quest-item.done .quest-text { text-decoration: line-through; color: #5a7a62; }
+    .quest-item.done .quest-text { text-decoration: line-through; color: #3a4a80; }
     .quest-check {
       width: 18px; height: 18px;
-      border: 1px solid #3a6a48;
-      border-radius: 4px;
-      background: #060e08;
-      cursor: pointer;
+      border: 1px solid #2a4aaa; border-radius: 4px;
+      background: #030818; cursor: pointer;
       display: flex; align-items: center; justify-content: center;
-      font-size: 11px;
-      flex-shrink: 0;
-      transition: background 0.2s;
+      font-size: 11px; flex-shrink: 0; transition: background 0.2s;
     }
-    .quest-item.done .quest-check { background: #1a4a28; border-color: #3a8a50; }
-    .quest-text { flex: 1; font-size: 13px; color: #c0d4c0; }
+    .quest-item.done .quest-check { background: #0a1a60; border-color: #3a60cc; }
+    .quest-text { flex: 1; font-size: 13px; color: #c0d0ff; }
     .quest-del {
-      background: none; border: none;
-      color: #3a4a38; font-size: 14px; cursor: pointer;
-      padding: 2px 6px; border-radius: 3px;
-      transition: color 0.2s;
+      background: none; border: none; color: #2a3060; font-size: 14px;
+      cursor: pointer; padding: 2px 6px; border-radius: 3px; transition: color 0.2s;
     }
-    .quest-del:hover { color: #cc5040; }
-    .quest-empty {
-      text-align: center;
-      padding: 20px;
-      color: #3a5040;
-      font-size: 12px;
-    }
-    .quest-footer {
-      margin-top: 10px;
-      font-size: 10px;
-      color: #3a5040;
-      text-align: right;
-    }
+    .quest-del:hover { color: #cc4030; }
+    .quest-empty { text-align: center; padding: 20px; color: #2a3060; font-size: 12px; }
+    .quest-footer { margin-top: 10px; font-size: 10px; color: #2a3a80; text-align: right; }
 
     /* ===== Adventure Locations ===== */
     .locations-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      grid-template-columns: repeat(2, 1fr);
       gap: 12px;
     }
     .location-card {
-      background: #0a1408;
-      border: 1px solid #1a2a18;
-      border-radius: 8px;
-      padding: 18px 14px;
+      background: #020510;
+      border: 1px solid #1a2a60;
+      border-radius: 6px;
+      padding: 20px 16px 16px;
       text-align: center;
       text-decoration: none;
       color: inherit;
       transition: all 0.2s;
       position: relative;
+      display: block;
     }
     .location-card.unlocked {
-      border-color: #2a4a28;
+      border-color: #2244aa;
       cursor: pointer;
     }
     .location-card.unlocked:hover {
-      border-color: #4a8a60;
-      background: #0e1e0e;
+      border-color: #4466ff;
+      background: #040a20;
+      box-shadow: 0 0 12px rgba(68,102,255,.25);
       transform: translateY(-2px);
     }
     .location-card.locked {
-      opacity: 0.45;
+      opacity: 0.4;
       cursor: not-allowed;
     }
-    .loc-icon { font-size: 32px; margin-bottom: 8px; }
+    .loc-icon { font-size: 32px; margin-bottom: 10px; display: block; }
     .loc-name {
-      font-size: 13px;
-      font-weight: bold;
-      color: #c0a850;
-      margin-bottom: 4px;
+      font-size: 14px;
+      color: #f0c840;
+      margin-bottom: 6px;
+      text-shadow: 0 0 6px rgba(240,200,64,.3);
     }
-    .location-card.locked .loc-name { color: #5a6a58; }
-    .loc-desc { font-size: 10px; color: #5a7a62; line-height: 1.5; }
+    .location-card.locked .loc-name { color: #3a4060; text-shadow: none; }
+    .loc-desc { font-size: 11px; color: #5a70aa; line-height: 1.6; }
+    .location-card.locked .loc-desc { color: #2a3050; }
+
     .loc-badge {
       position: absolute;
       top: 8px; right: 8px;
-      font-size: 9px;
-      padding: 2px 6px;
-      border-radius: 8px;
+      font-size: 9px; font-weight: bold;
+      padding: 2px 7px;
+      border-radius: 3px;
+      letter-spacing: 1px;
     }
-    .badge-new { background: #1a4a10; color: #5aaa40; border: 1px solid #3a8a30; }
-    .badge-lock { background: #1a1a1a; color: #5a5a5a; }
+    .badge-open { background: #003a10; color: #00ff44; border: 1px solid #00aa33; }
+    .badge-new  { background: #3a0020; color: #ff3388; border: 1px solid #aa0044; }
+    .badge-lock { background: #0a0a1a; color: #4a4a60; border: 1px solid #1a1a30; font-size: 10px; }
 
     /* ===== Responsive ===== */
     @media (max-width: 600px) {
       .char-panel { grid-template-columns: 1fr; }
       .char-avatar { width: 60px; height: 60px; font-size: 30px; }
-      .locations-grid { grid-template-columns: repeat(2, 1fr); }
+      .locations-grid { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -316,7 +296,7 @@
 
 <header class="page-header">
   <h1>🏰 ギルド本部</h1>
-  <a href="index.html">← 登録ページに戻る</a>
+  <a href="index.html">← 登録ページへ</a>
 </header>
 
 <main class="board">
@@ -331,8 +311,8 @@
   <section class="section-card">
     <div class="section-title">📜 個人クエストログ</div>
     <div class="quest-input-row">
-      <input type="text" id="quest-input" class="quest-input" placeholder="タスクを入力した Enter で追加" maxlength="60">
-      <button class="quest-add-btn" onclick="addQuest()">+ 追加</button>
+      <input type="text" id="quest-input" class="quest-input" placeholder="タスクを入力して Enter で追加" maxlength="60">
+      <button class="quest-add-btn" onclick="addQuest()">＋ 追加</button>
     </div>
     <div id="quest-list" class="quest-list"></div>
     <div class="quest-footer" id="quest-footer"></div>
@@ -340,43 +320,43 @@
 
   <!-- ===== 冒険の場所 ===== -->
   <section class="section-card">
-    <div class="section-title">🗺️ 冒険の場所</div>
+    <div class="section-title">📖 冒険の場所</div>
     <div class="locations-grid">
       <a href="https://kouta-project.onrender.com" target="_blank" class="location-card unlocked">
-        <div class="loc-badge badge-new">OPEN</div>
-        <div class="loc-icon">🌍</div>
+        <div class="loc-badge badge-open">OPEN</div>
+        <span class="loc-icon">🌍</span>
         <div class="loc-name">永遠の旅人</div>
         <div class="loc-desc">メインゲーム。放置系 RPG で魔物を倒し続ける</div>
       </a>
       <a href="https://kouta-project.onrender.com/equipment.html" target="_blank" class="location-card unlocked">
         <div class="loc-badge badge-new">NEW</div>
-        <div class="loc-icon">⚔️</div>
+        <span class="loc-icon">⚔️</span>
         <div class="loc-name">装備の間</div>
         <div class="loc-desc">所持装備を確認し、4スロットに装着・解除する</div>
       </a>
       <div class="location-card locked">
-        <div class="loc-badge badge-lock">🔒</div>
-        <div class="loc-icon">📖</div>
+        <div class="loc-badge badge-lock">🔒 封印中</div>
+        <span class="loc-icon">📖</span>
         <div class="loc-name">魔物図鑑</div>
-        <div class="loc-desc">勘んた魔物の記録を閲覧する（封印中）</div>
+        <div class="loc-desc">倒した魔物の記録を閲覧する</div>
       </div>
       <div class="location-card locked">
-        <div class="loc-badge badge-lock">🔒</div>
-        <div class="loc-icon">✨</div>
+        <div class="loc-badge badge-lock">🔒 封印中</div>
+        <span class="loc-icon">✨</span>
         <div class="loc-name">呼文工房</div>
-        <div class="loc-desc">強力なスキルを習得する（封印中）</div>
+        <div class="loc-desc">強力なスキルを習得する</div>
       </div>
       <div class="location-card locked">
-        <div class="loc-badge badge-lock">🔒</div>
-        <div class="loc-icon">⚔️</div>
+        <div class="loc-badge badge-lock">🔒 封印中</div>
+        <span class="loc-icon">⚔️</span>
         <div class="loc-name">バトルアリーナ</div>
-        <div class="loc-desc">他の冒険者と対戦する（封印中）</div>
+        <div class="loc-desc">他の冒険者と対戦する</div>
       </div>
       <div class="location-card locked">
-        <div class="loc-badge badge-lock">🔒</div>
-        <div class="loc-icon">🌆</div>
+        <div class="loc-badge badge-lock">🔒 封印中</div>
+        <span class="loc-icon">🌆</span>
         <div class="loc-name">冒険者街</div>
-        <div class="loc-desc">安息してステータスを回復（封印中）</div>
+        <div class="loc-desc">安息してステータスを回復する</div>
       </div>
     </div>
   </section>
@@ -403,7 +383,6 @@
   };
   const DEFAULT_STATS = { hp:100, mp:50, atk:10, def:5, spd:8 };
 
-  // ===== ゲームからのURL params を guild_char_stats に保存 =====
   function syncStatsFromURL() {
     const params = new URLSearchParams(window.location.search);
     if (!params.has('atk')) return;
@@ -419,7 +398,6 @@
     history.replaceState(null, '', window.location.pathname);
   }
 
-  // ===== キャラクターパネル =====
   function renderCharPanel() {
     const el = document.getElementById('char-panel-content');
     const raw = localStorage.getItem('guild_profile');
@@ -432,7 +410,6 @@
     const base  = JOB_STATS[p.job] || DEFAULT_STATS;
     const icon  = JOB_ICONS[p.job] || '⚔️';
 
-    // ゲーム同期値（ATK/DEF/HP/LV）を優先、MP/SPD は職業デフォルト維持
     const stats = {
       lv:  saved?.lv  ?? 1,
       hp:  saved?.hp  ?? base.hp,
@@ -459,7 +436,7 @@
             ${statChip('SPD', stats.spd, 20,        'spd')}
           </div>
           ${p.bio ? `<div class="char-bio">「${esc(p.bio)}」</div>` : ''}
-          ${saved?.lv ? `<div style="font-size:10px;color:#446655;margin-top:6px">⚔️ ゲームデータ同期済み</div>` : ''}
+          ${saved?.lv ? `<div style="font-size:10px;color:#3a5080;margin-top:6px">⚔️ ゲームデータ同期済み</div>` : ''}
         </div>
       </div>`;
   }
@@ -477,14 +454,11 @@
     return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
 
-  // ===== クエストログ CRUD =====
   function loadQuests() {
     try { return JSON.parse(localStorage.getItem('guild_quests') || '[]'); }
     catch(e) { return []; }
   }
-  function saveQuests(qs) {
-    localStorage.setItem('guild_quests', JSON.stringify(qs));
-  }
+  function saveQuests(qs) { localStorage.setItem('guild_quests', JSON.stringify(qs)); }
 
   function renderQuests() {
     const qs = loadQuests();
@@ -534,7 +508,6 @@
     if (e.key === 'Enter') addQuest();
   });
 
-  // ===== Init =====
   syncStatsFromURL();
   renderCharPanel();
   renderQuests();
