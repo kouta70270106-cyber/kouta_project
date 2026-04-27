@@ -403,6 +403,22 @@
   };
   const DEFAULT_STATS = { hp:100, mp:50, atk:10, def:5, spd:8 };
 
+  // ===== ゲームからのURL params を guild_char_stats に保存 =====
+  function syncStatsFromURL() {
+    const params = new URLSearchParams(window.location.search);
+    if (!params.has('atk')) return;
+    const saved = JSON.parse(localStorage.getItem('guild_char_stats') || '{}');
+    const merged = {
+      ...saved,
+      lv:  parseInt(params.get('lv'))  || saved.lv  || 1,
+      hp:  parseInt(params.get('hp'))  || saved.hp  || 100,
+      atk: parseInt(params.get('atk')) || saved.atk || 10,
+      def: parseInt(params.get('def')) || saved.def || 5,
+    };
+    localStorage.setItem('guild_char_stats', JSON.stringify(merged));
+    history.replaceState(null, '', window.location.pathname);
+  }
+
   // ===== キャラクターパネル =====
   function renderCharPanel() {
     const el = document.getElementById('char-panel-content');
@@ -411,12 +427,22 @@
       el.innerHTML = `<div class="no-profile">🔑 未登録です。<a href="index.html">冒険者登録</a>を先に行ってください</div>`;
       return;
     }
-    const p = JSON.parse(raw);
+    const p     = JSON.parse(raw);
     const saved = JSON.parse(localStorage.getItem('guild_char_stats') || 'null');
     const base  = JOB_STATS[p.job] || DEFAULT_STATS;
-    const stats = saved || base;
-    const lv    = stats.lv || 1;
     const icon  = JOB_ICONS[p.job] || '⚔️';
+
+    // ゲーム同期値（ATK/DEF/HP/LV）を優先、MP/SPD は職業デフォルト維持
+    const stats = {
+      lv:  saved?.lv  ?? 1,
+      hp:  saved?.hp  ?? base.hp,
+      mp:  base.mp,
+      atk: saved?.atk ?? base.atk,
+      def: saved?.def ?? base.def,
+      spd: base.spd,
+    };
+    const atkMax = Math.max(stats.atk, 50);
+    const defMax = Math.max(stats.def, 30);
 
     el.innerHTML = `
       <div class="char-panel">
@@ -424,15 +450,16 @@
         <div class="char-info-main">
           <div class="char-name">${esc(p.name)}</div>
           <div class="char-job">${esc(p.job)}</div>
-          <span class="char-level-badge">Lv. ${lv}</span>
+          <span class="char-level-badge">Lv. ${stats.lv}</span>
           <div class="char-stats-grid">
-            ${statChip('HP', stats.hp, stats.hp, 'hp')}
-            ${statChip('MP', stats.mp, stats.mp, 'mp')}
-            ${statChip('ATK', stats.atk, 30, 'atk')}
-            ${statChip('DEF', stats.def, 25, 'def')}
-            ${statChip('SPD', stats.spd, 20, 'spd')}
+            ${statChip('HP',  stats.hp,  stats.hp,  'hp')}
+            ${statChip('MP',  stats.mp,  stats.mp,  'mp')}
+            ${statChip('ATK', stats.atk, atkMax,    'atk')}
+            ${statChip('DEF', stats.def, defMax,    'def')}
+            ${statChip('SPD', stats.spd, 20,        'spd')}
           </div>
           ${p.bio ? `<div class="char-bio">「${esc(p.bio)}」</div>` : ''}
+          ${saved?.lv ? `<div style="font-size:10px;color:#446655;margin-top:6px">⚔️ ゲームデータ同期済み</div>` : ''}
         </div>
       </div>`;
   }
@@ -508,6 +535,7 @@
   });
 
   // ===== Init =====
+  syncStatsFromURL();
   renderCharPanel();
   renderQuests();
 </script>
