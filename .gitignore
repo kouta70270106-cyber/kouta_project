@@ -47,8 +47,8 @@ target/
 .gradle/
 gradle/wrapper/gradle-wrapper.jar
 
-### Claude Code local settings ###
-settings.json
+### Claude Code local settings (personal only) ###
+.claude/settings.local.json
 
 ### Node.js ###
 node_modules/
