@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>装備の間 — 永遠の旅人</title>
+  <script src="js/data.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #060d08;
+      color: #c8d4c0;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      font-size: 13px;
+      min-height: 100vh;
+    }
+
+    #wrapper {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 12px;
+    }
+
+    /* ===== Header ===== */
+    header {
+      background: linear-gradient(135deg, #0c1810, #142218);
+      border: 1px solid #1e3020;
+      border-radius: 8px;
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+    }
+
+    .back-btn {
+      background: #0c1810;
+      border: 1px solid #2a4030;
+      color: #7aaa88;
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-size: 12px;
+      cursor: pointer;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+    .back-btn:hover { border-color: #4a7050; color: #aaddbb; }
+
+    .page-title {
+      font-size: 17px;
+      font-weight: bold;
+      color: #c0a850;
+      flex: 1;
+    }
+
+    #stat-bar {
+      display: flex;
+      gap: 14px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .stat-chip { font-size: 12px; color: #88a892; }
+    .stat-chip b { color: #c8d4c0; }
+
+    /* ===== Layout ===== */
+    #content {
+      display: grid;
+      grid-template-columns: 270px 1fr;
+      gap: 12px;
+      align-items: start;
+    }
+
+    .panel {
+      background: #0a1610;
+      border: 1px solid #1e3020;
+      border-radius: 8px;
+      padding: 12px;
+    }
+
+    .panel-title {
+      font-size: 12px;
+      font-weight: bold;
+      color: #c0a850;
+      letter-spacing: 0.05em;
+      margin-bottom: 10px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid #1e3020;
+    }
+
+    /* ===== Slot cards ===== */
+    .slot-card {
+      background: #060d08;
+      border: 1px solid #1a2a1c;
+      border-radius: 6px;
+      padding: 9px 10px;
+      margin-bottom: 7px;
+      display: flex;
+      align-items: center;
+      gap: 9px;
+    }
+    .slot-card.has-item { border-color: #2a5038; }
+
+    .slot-icon { font-size: 20px; width: 30px; text-align: center; flex-shrink: 0; }
+
+    .slot-info { flex: 1; min-width: 0; }
+    .slot-label { font-size: 10px; color: #557766; margin-bottom: 2px; }
+    .slot-item-name {
+      font-size: 13px; font-weight: bold;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .slot-item-name.empty { color: #334433; font-weight: normal; font-style: italic; }
+    .slot-item-stats { font-size: 10px; color: #6aaa80; margin-top: 2px; }
+
+    .unequip-btn {
+      background: #1a0808;
+      border: 1px solid #4a2020;
+      color: #cc7070;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .unequip-btn:hover { background: #2a1010; border-color: #7a3030; }
+
+    /* ===== Inventory panel ===== */
+    #filter-row {
+      display: flex;
+      gap: 5px;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+    }
+
+    .filter-btn {
+      background: #0c1810;
+      border: 1px solid #1e3020;
+      color: #558866;
+      padding: 3px 9px;
+      border-radius: 4px;
+      font-size: 11px;
+      cursor: pointer;
+    }
+    .filter-btn.active {
+      background: #142a1c;
+      border-color: #3a7050;
+      color: #88ddaa;
+    }
+
+    .inv-item {
+      background: #060d08;
+      border: 1px solid #1a2a1c;
+      border-radius: 6px;
+      padding: 9px 11px;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .inv-item.is-equipped { border-color: #1e4a2a; opacity: 0.55; }
+
+    .item-icon { font-size: 20px; width: 26px; text-align: center; flex-shrink: 0; }
+
+    .item-info { flex: 1; min-width: 0; }
+
+    .item-name-row { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+    .item-name { font-size: 13px; font-weight: bold; }
+
+    .rarity-tag {
+      font-size: 9px; padding: 1px 5px; border-radius: 3px; font-weight: bold; flex-shrink: 0;
+    }
+    .r-common    { background: #181c10; color: #c8b888; border: 1px solid #383420; }
+    .r-uncommon  { background: #081808; color: #44ee88; border: 1px solid #185028; }
+    .r-rare      { background: #08081e; color: #5599ff; border: 1px solid #182858; }
+    .r-legendary { background: #180e04; color: #ffaa22; border: 1px solid #5a3008; }
+
+    .item-stats { font-size: 11px; color: #6aaa80; margin-top: 2px; }
+    .item-desc  { font-size: 10px; color: #557766; margin-top: 2px; }
+
+    .equip-btn {
+      background: #082008;
+      border: 1px solid #2a6838;
+      color: #55cc77;
+      padding: 4px 12px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: bold;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .equip-btn:hover { background: #143020; border-color: #4a9058; }
+
+    .equipped-mark { font-size: 11px; color: #446655; flex-shrink: 0; }
+
+    #empty-msg { color: #334433; font-size: 12px; text-align: center; padding: 24px 0; }
+
+    #no-save {
+      color: #557766; text-align: center;
+      padding: 40px 20px; font-size: 14px; line-height: 1.8;
+    }
+
+    /* ===== Mobile ===== */
+    @media (max-width: 620px) {
+      #content { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+<div id="wrapper">
+  <header>
+    <a href="/" class="back-btn">← ゲームへ戻る</a>
+    <div class="page-title">⚔️ 装備の間</div>
+    <div id="stat-bar"></div>
+  </header>
+
+  <div id="content">
+    <div class="panel" id="slots-panel">
+      <div class="panel-title">▌ 装着中スロット</div>
+      <div id="slots-list"></div>
+    </div>
+
+    <div class="panel" id="inventory-panel">
+      <div class="panel-title">▌ 所持装備</div>
+      <div id="filter-row">
+        <button class="filter-btn active" data-filter="all"   onclick="setFilter(this,'all')">すべて</button>
+        <button class="filter-btn"        data-filter="weapon"   onclick="setFilter(this,'weapon')">武器</button>
+        <button class="filter-btn"        data-filter="shield"   onclick="setFilter(this,'shield')">盾</button>
+        <button class="filter-btn"        data-filter="armor"    onclick="setFilter(this,'armor')">鎧</button>
+        <button class="filter-btn"        data-filter="accessory" onclick="setFilter(this,'accessory')">アクセサリ</button>
+      </div>
+      <div id="inventory-list"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  'use strict';
+
+  const SLOT_LABELS = { weapon:'武器', shield:'盾', armor:'鎧', accessory:'アクセサリ' };
+  const SLOT_EMPTY_ICONS = { weapon:'🗡️', shield:'🪬', armor:'👘', accessory:'🔮' };
+  const RARITY_LABELS = { common:'普通', uncommon:'珍しい', rare:'レア', legendary:'伝説' };
+
+  let currentFilter = 'all';
+
+  // ===== Save helpers =====
+  function loadSave() {
+    try { const r = localStorage.getItem('idle_rpg_save'); return r ? JSON.parse(r) : null; }
+    catch { return null; }
+  }
+  function writeSave(save) {
+    localStorage.setItem('idle_rpg_save', JSON.stringify(save));
+  }
+
+  // ===== Stat calculation =====
+  function calcStats(save) {
+    const p = save.player;
+    let atk = p.baseAtk, def = p.baseDef, hp = p.maxHp;
+    for (const eq of Object.values(p.equipment)) {
+      if (!eq) continue;
+      atk += (eq.atk || 0);
+      def += (eq.def || 0);
+      hp  += (eq.hp  || 0);
+    }
+    return { atk, def, hp };
+  }
+
+  // ===== Helpers =====
+  function statText(item) {
+    const parts = [];
+    if (item.atk) parts.push(`ATK${item.atk > 0 ? '+' : ''}${item.atk}`);
+    if (item.def) parts.push(`DEF${item.def > 0 ? '+' : ''}${item.def}`);
+    if (item.hp)  parts.push(`HP${item.hp > 0 ? '+' : ''}${item.hp}`);
+    return parts.join('　');
+  }
+
+  function getDesc(item) {
+    return (D.EQUIPMENT[item.id] || {}).desc || '';
+  }
+
+  // ===== Render =====
+  function renderStatBar(save) {
+    const s = calcStats(save);
+    const p = save.player;
+    document.getElementById('stat-bar').innerHTML =
+      `<span class="stat-chip">${p.name}&nbsp;<b>Lv.${p.level}</b></span>` +
+      `<span class="stat-chip">ATK <b>${s.atk}</b></span>` +
+      `<span class="stat-chip">DEF <b>${s.def}</b></span>` +
+      `<span class="stat-chip">MaxHP <b>${s.hp}</b></span>`;
+  }
+
+  function renderSlots(save) {
+    const eq = save.player.equipment;
+    document.getElementById('slots-list').innerHTML =
+      ['weapon','shield','armor','accessory'].map(slot => {
+        const item = eq[slot];
+        if (item) {
+          return `<div class="slot-card has-item">
+            <div class="slot-icon">${item.icon || '📦'}</div>
+            <div class="slot-info">
+              <div class="slot-label">${SLOT_LABELS[slot]}</div>
+              <div class="slot-item-name">${item.name}</div>
+              <div class="slot-item-stats">${statText(item)}</div>
+            </div>
+            <button class="unequip-btn" onclick="unequipSlot('${slot}')">解除</button>
+          </div>`;
+        }
+        return `<div class="slot-card">
+          <div class="slot-icon" style="opacity:.25">${SLOT_EMPTY_ICONS[slot]}</div>
+          <div class="slot-info">
+            <div class="slot-label">${SLOT_LABELS[slot]}</div>
+            <div class="slot-item-name empty">装備なし</div>
+          </div>
+        </div>`;
+      }).join('');
+  }
+
+  function renderInventory(save) {
+    const eq = save.player.equipment;
+    const equippedUids = new Set(
+      Object.values(eq).filter(Boolean).map(e => String(e.uid))
+    );
+
+    const EQUIP_TYPES = ['weapon','shield','armor','accessory'];
+    const items = save.inventory.filter(i =>
+      EQUIP_TYPES.includes(i.type) &&
+      (currentFilter === 'all' || i.type === currentFilter)
+    );
+
+    if (items.length === 0) {
+      document.getElementById('inventory-list').innerHTML =
+        `<div id="empty-msg">装備可能なアイテムがありません</div>`;
+      return;
+    }
+
+    document.getElementById('inventory-list').innerHTML = items.map(item => {
+      const isEquipped = equippedUids.has(String(item.uid));
+      const desc = getDesc(item);
+      const rTag = `r-${item.rarity || 'common'}`;
+      const rLabel = RARITY_LABELS[item.rarity] || item.rarity;
+      return `<div class="inv-item${isEquipped ? ' is-equipped' : ''}">
+        <div class="item-icon">${item.icon || '📦'}</div>
+        <div class="item-info">
+          <div class="item-name-row">
+            <span class="item-name">${item.name}</span>
+            <span class="rarity-tag ${rTag}">${rLabel}</span>
+          </div>
+          <div class="item-stats">${statText(item)}</div>
+          ${desc ? `<div class="item-desc">${desc}</div>` : ''}
+        </div>
+        ${isEquipped
+          ? `<span class="equipped-mark">装備中</span>`
+          : `<button class="equip-btn" onclick="equipItem('${item.uid}')">装備</button>`}
+      </div>`;
+    }).join('');
+  }
+
+  // ===== Actions =====
+  function equipItem(uid) {
+    const save = loadSave();
+    if (!save) return;
+    const item = save.inventory.find(i => String(i.uid) === String(uid));
+    if (!item) return;
+    save.player.equipment[item.type] = item;
+    const stats = calcStats(save);
+    save.player.hp = Math.min(save.player.hp, stats.hp);
+    writeSave(save);
+    render();
+  }
+
+  function unequipSlot(slot) {
+    const save = loadSave();
+    if (!save) return;
+    save.player.equipment[slot] = null;
+    writeSave(save);
+    render();
+  }
+
+  function setFilter(btn, f) {
+    currentFilter = f;
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const save = loadSave();
+    if (save) renderInventory(save);
+  }
+
+  // ===== Main =====
+  function render() {
+    const save = loadSave();
+    if (!save) {
+      document.getElementById('content').innerHTML =
+        `<div id="no-save">セーブデータが見つかりません。<br>先にゲームを起動してください。</div>`;
+      return;
+    }
+    renderStatBar(save);
+    renderSlots(save);
+    renderInventory(save);
+  }
+
+  render();
+</script>
+</body>
+</html>
