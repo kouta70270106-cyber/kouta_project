@@ -214,7 +214,11 @@ class DungeonScene extends Phaser.Scene {
 
   _autoMove() {
     this.autoMoveTimer = 0;
-    // Priority: right→up→left→down, prefer uncleared rooms
+
+    // BFS to find nearest uncleared room and move one step toward it
+    const start = this.playerCell;
+    const visited = new Set([`${start.col},${start.row}`]);
+    const queue = [{ col: start.col, row: start.row, firstStep: null }];
     const dirs = [
       { col: 1, row: 0 },
       { col: 0, row: -1 },
@@ -222,30 +226,32 @@ class DungeonScene extends Phaser.Scene {
       { col: 0, row: 1 },
     ];
 
-    // First pass: adjacent uncleared room
-    for (const d of dirs) {
-      const nc = this.playerCell.col + d.col;
-      const nr = this.playerCell.row + d.row;
-      if (nc < 0 || nc >= DCOLS || nr < 0 || nr >= DROWS) continue;
-      const adj = this._getRoom(nc, nr);
-      if (adj && !adj.cleared && adj.monster) {
-        this.playerCell.col = nc;
-        this.playerCell.row = nr;
-        this._enterRoom();
-        return;
+    while (queue.length > 0) {
+      const cur = queue.shift();
+      for (const d of dirs) {
+        const nc = cur.col + d.col;
+        const nr = cur.row + d.row;
+        if (nc < 0 || nc >= DCOLS || nr < 0 || nr >= DROWS) continue;
+        const key = `${nc},${nr}`;
+        if (visited.has(key)) continue;
+        visited.add(key);
+
+        const firstStep = cur.firstStep || { col: nc, row: nr };
+        const adj = this._getRoom(nc, nr);
+
+        if (adj && !adj.cleared && adj.monster) {
+          // Found an uncleared room — move one step toward it
+          this.playerCell.col = firstStep.col;
+          this.playerCell.row = firstStep.row;
+          this._enterRoom();
+          return;
+        }
+        queue.push({ col: nc, row: nr, firstStep });
       }
     }
 
-    // Second pass: any adjacent room (all cleared, keep moving)
-    for (const d of dirs) {
-      const nc = this.playerCell.col + d.col;
-      const nr = this.playerCell.row + d.row;
-      if (nc < 0 || nc >= DCOLS || nr < 0 || nr >= DROWS) continue;
-      this.playerCell.col = nc;
-      this.playerCell.row = nr;
-      this._enterRoom();
-      return;
-    }
+    // No uncleared rooms reachable — trigger all-clear
+    this._showMoveButtons();
   }
 
   _toggleAutoMode() {
