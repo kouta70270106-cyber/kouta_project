@@ -13,7 +13,7 @@ class GameState {
       baseAtk: 10,
       baseDef: 5,
       gold: 0,
-      equipment: { weapon: null, shield: null, armor: null, accessory: null },
+      equipment: { weapon: null, shield: null, armor: null, accessory: null, spellbook: null },
     };
     this.inventory = [];   // max 20 items
     this.guild = null;     // { id, name, ... }
@@ -122,7 +122,7 @@ class GameState {
 
   equip(item) {
     const slot = item.type;
-    if (!['weapon','shield','armor','accessory'].includes(slot)) return;
+    if (!['weapon','shield','armor','accessory','spellbook'].includes(slot)) return;
     const prev = this.player.equipment[slot];
     this.player.equipment[slot] = item;
     // recalculate HP bounds
@@ -130,6 +130,21 @@ class GameState {
     this.player.hp = Math.min(this.player.hp, stats.maxHp);
     this.addLog(`🔧 ${item.name}を装備した！`, 'success');
     return prev;
+  }
+
+  // ===== Shop =====
+  buyItem(itemId) {
+    const entry = D.SHOP.find(s => s.itemId === itemId);
+    if (!entry) return { ok: false, msg: 'アイテムが見つかりません' };
+    const def = D.EQUIPMENT[itemId];
+    if (!def) return { ok: false, msg: 'アイテムデータがありません' };
+    if (this.player.gold < entry.price) return { ok: false, msg: 'ゴールドが足りません' };
+    if (this.inventory.length >= 20) return { ok: false, msg: '荷物がいっぱいです' };
+    this.player.gold -= entry.price;
+    const item = { ...def, uid: Date.now() + Math.random() };
+    this.inventory.push(item);
+    if (!this.player.equipment[item.type]) this.equip(item);
+    return { ok: true, item };
   }
 
   // ===== Quests =====

@@ -238,8 +238,8 @@
 <script>
   'use strict';
 
-  const SLOT_LABELS = { weapon:'武器', shield:'盾', armor:'鎧', accessory:'アクセサリ' };
-  const SLOT_EMPTY_ICONS = { weapon:'🗡️', shield:'🪬', armor:'👘', accessory:'🔮' };
+  const SLOT_LABELS = { weapon:'武器', shield:'盾', armor:'鎧', accessory:'アクセサリ', spellbook:'魔法書' };
+  const SLOT_EMPTY_ICONS = { weapon:'🗡️', shield:'🪬', armor:'👘', accessory:'🔮', spellbook:'📖' };
   const RARITY_LABELS = { common:'普通', uncommon:'珍しい', rare:'レア', legendary:'伝説' };
 
   let currentFilter = 'all';
@@ -312,7 +312,7 @@
   function renderSlots(save) {
     const eq = save.player.equipment;
     document.getElementById('slots-list').innerHTML =
-      ['weapon','shield','armor','accessory'].map(slot => {
+      ['weapon','shield','armor','accessory','spellbook'].map(slot => {
         const item = eq[slot];
         if (item) {
           return `<div class="slot-card has-item">
@@ -341,7 +341,7 @@
       Object.values(eq).filter(Boolean).map(e => String(e.uid))
     );
 
-    const EQUIP_TYPES = ['weapon','shield','armor','accessory'];
+    const EQUIP_TYPES = ['weapon','shield','armor','accessory','spellbook'];
     const items = save.inventory.filter(i =>
       EQUIP_TYPES.includes(i.type) &&
       (currentFilter === 'all' || i.type === currentFilter)

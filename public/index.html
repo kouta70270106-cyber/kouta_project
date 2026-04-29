@@ -64,6 +64,7 @@
       <button class="tab-btn active" data-tab="equipment">装備</button>
       <button class="tab-btn" data-tab="inventory">荷物</button>
       <button class="tab-btn" data-tab="quests">依頼</button>
+      <button class="tab-btn" data-tab="shop">🛒</button>
       <button class="tab-btn" data-tab="guild">ギルド</button>
       <button class="tab-btn" data-tab="multi">マルチ</button>
     </div>
@@ -90,6 +91,11 @@
         <span class="slot-icon">💍</span>
         <span class="slot-name">装飾</span>
         <span class="slot-item" id="eq-accessory">なし</span>
+      </div>
+      <div class="equip-slot">
+        <span class="slot-icon">📖</span>
+        <span class="slot-name">魔法書</span>
+        <span class="slot-item" id="eq-spellbook">なし</span>
       </div>
       <div class="section-title" style="margin-top:12px">詳細ステータス</div>
       <div id="stats-detail"></div>
@@ -123,6 +129,20 @@
       <div id="player-bio-text" style="font-size:11px;color:#aaa;line-height:1.6;min-height:16px"></div>
       <div class="section-title" style="margin-top:12px">統計</div>
       <div id="guild-stats"></div>
+    </div>
+
+    <!-- Shop Tab -->
+    <div id="tab-shop" class="tab-content">
+      <div class="section-title">🛒 ショップ <span id="shop-gold" style="float:right;color:#ffd700;font-size:11px"></span></div>
+      <div id="shop-filter-row">
+        <button class="shop-filter-btn active" onclick="setShopFilter(this,'all')">全て</button>
+        <button class="shop-filter-btn" onclick="setShopFilter(this,'weapon')">武器</button>
+        <button class="shop-filter-btn" onclick="setShopFilter(this,'shield')">盾</button>
+        <button class="shop-filter-btn" onclick="setShopFilter(this,'armor')">鎧</button>
+        <button class="shop-filter-btn" onclick="setShopFilter(this,'accessory')">装飾</button>
+        <button class="shop-filter-btn" onclick="setShopFilter(this,'spellbook')">魔法書</button>
+      </div>
+      <div id="shop-list"></div>
     </div>
 
     <!-- Multi Tab -->

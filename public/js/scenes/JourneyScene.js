@@ -210,7 +210,17 @@ class JourneyScene extends Phaser.Scene {
     const pStats = gs.getStats();
 
     // Player → Monster
-    const pDmg = Math.max(1, pStats.atk - this.currentMonster.def);
+    let pDmg = Math.max(1, pStats.atk - this.currentMonster.def);
+    const spell = gs.player.equipment?.spellbook;
+    // 魔法書スキル: 攻撃時
+    if (spell?.element === 'fire' && Math.random() < 0.15) {
+      const bonus = Math.floor(pStats.atk * 0.5);
+      pDmg += bonus;
+      gs.addLog(`🔥 炎バースト！ +${bonus}ダメージ！`, 'highlight');
+    } else if (spell?.element === 'thunder' && Math.random() < 0.20) {
+      pDmg *= 2;
+      gs.addLog(`⚡ 雷撃発動！ ダメージ2倍！`, 'highlight');
+    }
     this.monsterHp -= pDmg;
     this._addFloat(this.monsterX, GROUND_Y - 60, `-${pDmg}`, '#ff4444');
 
@@ -236,7 +246,12 @@ class JourneyScene extends Phaser.Scene {
       const target = targets[Math.floor(Math.random() * targets.length)];
 
       if (target.type === 'player') {
-        const mDmg = Math.max(1, this.currentMonster.atk - pStats.def);
+        let mDmg = Math.max(1, this.currentMonster.atk - pStats.def);
+        // 氷魔法スキル: 被ダメ軽減
+        if (spell?.element === 'ice' && Math.random() < 0.20) {
+          mDmg = Math.floor(mDmg * 0.5);
+          gs.addLog(`❄️ 氷の盾！ ダメージ半減！`, 'success');
+        }
         gs.player.hp = Math.max(0, gs.player.hp - mDmg);
         this._addFloat(PLAYER_X, GROUND_Y - 60, `-${mDmg}`, '#ff8844');
       } else {
@@ -265,13 +280,24 @@ class JourneyScene extends Phaser.Scene {
     const gs = window.gameState;
     const m = this.currentMonster;
 
-    // EXP
+    const spell = gs.player.equipment?.spellbook;
+
+    // EXP（秘術: +30%ボーナス）
     const baseExp = m.exp * D.RARITY_EXP[m.rarity];
-    const gained = gs.gainExp(baseExp);
+    const expMult = spell?.element === 'arcane' ? 1.3 : 1;
+    const gained = gs.gainExp(Math.floor(baseExp * expMult));
+    if (spell?.element === 'arcane') gs.addLog(`🌌 秘術の知恵 +30% EXP！`, 'rare');
 
     // Gold
     const g = m.gold[0] + Math.floor(Math.random() * (m.gold[1] - m.gold[0] + 1));
     const goldGained = gs.gainGold(g);
+
+    // 回復魔法: 戦闘勝利後HP回復
+    if (spell?.element === 'heal') {
+      const healAmt = Math.floor(gs.getStats().maxHp * 0.08);
+      gs.player.hp = Math.min(gs.getStats().maxHp, gs.player.hp + healAmt);
+      if (healAmt > 0) gs.addLog(`💚 回復の加護 +${healAmt}HP`, 'success');
+    }
 
     // Stats
     gs.stats.monstersKilled++;

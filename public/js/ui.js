@@ -47,6 +47,7 @@ function updateUI() {
     case 'inventory': updateInventoryTab(); break;
     case 'quests': updateQuestsTab(); break;
     case 'guild': updateGuildTab(); break;
+    case 'shop': updateShopTab(); break;
   }
 
   // Battle log
@@ -66,6 +67,7 @@ function updateEquipmentTab() {
   document.getElementById('eq-shield').innerHTML    = fmt(eq.shield);
   document.getElementById('eq-armor').innerHTML     = fmt(eq.armor);
   document.getElementById('eq-accessory').innerHTML = fmt(eq.accessory);
+  document.getElementById('eq-spellbook').innerHTML = fmt(eq.spellbook);
 
   const det = document.getElementById('stats-detail');
   det.innerHTML = `
@@ -336,6 +338,72 @@ document.addEventListener('DOMContentLoaded', () => {
     if (e.key === 'Enter') document.getElementById('join-btn')?.click();
   });
 });
+
+// ============================================================
+//  Shop Tab
+// ============================================================
+let _shopFilter = 'all';
+
+function updateShopTab() {
+  const gs = window.gameState;
+
+  const goldEl = document.getElementById('shop-gold');
+  if (goldEl) goldEl.textContent = `💰 ${gs.player.gold.toLocaleString()} G`;
+
+  const list = document.getElementById('shop-list');
+  if (!list) return;
+
+  const items = D.SHOP.filter(s => _shopFilter === 'all' || s.category === _shopFilter);
+
+  list.innerHTML = items.map(entry => {
+    const def = D.EQUIPMENT[entry.itemId];
+    if (!def) return '';
+    const canAfford = gs.player.gold >= entry.price;
+    const invFull   = gs.inventory.length >= 20;
+    const stats = [];
+    if (def.atk) stats.push(`ATK+${def.atk}`);
+    if (def.def) stats.push(`DEF+${def.def}`);
+    if (def.hp)  stats.push(`HP+${def.hp}`);
+    return `<div class="shop-item">
+      <div class="shop-item-left">
+        <span class="shop-icon">${def.icon || '📦'}</span>
+        <div>
+          <div class="shop-name rarity-${def.rarity}">${def.name}</div>
+          <div class="shop-stats">${stats.join(' / ') || '—'}</div>
+          ${def.desc ? `<div class="shop-desc">${def.desc}</div>` : ''}
+          ${def.elementLabel ? `<div class="shop-element">${def.elementLabel}</div>` : ''}
+        </div>
+      </div>
+      <div class="shop-item-right">
+        <div class="shop-price${canAfford ? '' : ' no-gold'}">💰${entry.price.toLocaleString()}</div>
+        <button class="btn btn-gold shop-buy-btn"
+          onclick="buyShopItem('${entry.itemId}')"
+          ${invFull || !canAfford ? 'disabled' : ''}>
+          ${invFull ? '満杯' : canAfford ? '購入' : '不足'}
+        </button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function buyShopItem(itemId) {
+  const gs = window.gameState;
+  const result = gs.buyItem(itemId);
+  if (result.ok) {
+    gs.addLog(`🛒 ${result.item.name}を購入した！`, 'success');
+    gs.save();
+  } else {
+    gs.addLog(`⚠️ ${result.msg}`, 'danger');
+  }
+  updateUI();
+}
+
+function setShopFilter(btn, cat) {
+  _shopFilter = cat;
+  document.querySelectorAll('.shop-filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  updateShopTab();
+}
 
 // ギルド本部へ — 現在のゲームステータスをURLパラメータで渡す
 function openGuildHQ() {

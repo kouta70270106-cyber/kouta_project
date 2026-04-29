@@ -602,3 +602,83 @@ body {
 }
 
 .item-equip-btn:hover { background: #223a28; }
+
+/* ===== Shop Tab ===== */
+#shop-filter-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 8px;
+}
+
+.shop-filter-btn {
+  background: #0c1810;
+  border: 1px solid #1e3020;
+  color: #558866;
+  padding: 2px 7px;
+  border-radius: 4px;
+  font-size: 10px;
+  cursor: pointer;
+}
+.shop-filter-btn.active {
+  background: #142a1c;
+  border-color: #3a7050;
+  color: #88ddaa;
+}
+
+#shop-list { overflow-y: auto; max-height: 340px; }
+
+.shop-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 6px;
+  background: #060d08;
+  border: 1px solid #1a2a1c;
+  border-radius: 5px;
+  padding: 7px 8px;
+  margin-bottom: 5px;
+}
+
+.shop-item-left {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  flex: 1;
+  min-width: 0;
+}
+
+.shop-icon { font-size: 18px; flex-shrink: 0; }
+
+.shop-name {
+  font-size: 12px;
+  font-weight: bold;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.shop-stats { font-size: 10px; color: #6aaa80; }
+.shop-desc  { font-size: 10px; color: #557766; margin-top: 1px; }
+.shop-element { font-size: 10px; margin-top: 1px; }
+
+.shop-item-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 3px;
+  flex-shrink: 0;
+}
+
+.shop-price { font-size: 11px; color: #ffd700; white-space: nowrap; }
+.shop-price.no-gold { color: #885544; }
+
+.shop-buy-btn {
+  font-size: 11px;
+  padding: 2px 8px;
+}
+
+.shop-buy-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
