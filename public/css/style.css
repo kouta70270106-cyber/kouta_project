@@ -293,13 +293,15 @@ body {
 /* ===== Tabs ===== */
 #panel-tabs {
   display: flex;
+  flex-wrap: wrap;
   border-bottom: 1px solid #1e3020;
   background: #080e0a;
 }
 
 .tab-btn {
-  flex: 1;
-  padding: 8px 2px;
+  flex: 1 0 calc(100% / 4);
+  min-width: 0;
+  padding: 6px 2px;
   background: none;
   border: none;
   color: #666;
