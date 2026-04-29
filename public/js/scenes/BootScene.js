@@ -9,6 +9,17 @@ class BootScene extends Phaser.Scene {
     try { createGameSprites(this); } catch(e) { console.error('Sprite init error:', e); }
 
     const gs = window.gameState;
+
+    // 装備ページから戻った際、URLハッシュにセーブデータが含まれていれば取り込む
+    const hash = window.location.hash;
+    if (hash.startsWith('#d=')) {
+      try {
+        const json = decodeURIComponent(escape(atob(hash.slice(3))));
+        localStorage.setItem('idle_rpg_save', json);
+        history.replaceState(null, '', window.location.pathname + window.location.search);
+      } catch(e) { console.warn('Hash save import error:', e); }
+    }
+
     const hasSave = gs.load();
 
     // 登録ページからのURLパラメータを取得

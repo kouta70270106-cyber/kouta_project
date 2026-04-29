@@ -210,7 +210,7 @@
 <body>
 <div id="wrapper">
   <header>
-    <a href="/" class="back-btn">← ゲームへ戻る</a>
+    <a href="#" onclick="goBackToGame();return false;" class="back-btn">← ゲームへ戻る</a>
     <div class="page-title">⚔️ 装備の間</div>
     <div id="stat-bar"></div>
   </header>
@@ -246,6 +246,16 @@
 
   // ===== Save helpers =====
   function loadSave() {
+    // URLハッシュにデータがあればそちらを優先（WebViewなど別コンテキスト対応）
+    const hash = location.hash;
+    if (hash.startsWith('#d=')) {
+      try {
+        const json = decodeURIComponent(escape(atob(hash.slice(3))));
+        localStorage.setItem('idle_rpg_save', json);
+        history.replaceState(null, '', location.pathname);
+        return JSON.parse(json);
+      } catch(e) {}
+    }
     try { const r = localStorage.getItem('idle_rpg_save'); return r ? JSON.parse(r) : null; }
     catch { return null; }
   }
@@ -396,6 +406,12 @@
     renderStatBar(save);
     renderSlots(save);
     renderInventory(save);
+  }
+
+  function goBackToGame() {
+    const raw = localStorage.getItem('idle_rpg_save');
+    const hash = raw ? '#d=' + btoa(unescape(encodeURIComponent(raw))) : '';
+    location.href = '/' + hash;
   }
 
   render();
