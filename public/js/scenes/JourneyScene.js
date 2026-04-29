@@ -365,17 +365,11 @@ class JourneyScene extends Phaser.Scene {
     const templates = D.QUEST_TEMPLATES;
     const tmpl = templates[Math.floor(Math.random() * templates.length)];
     const quest = D.makeQuest(tmpl.id);
-    this.npcData = quest;
-    this.state = 'event';
 
+    // Auto-accept: just log and continue without blocking dialog
+    gs.addQuest(quest);
     this.npcImg.setVisible(true);
-    this._showDialog(
-      `${quest.npcName}「${quest.title}を頼む！\n完了報酬: EXP+${quest.reward.exp} Gold+${quest.reward.gold}」`,
-      [
-        { label: '引き受ける', cb: () => { gs.addQuest(quest); this._closeEvent(); } },
-        { label: '断る',       cb: () => { gs.addLog(`📜 依頼を断った`); this._closeEvent(); } },
-      ]
-    );
+    setTimeout(() => this.npcImg.setVisible(false), 2000);
   }
 
   _closeEvent() {
