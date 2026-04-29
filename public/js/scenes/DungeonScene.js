@@ -21,6 +21,10 @@ class DungeonScene extends Phaser.Scene {
     this.battleMonsterHp = 0;
     this.battleFlashT = 0;
     this.battleDmgTimer = 1.5;
+    this.autoMoveTimer = 0;
+
+    // Auto mode: default true, persisted in localStorage
+    this.autoMode = localStorage.getItem('dungeon_auto') !== 'false';
 
     // Graphics layers
     this.mapGfx  = this.add.graphics();
@@ -33,11 +37,19 @@ class DungeonScene extends Phaser.Scene {
       fontSize: '16px', color: '#ffd700', stroke: '#000', strokeThickness: 2
     }).setOrigin(0.5);
 
-    // Exit button (bottom)
-    const exitBtn = this.add.text(CANVAS_W / 2, CANVAS_H - 20, '[ 退出する ]', {
+    // Exit button (bottom-left)
+    const exitBtn = this.add.text(60, CANVAS_H - 20, '[ 退出 ]', {
       fontSize: '13px', color: '#ff8888', stroke: '#000', strokeThickness: 2
     }).setOrigin(0.5).setInteractive({ useHandCursor: true });
     exitBtn.on('pointerdown', () => this._exitDungeon(false));
+
+    // Auto/Manual toggle button (bottom-right)
+    this.toggleBtn = this.add.text(CANVAS_W - 60, CANVAS_H - 20, '', {
+      fontSize: '12px', stroke: '#000', strokeThickness: 2,
+      backgroundColor: '#1a2a1a', padding: { x: 8, y: 3 }
+    }).setOrigin(0.5).setInteractive({ useHandCursor: true });
+    this.toggleBtn.on('pointerdown', () => this._toggleAutoMode());
+    this._updateToggleBtn();
 
     this._drawAll();
     this._enterRoom();
@@ -54,6 +66,11 @@ class DungeonScene extends Phaser.Scene {
       if (this.battleDmgTimer <= 0) {
         this._doBattleTick();
         this.battleDmgTimer = 1.0;
+      }
+    } else if (this.state === 'explore' && this.autoMode && this.autoMoveTimer > 0) {
+      this.autoMoveTimer -= dt;
+      if (this.autoMoveTimer <= 0) {
+        this._autoMove();
       }
     }
     this._drawAll();
@@ -156,6 +173,14 @@ class DungeonScene extends Phaser.Scene {
     }
 
     this._clearMoveButtons();
+
+    if (this.autoMode) {
+      // Auto mode: start timer and move automatically
+      this.autoMoveTimer = 1.2;
+      return;
+    }
+
+    // Manual mode: show direction buttons
     const dirs = [
       { label: '→', col: 1,  row: 0,  x: CANVAS_W / 2 + 80, y: CANVAS_H - 52 },
       { label: '←', col: -1, row: 0,  x: CANVAS_W / 2 - 80, y: CANVAS_H - 52 },
@@ -169,8 +194,11 @@ class DungeonScene extends Phaser.Scene {
       const nr = this.playerCell.row + d.row;
       if (nc < 0 || nc >= DCOLS || nr < 0 || nr >= DROWS) continue;
 
+      const adj = this._getRoom(nc, nr);
+      const hasMonster = adj && !adj.cleared && adj.monster;
       const btn = this.add.text(d.x, d.y, d.label, {
-        fontSize: '20px', color: '#ffd700', stroke: '#000', strokeThickness: 3,
+        fontSize: '20px', color: hasMonster ? '#ff8888' : '#ffd700',
+        stroke: '#000', strokeThickness: 3,
         backgroundColor: '#1a1a3a', padding: { x: 10, y: 4 }
       }).setOrigin(0.5).setInteractive({ useHandCursor: true });
 
@@ -181,6 +209,69 @@ class DungeonScene extends Phaser.Scene {
         this._enterRoom();
       });
       this.moveButtons.push(btn);
+    }
+  }
+
+  _autoMove() {
+    this.autoMoveTimer = 0;
+    // Priority: right→up→left→down, prefer uncleared rooms
+    const dirs = [
+      { col: 1, row: 0 },
+      { col: 0, row: -1 },
+      { col: -1, row: 0 },
+      { col: 0, row: 1 },
+    ];
+
+    // First pass: adjacent uncleared room
+    for (const d of dirs) {
+      const nc = this.playerCell.col + d.col;
+      const nr = this.playerCell.row + d.row;
+      if (nc < 0 || nc >= DCOLS || nr < 0 || nr >= DROWS) continue;
+      const adj = this._getRoom(nc, nr);
+      if (adj && !adj.cleared && adj.monster) {
+        this.playerCell.col = nc;
+        this.playerCell.row = nr;
+        this._enterRoom();
+        return;
+      }
+    }
+
+    // Second pass: any adjacent room (all cleared, keep moving)
+    for (const d of dirs) {
+      const nc = this.playerCell.col + d.col;
+      const nr = this.playerCell.row + d.row;
+      if (nc < 0 || nc >= DCOLS || nr < 0 || nr >= DROWS) continue;
+      this.playerCell.col = nc;
+      this.playerCell.row = nr;
+      this._enterRoom();
+      return;
+    }
+  }
+
+  _toggleAutoMode() {
+    this.autoMode = !this.autoMode;
+    localStorage.setItem('dungeon_auto', this.autoMode ? 'true' : 'false');
+    this._updateToggleBtn();
+
+    if (!this.autoMode) {
+      // Switched to manual: cancel pending auto-move and show buttons
+      this.autoMoveTimer = 0;
+      if (this.state === 'explore') this._showMoveButtons();
+    } else {
+      // Switched to auto: hide manual buttons and start auto timer
+      this._clearMoveButtons();
+      if (this.state === 'explore') this.autoMoveTimer = 0.5;
+    }
+  }
+
+  _updateToggleBtn() {
+    if (!this.toggleBtn) return;
+    if (this.autoMode) {
+      this.toggleBtn.setText('🤖 オート中');
+      this.toggleBtn.setColor('#88ffaa');
+    } else {
+      this.toggleBtn.setText('🕹️ 手動操作');
+      this.toggleBtn.setColor('#ffdd88');
     }
   }
 
