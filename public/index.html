@@ -178,9 +178,10 @@
 
 <script>
 function goToEquipment() {
-  const raw = localStorage.getItem('idle_rpg_save');
-  const hash = raw ? '#d=' + btoa(unescape(encodeURIComponent(raw))) : '';
-  location.href = '/equipment.html' + hash;
+  // まず最新データをサーバーに保存してから遷移
+  if (window.gameState) window.gameState.save();
+  const token = localStorage.getItem('idle_rpg_token');
+  location.href = token ? `/equipment.html?id=${token}` : '/equipment.html';
 }
 </script>
 <script src="/socket.io/socket.io.js"></script>

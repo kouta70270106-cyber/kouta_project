@@ -2,6 +2,7 @@ const express = require('express');
 const { createServer } = require('http');
 const { Server } = require('socket.io');
 const path = require('path');
+const fs = require('fs');
 
 const app = express();
 const httpServer = createServer(app);
@@ -9,7 +10,47 @@ const io = new Server(httpServer, {
   cors: { origin: '*' }
 });
 
+app.use(express.json({ limit: '128kb' }));
 app.use(express.static(path.join(__dirname, 'public')));
+
+// ===== セーブデータ API =====
+// token -> saveData (in-memory)
+const saves = new Map();
+
+// 起動時にファイルから復元（デプロイ間以外の再起動に対応）
+const SAVE_FILE = path.join(__dirname, 'saves.json');
+try {
+  if (fs.existsSync(SAVE_FILE)) {
+    const loaded = JSON.parse(fs.readFileSync(SAVE_FILE, 'utf8'));
+    for (const [k, v] of Object.entries(loaded)) saves.set(k, v);
+    console.log(`セーブ復元: ${saves.size}件`);
+  }
+} catch(e) { console.warn('セーブファイル読み込み失敗:', e.message); }
+
+// 60秒ごとにファイルへ書き出し
+setInterval(() => {
+  try {
+    const obj = Object.fromEntries(saves);
+    fs.writeFileSync(SAVE_FILE, JSON.stringify(obj));
+  } catch(e) { /* ignore */ }
+}, 60_000);
+
+const TOKEN_RE = /^[a-f0-9]{16}$/;
+
+app.get('/api/save/:token', (req, res) => {
+  if (!TOKEN_RE.test(req.params.token)) return res.status(400).json({ error: 'invalid token' });
+  const data = saves.get(req.params.token);
+  if (!data) return res.status(404).json({ error: 'not found' });
+  res.json({ save: data });
+});
+
+app.post('/api/save/:token', (req, res) => {
+  if (!TOKEN_RE.test(req.params.token)) return res.status(400).json({ error: 'invalid token' });
+  const { save } = req.body;
+  if (!save || typeof save !== 'object') return res.status(400).json({ error: 'no save data' });
+  saves.set(req.params.token, save);
+  res.json({ ok: true });
+});
 
 // rooms: Map<passphrase, { players: [socketId], host: socketId }>
 const rooms = new Map();

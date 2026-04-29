@@ -211,10 +211,22 @@ class GameState {
     }
   }
 
+  // ===== Token =====
+  _getOrCreateToken() {
+    let t = localStorage.getItem('idle_rpg_token');
+    if (!t || !/^[a-f0-9]{16}$/.test(t)) {
+      t = Array.from({ length: 16 }, () => Math.floor(Math.random() * 16).toString(16)).join('');
+      localStorage.setItem('idle_rpg_token', t);
+    }
+    this.token = t;
+    return t;
+  }
+
   // ===== Save / Load =====
   save() {
     try {
-      localStorage.setItem('idle_rpg_save', JSON.stringify({
+      const token = this._getOrCreateToken();
+      const data = {
         player: this.player,
         inventory: this.inventory,
         guild: this.guild,
@@ -223,12 +235,21 @@ class GameState {
         gameTime: this.gameTime,
         stats: this.stats,
         companions: this.companions,
-      }));
+      };
+      localStorage.setItem('idle_rpg_save', JSON.stringify(data));
+      // サーバーに非同期で同期（失敗しても無視）
+      fetch(`/api/save/${token}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ save: data }),
+      }).catch(() => {});
     } catch(e) { /* ignore */ }
   }
 
   load() {
     try {
+      const t = localStorage.getItem('idle_rpg_token');
+      if (t) this.token = t;
       const raw = localStorage.getItem('idle_rpg_save');
       if (!raw) return false;
       const data = JSON.parse(raw);
@@ -244,6 +265,19 @@ class GameState {
     } catch(e) {
       return false;
     }
+  }
+
+  // サーバーからセーブデータを取得し localStorage に書き込む
+  async loadFromServer(token) {
+    try {
+      const res = await fetch(`/api/save/${token}`);
+      if (!res.ok) return false;
+      const { save: data } = await res.json();
+      localStorage.setItem('idle_rpg_save', JSON.stringify(data));
+      localStorage.setItem('idle_rpg_token', token);
+      this.token = token;
+      return true;
+    } catch(e) { return false; }
   }
 
   reset() {
