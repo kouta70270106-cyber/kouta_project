@@ -44,13 +44,14 @@ class GameState {
     let def = p.baseDef;
     let bonusHp = 0;
 
-    const slots = ['weapon', 'shield', 'armor', 'accessory'];
+    const slots = ['weapon', 'shield', 'armor', 'accessory', 'spellbook'];
     for (const slot of slots) {
       const eq = p.equipment[slot];
       if (eq) {
-        atk += eq.atk || 0;
-        def += eq.def || 0;
-        bonusHp += eq.hp || 0;
+        const mult = 1 + (eq.refine || 0) * 0.1;
+        atk += Math.floor((eq.atk || 0) * mult);
+        def += Math.floor((eq.def || 0) * mult);
+        bonusHp += Math.floor((eq.hp || 0) * mult);
       }
     }
 
@@ -107,17 +108,40 @@ class GameState {
 
   // ===== Inventory =====
   addItem(item) {
+    // Check for existing item with same id → auto-refine
+    const existing = this.inventory.find(i => i.id === item.id);
+    if (existing) {
+      const refine = existing.refine || 0;
+      if (refine < 5) {
+        existing.refine = refine + 1;
+        this.addLog(`✨ ${item.name}を合成！ +${existing.refine} になった！`, 'success');
+      } else {
+        const sellGold = this._getSellPrice(item);
+        this.gainGold(sellGold);
+        this.addLog(`💰 ${item.name}(+5 MAX) を自動売却 💰+${sellGold}`, 'highlight');
+      }
+      return true;
+    }
+
     if (this.inventory.length >= 20) {
       this.addLog(`🎒 荷物がいっぱいで${item.name}を拾えなかった...`, 'danger');
       return false;
     }
-    this.inventory.push({ ...item, uid: Date.now() + Math.random() });
+    const newItem = { ...item, uid: Date.now() + Math.random(), refine: 0 };
+    this.inventory.push(newItem);
 
     // Auto-equip if slot is empty
     if (item.type && !this.player.equipment[item.type]) {
-      this.equip(item);
+      this.equip(newItem);
     }
     return true;
+  }
+
+  _getSellPrice(item) {
+    const shopEntry = D.SHOP.find(s => s.itemId === item.id);
+    if (shopEntry) return Math.floor(shopEntry.price * 0.3);
+    const byRarity = { common: 50, uncommon: 200, rare: 800, legendary: 3000 };
+    return byRarity[item.rarity] || 100;
   }
 
   equip(item) {
@@ -139,9 +163,25 @@ class GameState {
     const def = D.EQUIPMENT[itemId];
     if (!def) return { ok: false, msg: 'アイテムデータがありません' };
     if (this.player.gold < entry.price) return { ok: false, msg: 'ゴールドが足りません' };
-    if (this.inventory.length >= 20) return { ok: false, msg: '荷物がいっぱいです' };
+
+    const existing = this.inventory.find(i => i.id === itemId);
+    if (!existing && this.inventory.length >= 20) return { ok: false, msg: '荷物がいっぱいです' };
+
     this.player.gold -= entry.price;
-    const item = { ...def, uid: Date.now() + Math.random() };
+
+    if (existing) {
+      const refine = existing.refine || 0;
+      if (refine < 5) {
+        existing.refine = refine + 1;
+        return { ok: true, item: existing, refined: true };
+      } else {
+        const refund = Math.floor(entry.price * 0.3);
+        this.gainGold(refund);
+        return { ok: true, item: existing, maxRefine: true, refund };
+      }
+    }
+
+    const item = { ...def, uid: Date.now() + Math.random(), refine: 0 };
     this.inventory.push(item);
     if (!this.player.equipment[item.type]) this.equip(item);
     return { ok: true, item };

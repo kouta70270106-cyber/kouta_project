@@ -774,3 +774,28 @@ body {
 .book-kills strong {
   color: #88cc88;
 }
+
+/* ============================================================
+   Refine Badge (+N)
+   ============================================================ */
+.refine-badge {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: bold;
+  color: #aaaaaa;
+  background: rgba(0,0,0,0.55);
+  border: 1px solid currentColor;
+  border-radius: 3px;
+  padding: 0 3px;
+  margin-left: 4px;
+  vertical-align: middle;
+  line-height: 1.4;
+}
+.refine-badge.maxed {
+  color: #ffaa22;
+  animation: refine-glow 1.5s ease-in-out infinite alternate;
+}
+@keyframes refine-glow {
+  from { box-shadow: 0 0 3px #ffaa22; }
+  to   { box-shadow: 0 0 8px #ffaa22; }
+}

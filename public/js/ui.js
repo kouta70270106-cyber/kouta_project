@@ -56,6 +56,15 @@ function updateUI() {
 }
 
 // ============================================================
+//  Refine badge helper
+// ============================================================
+function _refineBadge(item) {
+  if (!item || !item.refine) return '';
+  const maxed = item.refine >= 5;
+  return `<span class="refine-badge${maxed ? ' maxed' : ''}">+${item.refine}</span>`;
+}
+
+// ============================================================
 //  Equipment Tab
 // ============================================================
 function updateEquipmentTab() {
@@ -63,7 +72,9 @@ function updateEquipmentTab() {
   const eq = gs.player.equipment;
   const stats = gs.getStats();
 
-  const fmt = item => item ? `<span class="rarity-${item.rarity}">${item.icon || ''} ${item.name}</span>` : '<span style="color:#444">なし</span>';
+  const fmt = item => item
+    ? `<span class="rarity-${item.rarity}">${item.icon || ''} ${item.name}</span>${_refineBadge(item)}`
+    : '<span style="color:#444">なし</span>';
   document.getElementById('eq-weapon').innerHTML    = fmt(eq.weapon);
   document.getElementById('eq-shield').innerHTML    = fmt(eq.shield);
   document.getElementById('eq-armor').innerHTML     = fmt(eq.armor);
@@ -106,7 +117,7 @@ function updateInventoryTab() {
     return `<div class="inv-item" onclick="openItemDetail('${item.uid}')">
       <span class="inv-item-type">${item.icon || ''}</span>
       <div style="flex:1">
-        <div class="inv-item-name rarity-${item.rarity}">${item.name}${isEquipped ? ' <span style="color:#666;font-size:10px">[装備中]</span>' : ''}</div>
+        <div class="inv-item-name rarity-${item.rarity}">${item.name}${_refineBadge(item)}${isEquipped ? ' <span style="color:#666;font-size:10px">[装備中]</span>' : ''}</div>
         <div style="font-size:10px;color:#666">${stats.join(' / ')}</div>
       </div>
     </div>`;
@@ -125,9 +136,13 @@ function openItemDetail(uid) {
   if (item.hp) stats.push(`❤️ HP ${item.hp > 0 ? '+' : ''}${item.hp}`);
 
   const el = document.getElementById('item-modal-content');
+  const refineInfo = item.refine
+    ? `<div style="margin-bottom:6px">${_refineBadge(item)} <span style="font-size:10px;color:#888">（各ステータス +${item.refine * 10}%）</span></div>`
+    : '';
   el.innerHTML = `
     <div style="font-size:16px;margin-bottom:8px" class="rarity-${item.rarity}">${item.icon || ''} ${item.name}</div>
-    <div style="color:#888;font-size:11px;margin-bottom:8px">レアリティ: ${item.rarity} | 種別: ${item.type}</div>
+    <div style="color:#888;font-size:11px;margin-bottom:4px">レアリティ: ${item.rarity} | 種別: ${item.type}</div>
+    ${refineInfo}
     <div style="margin-bottom:12px">${stats.join('<br>')}</div>
     ${!isEquipped ? `<button class="btn btn-gold" onclick="equipFromModal('${uid}')">装備する</button>` : '<div style="color:#44ff88">装備中</div>'}
     <button class="btn btn-danger" onclick="dropItem('${uid}')" style="margin-top:4px">捨てる</button>
@@ -391,7 +406,13 @@ function buyShopItem(itemId) {
   const gs = window.gameState;
   const result = gs.buyItem(itemId);
   if (result.ok) {
-    gs.addLog(`🛒 ${result.item.name}を購入した！`, 'success');
+    if (result.maxRefine) {
+      gs.addLog(`💰 ${result.item.name}は+5 MAX！ 差額 💰+${result.refund}で返金`, 'highlight');
+    } else if (result.refined) {
+      gs.addLog(`✨ ${result.item.name}を合成！ +${result.item.refine} になった！`, 'success');
+    } else {
+      gs.addLog(`🛒 ${result.item.name}を購入した！`, 'success');
+    }
     gs.save();
   } else {
     gs.addLog(`⚠️ ${result.msg}`, 'danger');
