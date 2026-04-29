@@ -46,7 +46,7 @@ function updateUI() {
     case 'equipment': updateEquipmentTab(); break;
     case 'inventory': updateInventoryTab(); break;
     case 'quests': updateQuestsTab(); break;
-    case 'guild': updateGuildTab(); break;
+    case 'guild': updateGuildTab(); updateQuestsTab(); break;
     case 'shop': updateShopTab(); break;
     case 'book': updateMonsterBookTab(); break;
   }
