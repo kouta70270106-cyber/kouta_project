@@ -97,31 +97,50 @@ function updateEquipmentTab() {
 // ============================================================
 //  Inventory Tab
 // ============================================================
+const INV_GROUPS = [
+  { type: 'weapon',    label: '⚔️ 武器' },
+  { type: 'shield',    label: '🛡️ 盾' },
+  { type: 'armor',     label: '🥋 鎧' },
+  { type: 'accessory', label: '💍 装飾' },
+  { type: 'spellbook', label: '📖 魔法書' },
+];
+
 function updateInventoryTab() {
   const gs = window.gameState;
   document.getElementById('inv-count').textContent = `(${gs.inventory.length}/20)`;
 
   const list = document.getElementById('inventory-list');
   if (gs.inventory.length === 0) {
-    list.innerHTML = '<div style="color:#444;font-size:12px;text-align:center;padding:10px">アイテムなし</div>';
+    list.innerHTML = '<div style="color:#444;font-size:12px;text-align:center;padding:16px">アイテムなし</div>';
     return;
   }
 
-  list.innerHTML = gs.inventory.map(item => {
-    const isEquipped = Object.values(gs.player.equipment).some(e => e && e.uid === item.uid);
-    const stats = [];
-    if (item.atk) stats.push(`ATK+${item.atk}`);
-    if (item.def) stats.push(`DEF+${item.def}`);
-    if (item.hp) stats.push(`HP+${item.hp}`);
+  let html = '';
+  for (const group of INV_GROUPS) {
+    const items = gs.inventory.filter(i => i.type === group.type);
+    if (items.length === 0) continue;
 
-    return `<div class="inv-item" onclick="openItemDetail('${item.uid}')">
-      <span class="inv-item-type">${item.icon || ''}</span>
-      <div style="flex:1">
-        <div class="inv-item-name rarity-${item.rarity}">${item.name}${_refineBadge(item)}${isEquipped ? ' <span style="color:#666;font-size:10px">[装備中]</span>' : ''}</div>
-        <div style="font-size:10px;color:#666">${stats.join(' / ')}</div>
-      </div>
-    </div>`;
-  }).join('');
+    html += `<div class="inv-group-header">${group.label} <span class="inv-group-count">${items.length}</span></div>`;
+    html += items.map(item => {
+      const isEquipped = gs.player.equipment[item.type]?.uid === item.uid;
+      const mult = 1 + (item.refine || 0) * 0.1;
+      const statParts = [];
+      if (item.atk) statParts.push(`ATK+${Math.floor(item.atk * mult)}`);
+      if (item.def) statParts.push(`DEF+${Math.floor(item.def * mult)}`);
+      if (item.hp)  statParts.push(`HP+${Math.floor(item.hp  * mult)}`);
+
+      return `<div class="inv-item${isEquipped ? ' inv-equipped' : ''}" onclick="openItemDetail('${item.uid}')">
+        <span class="inv-item-icon">${item.icon || '📦'}</span>
+        <div class="inv-item-body">
+          <div class="inv-item-name rarity-${item.rarity}">${item.name}${_refineBadge(item)}</div>
+          <div class="inv-item-stats">${statParts.join('  ')}</div>
+        </div>
+        ${isEquipped ? '<span class="inv-equipped-mark">装備中</span>' : ''}
+      </div>`;
+    }).join('');
+  }
+
+  list.innerHTML = html;
 }
 
 function openItemDetail(uid) {

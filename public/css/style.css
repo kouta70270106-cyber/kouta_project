@@ -358,6 +358,25 @@ body {
 .stat-row span { color: #c0c8b0; }
 
 /* ===== Inventory ===== */
+.inv-group-header {
+  font-size: 11px;
+  font-weight: bold;
+  color: #8a9a88;
+  background: #0a120a;
+  border-top: 1px solid #1e3020;
+  border-bottom: 1px solid #1e3020;
+  padding: 4px 8px;
+  margin: 6px 0 3px;
+  letter-spacing: 0.05em;
+}
+.inv-group-header:first-child { margin-top: 0; }
+
+.inv-group-count {
+  color: #556655;
+  font-weight: normal;
+  font-size: 10px;
+}
+
 .inv-item {
   display: flex;
   align-items: center;
@@ -366,14 +385,29 @@ body {
   background: #0b1810;
   border: 1px solid #162816;
   border-radius: 4px;
-  margin-bottom: 3px;
+  margin-bottom: 2px;
   cursor: pointer;
   transition: border-color 0.2s;
+  position: relative;
+}
+.inv-item:hover { border-color: #2a4a38; background: #0f1e12; }
+.inv-item.inv-equipped { border-color: #2a5a38; background: #0d1e12; }
+
+.inv-item-icon { font-size: 18px; width: 22px; text-align: center; flex-shrink: 0; }
+.inv-item-body { flex: 1; min-width: 0; }
+.inv-item-name { font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.inv-item-stats { font-size: 10px; color: #556655; margin-top: 1px; }
+
+.inv-equipped-mark {
+  font-size: 9px;
+  color: #44aa66;
+  background: rgba(40,90,50,0.5);
+  border: 1px solid #2a5a38;
+  border-radius: 3px;
+  padding: 1px 4px;
+  flex-shrink: 0;
 }
 
-.inv-item:hover { border-color: #2a4a38; }
-
-.inv-item-name { flex: 1; font-size: 12px; }
 .inv-item-type { font-size: 10px; color: #666; }
 
 .rarity-common { color: #c0c8b8; }
