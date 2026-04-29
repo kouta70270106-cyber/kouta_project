@@ -48,6 +48,7 @@ function updateUI() {
     case 'quests': updateQuestsTab(); break;
     case 'guild': updateGuildTab(); break;
     case 'shop': updateShopTab(); break;
+    case 'book': updateMonsterBookTab(); break;
   }
 
   // Battle log
@@ -403,6 +404,51 @@ function setShopFilter(btn, cat) {
   document.querySelectorAll('.shop-filter-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
   updateShopTab();
+}
+
+// ============================================================
+//  Monster Book Tab (図鑑)
+// ============================================================
+const RARITY_STARS = { common:'★☆☆☆☆', uncommon:'★★☆☆☆', rare:'★★★★☆', legendary:'★★★★★' };
+
+function updateMonsterBookTab() {
+  const gs = window.gameState;
+  const list = document.getElementById('book-list');
+  if (!list) return;
+
+  const monsters = Object.values(D.MONSTERS);
+  const killCount = gs.stats.killCount || {};
+
+  list.innerHTML = monsters.map(m => {
+    const kills = killCount[m.id] || 0;
+    const seen = kills > 0;
+    const rarityColor = D.RARITY_COLOR[m.rarity] || '#d4c8a8';
+    const stars = RARITY_STARS[m.rarity] || '☆☆☆☆☆';
+
+    if (!seen) {
+      return `<div class="book-entry book-unknown">
+        <div class="book-silhouette">?</div>
+        <div class="book-info">
+          <div class="book-name unknown-name">？？？？？</div>
+          <div class="book-stars" style="color:#444">${stars}</div>
+          <div class="book-kills" style="color:#333">未討伐</div>
+        </div>
+      </div>`;
+    }
+
+    return `<div class="book-entry">
+      <div class="book-icon" style="color:${rarityColor}">${m.shape === 'gold_blob' ? '🟡' : m.shape === 'silver_blob' ? '⚪' : m.shape === 'blob' ? '🟢' : m.shape === 'fly' ? '🦇' : m.shape === 'multi' ? '🕷️' : m.shape === 'quad' ? '🐺' : m.shape === 'human' ? '💀' : '👹'}</div>
+      <div class="book-info">
+        <div class="book-name" style="color:${rarityColor}">${m.name}</div>
+        <div class="book-stars" style="color:${rarityColor}">${stars}</div>
+        <div class="book-stats-row">
+          <span>HP ${m.hp}</span><span>ATK ${m.atk}</span><span>DEF ${m.def}</span>
+        </div>
+        <div class="book-desc">${m.desc || ''}</div>
+        <div class="book-kills">討伐数: <strong>${kills}</strong></div>
+      </div>
+    </div>`;
+  }).join('');
 }
 
 // ギルド本部へ — 現在のゲームステータスをURLパラメータで渡す

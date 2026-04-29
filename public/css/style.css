@@ -682,3 +682,93 @@ body {
   opacity: 0.4;
   cursor: not-allowed;
 }
+
+/* ============================================================
+   Monster Book (図鑑)
+   ============================================================ */
+#book-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.book-entry {
+  display: flex;
+  gap: 8px;
+  padding: 8px;
+  background: #0d1f10;
+  border: 1px solid #1e3020;
+  border-radius: 6px;
+}
+
+.book-entry.book-unknown {
+  border-color: #181818;
+  background: #0a0a0a;
+}
+
+.book-icon {
+  font-size: 22px;
+  width: 28px;
+  text-align: center;
+  flex-shrink: 0;
+  line-height: 1;
+  margin-top: 2px;
+}
+
+.book-silhouette {
+  font-size: 22px;
+  width: 28px;
+  text-align: center;
+  flex-shrink: 0;
+  color: #1a1a1a;
+  background: #111;
+  border-radius: 4px;
+  line-height: 26px;
+  filter: blur(2px);
+}
+
+.book-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.book-name {
+  font-size: 12px;
+  font-weight: bold;
+  margin-bottom: 2px;
+}
+
+.unknown-name {
+  color: #333 !important;
+  letter-spacing: 3px;
+}
+
+.book-stars {
+  font-size: 11px;
+  letter-spacing: 1px;
+  margin-bottom: 3px;
+}
+
+.book-stats-row {
+  display: flex;
+  gap: 8px;
+  font-size: 10px;
+  color: #666;
+  margin-bottom: 3px;
+}
+
+.book-desc {
+  font-size: 10px;
+  color: #8a9a88;
+  line-height: 1.5;
+  margin-bottom: 3px;
+}
+
+.book-kills {
+  font-size: 10px;
+  color: #556655;
+}
+
+.book-kills strong {
+  color: #88cc88;
+}
