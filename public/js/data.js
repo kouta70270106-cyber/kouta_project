@@ -83,6 +83,12 @@ const D = {
     frost_dragon: { id:'frost_dragon', name:'氷霧の龍',              hp:400, atk:45, def:25, exp:400, gold:[100,200],rarity:'rare',      types:['beast','magic'],      areas:['tundra'],                   shape:'fly',    color:0x44aaff, drop:['frost_scale','ice_fang','mithril_sword'] },
     demon_knight: { id:'demon_knight', name:'魔族の戦士',            hp:350, atk:50, def:30, exp:380, gold:[90,180], rarity:'rare',      types:['physical','humanoid'],areas:['demon_realm'],              shape:'large',  color:0xaa2244, drop:['demon_sword','demon_armor','dark_ring'] },
 
+    // ===== レアスライム（超低確率・スケールなし） =====
+    gold_slime:   { id:'gold_slime',   name:'黄金のスライム王',      hp:50,  atk:3,  def:80, exp:50,   gold:[2000,5000], rarity:'legendary', types:['beast'],  areas:null, shape:'gold_blob',   color:0xFFD700, noScale:true, spawnWeight:4,
+                    drop:['acc_life_amulet','acc_power_ring'] },
+    silver_slime: { id:'silver_slime', name:'白銀のスライム王',      hp:50,  atk:3,  def:80, exp:8000, gold:[5,20],      rarity:'legendary', types:['beast'],  areas:null, shape:'silver_blob', color:0xC0C0C0, noScale:true, spawnWeight:4,
+                    drop:['spellbook_arcane','spellbook_thunder'] },
+
     dragon:       { id:'dragon',       name:'古の大龍',              hp:800, atk:80, def:50, exp:1000,gold:[200,500],rarity:'legendary', types:['beast','magic'],      areas:['volcano','demon_realm'],    shape:'fly',    color:0xff2200, drop:['dragon_sword','dragon_shield','dragon_scale'] },
     lich:         { id:'lich',         name:'不死の大魔術師',        hp:600, atk:100,def:30, exp:1200,gold:[300,600],rarity:'legendary', types:['undead','magic'],     areas:['ruins','demon_realm'],      shape:'large',  color:0x6600aa, drop:['lich_staff','cursed_crown','death_ring'] },
     chimera:      { id:'chimera',      name:'合成の魔獣',            hp:900, atk:90, def:45, exp:1100,gold:[250,550],rarity:'legendary', types:['beast','magic'],      areas:['demon_realm'],              shape:'large',  color:0xff6600, drop:['chimera_claw','beast_ring','chimera_horn'] },
@@ -231,11 +237,14 @@ const D = {
     const all = Object.values(D.MONSTERS);
     const guild = guildId ? D.GUILDS[guildId] : null;
 
+    // レアスライムは areas:null → 全エリアで出現可能
     let pool = all.filter(m => !m.areas || m.areas.includes(area));
     if (pool.length === 0) pool = all.filter(m => m.rarity === 'common');
 
     const biasTypes = guild ? guild.monsterBias : [];
     const weights = pool.map(m => {
+      // spawnWeight が設定されている場合はそちらを優先（超低確率出現用）
+      if (m.spawnWeight !== undefined) return m.spawnWeight;
       let w = D.RARITY_WEIGHT[m.rarity] || 10;
       if (biasTypes.some(t => m.types?.includes(t))) w *= 2;
       return w;

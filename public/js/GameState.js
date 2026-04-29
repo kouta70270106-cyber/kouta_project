@@ -186,6 +186,8 @@ class GameState {
 
   // ===== Monster scaling =====
   scaleMonster(base) {
+    // noScale:true のモンスター（レアスライム等）はスケールしない
+    if (base.noScale) return { ...base };
     const scale = 1 + (this.player.level - 1) * 0.12;
     return {
       ...base,

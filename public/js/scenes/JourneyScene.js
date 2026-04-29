@@ -8,6 +8,7 @@ const PLAYER_X = 180;
 const SHAPE_SPRITE = {
   blob:'slime', small:'goblin', human:'skeleton',
   large:'orc', quad:'dragon', fly:'bat', multi:'spider',
+  gold_blob:'gold_slime', silver_blob:'silver_slime',
 };
 
 class JourneyScene extends Phaser.Scene {
@@ -200,7 +201,15 @@ class JourneyScene extends Phaser.Scene {
     this.monsterImg.setTexture(key).setPosition(this.monsterX, groundY).clearTint().setVisible(true);
     this.hpBarsGfx.setVisible(true);
     this.monsterNameTxt.setText(this.currentMonster.name).setPosition(this.monsterX, GROUND_Y - 88).setVisible(true);
-    gs.addLog(`⚠️ ${this.currentMonster.name}が現れた！ [${this.currentMonster.rarity}]`);
+
+    // レアスライム出現時の特別演出
+    if (this.currentMonster.id === 'gold_slime') {
+      gs.addLog(`✨ 黄金のスライム王が現れた！ 倒せばお宝が！！`, 'legendary');
+    } else if (this.currentMonster.id === 'silver_slime') {
+      gs.addLog(`✨ 白銀のスライム王が現れた！ 大量の経験値が！！`, 'legendary');
+    } else {
+      gs.addLog(`⚠️ ${this.currentMonster.name}が現れた！ [${this.currentMonster.rarity}]`);
+    }
   }
 
   _doBattleTick() {
@@ -640,9 +649,13 @@ class JourneyScene extends Phaser.Scene {
       g.fillRect(mx - 35, GROUND_Y - 80, Math.floor(70 * mPct), 8);
 
       if (this.currentMonster.rarity === 'rare' || this.currentMonster.rarity === 'legendary') {
-        const glowCol = this.currentMonster.rarity === 'legendary' ? 0xffaa00 : 0x4488ff;
-        g.lineStyle(2, glowCol, 0.6);
-        g.strokeCircle(mx, GROUND_Y - 30, 44);
+        let glowCol = this.currentMonster.rarity === 'legendary' ? 0xffaa00 : 0x4488ff;
+        if (this.currentMonster.id === 'gold_slime')   glowCol = 0xFFD700;
+        if (this.currentMonster.id === 'silver_slime') glowCol = 0xC0C0FF;
+        g.lineStyle(3, glowCol, 0.8);
+        g.strokeCircle(mx, GROUND_Y - 30, 50);
+        g.lineStyle(1, glowCol, 0.3);
+        g.strokeCircle(mx, GROUND_Y - 30, 58);
       }
     }
   }
