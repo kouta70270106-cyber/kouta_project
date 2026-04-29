@@ -537,6 +537,26 @@ body {
 }
 .btn-sell:hover { background: linear-gradient(135deg, #3a3000, #5a4800); }
 
+.btn-unlock {
+  background: linear-gradient(135deg, #1a2a3a, #2a3a4a);
+  border: 1px solid #4a6a8a;
+  color: #88aacc;
+  font-size: 11px;
+  padding: 3px 10px;
+  margin-left: 8px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.btn-unlock:hover { background: linear-gradient(135deg, #2a3a4a, #3a4a5a); }
+
+.item-modal-equipped {
+  display: flex;
+  align-items: center;
+  color: #44ff88;
+  font-size: 12px;
+  margin-bottom: 4px;
+}
+
 /* ===== Modals ===== */
 .modal-overlay {
   position: fixed;

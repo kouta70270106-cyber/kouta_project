@@ -159,16 +159,34 @@ function openItemDetail(uid) {
     ? `<div style="margin-bottom:6px">${_refineBadge(item)} <span style="font-size:10px;color:#888">（各ステータス +${item.refine * 10}%）</span></div>`
     : '';
   const sellPrice = gs._getSellPrice(item);
+  const equipRow = isEquipped
+    ? `<div class="item-modal-equipped">🔒 装備中（ロック）<button class="btn btn-unlock" onclick="unequipFromModal('${uid}')">🔓 外す</button></div>`
+    : `<button class="btn btn-gold" onclick="equipFromModal('${uid}')">装備する</button>`;
+  const sellRow = isEquipped
+    ? `<button class="btn btn-sell" disabled style="margin-top:4px;opacity:0.35;cursor:not-allowed">🔒 売却（ロック中）</button>`
+    : `<button class="btn btn-sell" onclick="sellItem('${uid}')" style="margin-top:4px">💰 売却 (${sellPrice.toLocaleString()}G)</button>`;
   el.innerHTML = `
     <div style="font-size:16px;margin-bottom:8px" class="rarity-${item.rarity}">${item.icon || ''} ${item.name}</div>
     <div style="color:#888;font-size:11px;margin-bottom:4px">レアリティ: ${item.rarity} | 種別: ${item.type}</div>
     ${refineInfo}
     <div style="margin-bottom:12px">${stats.join('<br>')}</div>
-    ${!isEquipped ? `<button class="btn btn-gold" onclick="equipFromModal('${uid}')">装備する</button>` : '<div style="color:#44ff88;margin-bottom:8px">装備中</div>'}
-    <button class="btn btn-sell" onclick="sellItem('${uid}')" style="margin-top:4px">💰 売却 (${sellPrice.toLocaleString()}G)</button>
+    ${equipRow}
+    ${sellRow}
     <button class="btn btn-danger" onclick="dropItem('${uid}')" style="margin-top:4px">捨てる</button>
   `;
   document.getElementById('item-modal').style.display = 'flex';
+}
+
+function unequipFromModal(uid) {
+  const gs = window.gameState;
+  const item = gs.inventory.find(i => i.uid == uid);
+  if (!item) return;
+  if (gs.player.equipment[item.type]?.uid === item.uid) {
+    gs.player.equipment[item.type] = null;
+    gs.addLog(`🔓 ${item.name}を外した`);
+  }
+  document.getElementById('item-modal').style.display = 'none';
+  updateUI();
 }
 
 function equipFromModal(uid) {
