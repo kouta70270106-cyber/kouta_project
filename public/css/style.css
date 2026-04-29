@@ -528,8 +528,14 @@ body {
   border: 1px solid #7a9040;
   color: #c0a850;
 }
-
 .btn-gold:hover { background: linear-gradient(135deg, #3a4a20, #4a5a28); }
+
+.btn-sell {
+  background: linear-gradient(135deg, #2a2000, #4a3800);
+  border: 1px solid #8a6a00;
+  color: #ffd700;
+}
+.btn-sell:hover { background: linear-gradient(135deg, #3a3000, #5a4800); }
 
 /* ===== Modals ===== */
 .modal-overlay {

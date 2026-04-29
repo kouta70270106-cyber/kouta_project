@@ -158,12 +158,14 @@ function openItemDetail(uid) {
   const refineInfo = item.refine
     ? `<div style="margin-bottom:6px">${_refineBadge(item)} <span style="font-size:10px;color:#888">（各ステータス +${item.refine * 10}%）</span></div>`
     : '';
+  const sellPrice = gs._getSellPrice(item);
   el.innerHTML = `
     <div style="font-size:16px;margin-bottom:8px" class="rarity-${item.rarity}">${item.icon || ''} ${item.name}</div>
     <div style="color:#888;font-size:11px;margin-bottom:4px">レアリティ: ${item.rarity} | 種別: ${item.type}</div>
     ${refineInfo}
     <div style="margin-bottom:12px">${stats.join('<br>')}</div>
-    ${!isEquipped ? `<button class="btn btn-gold" onclick="equipFromModal('${uid}')">装備する</button>` : '<div style="color:#44ff88">装備中</div>'}
+    ${!isEquipped ? `<button class="btn btn-gold" onclick="equipFromModal('${uid}')">装備する</button>` : '<div style="color:#44ff88;margin-bottom:8px">装備中</div>'}
+    <button class="btn btn-sell" onclick="sellItem('${uid}')" style="margin-top:4px">💰 売却 (${sellPrice.toLocaleString()}G)</button>
     <button class="btn btn-danger" onclick="dropItem('${uid}')" style="margin-top:4px">捨てる</button>
   `;
   document.getElementById('item-modal').style.display = 'flex';
@@ -193,6 +195,23 @@ function dropItem(uid) {
     document.getElementById('item-modal').style.display = 'none';
     updateUI();
   }
+}
+
+function sellItem(uid) {
+  const gs = window.gameState;
+  const idx = gs.inventory.findIndex(i => i.uid == uid);
+  if (idx < 0) return;
+  const item = gs.inventory[idx];
+  if (gs.player.equipment[item.type]?.uid === item.uid) {
+    gs.player.equipment[item.type] = null;
+  }
+  gs.inventory.splice(idx, 1);
+  const gold = gs._getSellPrice(item);
+  gs.gainGold(gold);
+  gs.addLog(`💰 ${item.name}を売却！ +${gold}G`, 'success');
+  gs.save();
+  document.getElementById('item-modal').style.display = 'none';
+  updateUI();
 }
 
 // ============================================================
