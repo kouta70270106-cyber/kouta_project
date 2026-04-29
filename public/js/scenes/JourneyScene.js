@@ -402,12 +402,8 @@ class JourneyScene extends Phaser.Scene {
     const boss = D.pickBoss(gs.gameTime.month - 1);
     gs.addLog(`⚡ 月の終わり！ 大魔族「${boss.name}」が現れた！`, 'legendary');
     this.state = 'boss_enter';
-
-    showGuildModal(() => {
-      gs.guild && null; // guild already set
-      this.scene.pause('JourneyScene');
-      this.scene.launch('BossScene', { boss });
-    }, true); // true = is monthly reset
+    this.scene.pause('JourneyScene');
+    this.scene.launch('BossScene', { boss });
   }
 
   // =========================================================
