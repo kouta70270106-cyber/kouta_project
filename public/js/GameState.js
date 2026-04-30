@@ -294,6 +294,9 @@ class GameState {
         companions: this.companions,
       };
       localStorage.setItem('idle_rpg_save', JSON.stringify(data));
+      // bestiary.defeatedMonsterIds を killCount から同期
+      const defeated = Object.keys(this.stats.killCount || {}).filter(id => this.stats.killCount[id] > 0);
+      localStorage.setItem('bestiary.defeatedMonsterIds', JSON.stringify(defeated));
       // サーバーに非同期で同期（失敗しても無視）
       fetch(`/api/save/${token}`, {
         method: 'POST',

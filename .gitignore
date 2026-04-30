@@ -49,6 +49,7 @@ gradle/wrapper/gradle-wrapper.jar
 
 ### Claude Code local settings (personal only) ###
 .claude/settings.local.json
+CLAUDE.local.md
 
 ### Node.js ###
 node_modules/
