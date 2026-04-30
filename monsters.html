@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>モンスター図鑑 — 永遠の旅人</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #060d08; color: #c8d4c0; font-family: 'Segoe UI', sans-serif; min-height: 100vh; }
+    header { background: linear-gradient(135deg, #0a1a0c, #081208); border-bottom: 1px solid #1e3020; padding: 16px 20px; display: flex; align-items: center; gap: 12px; }
+    header h1 { font-size: 20px; color: #c0a850; letter-spacing: 0.05em; }
+    header a { color: #8a9a88; font-size: 12px; text-decoration: none; margin-left: auto; }
+    header a:hover { color: #c8d4c0; }
+    .controls { display: flex; gap: 8px; padding: 12px 20px; flex-wrap: wrap; background: #080e0a; border-bottom: 1px solid #1e3020; }
+    .filter-btn { padding: 5px 14px; font-size: 11px; background: #0d180d; border: 1px solid #1e3020; border-radius: 4px; color: #8a9a88; cursor: pointer; transition: all 0.2s; }
+    .filter-btn:hover, .filter-btn.active { background: #1a2e1a; border-color: #4a6a4a; color: #c8d4c0; }
+    .search-box { padding: 5px 10px; font-size: 11px; background: #0d180d; border: 1px solid #1e3020; border-radius: 4px; color: #c8d4c0; width: 160px; }
+    .search-box:focus { outline: none; border-color: #4a6a4a; }
+    #count { font-size: 11px; color: #556655; margin-left: auto; align-self: center; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 10px; padding: 16px 20px; }
+    .card { background: #0d1a0d; border: 1px solid #1e3020; border-radius: 8px; padding: 12px; cursor: pointer; transition: border-color 0.2s; position: relative; }
+    .card:hover { border-color: #2e5030; }
+    .card.defeated { border-color: #1a3a1a; background: #0a160a; }
+    .card.unknown { filter: none; }
+    .card-header { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+    .card-icon { font-size: 26px; width: 36px; text-align: center; flex-shrink: 0; }
+    .card-icon.silhouette { filter: brightness(0) invert(0.1); font-size: 26px; }
+    .card-title { flex: 1; }
+    .card-name { font-size: 13px; font-weight: bold; margin-bottom: 2px; }
+    .card-name.unknown-name { color: #222; letter-spacing: 4px; }
+    .card-rarity { font-size: 11px; letter-spacing: 1px; }
+    .defeated-badge { position: absolute; top: 8px; right: 8px; font-size: 10px; background: rgba(30,60,30,0.8); border: 1px solid #2a5a2a; border-radius: 3px; padding: 1px 6px; color: #44aa66; }
+    .card-stats { display: flex; gap: 10px; font-size: 10px; color: #556655; margin-bottom: 6px; flex-wrap: wrap; }
+    .card-stats span { background: #0a120a; border: 1px solid #1a2a1a; border-radius: 3px; padding: 1px 6px; }
+    .card-types { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 6px; }
+    .type-tag { font-size: 9px; background: #121e12; border: 1px solid #1e2e1e; border-radius: 10px; padding: 1px 7px; color: #667766; }
+    .card-desc { font-size: 11px; color: #667766; line-height: 1.5; }
+    .card-desc.hidden { color: #1a2a1a; }
+    .kills-row { font-size: 10px; color: #445544; margin-top: 6px; border-top: 1px solid #162016; padding-top: 6px; }
+    .kills-row strong { color: #66aa66; }
+    /* Rarity colors */
+    .r-common    { color: #d4c8a8; }
+    .r-uncommon  { color: #44ff88; }
+    .r-rare      { color: #4488ff; }
+    .r-legendary { color: #ffaa22; }
+    /* Stars */
+    .stars { font-size: 12px; }
+    footer { text-align: center; padding: 24px; color: #334433; font-size: 11px; border-top: 1px solid #1e3020; margin-top: 8px; }
+    @media (max-width: 600px) {
+      .grid { grid-template-columns: 1fr; padding: 10px; }
+      header h1 { font-size: 16px; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <span style="font-size:24px">📖</span>
+  <h1>モンスター図鑑</h1>
+  <a href="/">← ゲームへ戻る</a>
+</header>
+
+<div class="controls">
+  <button class="filter-btn active" data-rarity="all">全て</button>
+  <button class="filter-btn" data-rarity="common">★ Common</button>
+  <button class="filter-btn" data-rarity="uncommon">★★ Uncommon</button>
+  <button class="filter-btn" data-rarity="rare">★★★★ Rare</button>
+  <button class="filter-btn" data-rarity="legendary">★★★★★ Legendary</button>
+  <input class="search-box" id="search" placeholder="名前で検索…">
+  <span id="count"></span>
+</div>
+
+<div class="grid" id="grid"></div>
+
+<footer>討伐記録はゲームのセーブデータと連動しています</footer>
+
+<script>
+const RARITY_STARS = { common:'★☆☆☆☆', uncommon:'★★☆☆☆', rare:'★★★★☆', legendary:'★★★★★' };
+const RARITY_CLASS = { common:'r-common', uncommon:'r-uncommon', rare:'r-rare', legendary:'r-legendary' };
+const ICON_MAP = {
+  blob:'🟢', gold_blob:'🟡', silver_blob:'⚪', fly:'🦇', multi:'🕷️',
+  quad:'🐺', human:'💀', large:'👹', small:'👺'
+};
+
+// 討伐済みIDをlocalStorageから取得
+function getDefeated() {
+  try {
+    const raw = localStorage.getItem('bestiary.defeatedMonsterIds');
+    return new Set(raw ? JSON.parse(raw) : []);
+  } catch { return new Set(); }
+}
+
+// ゲームのkillCountも参照（同一ブラウザならマージ）
+function getKillCount() {
+  try {
+    const save = JSON.parse(localStorage.getItem('idle_rpg_save') || '{}');
+    return save.stats?.killCount || {};
+  } catch { return {}; }
+}
+
+let monsters = [];
+let currentFilter = 'all';
+let currentSearch = '';
+
+fetch('game-spec/monsters.json')
+  .catch(() => null)
+  .then(r => r ? r.json() : [])
+  .then(data => { monsters = data; render(); })
+  .catch(() => render());
+
+// fallback: inline data
+window.addEventListener('DOMContentLoaded', () => {
+  if (monsters.length === 0) {
+    // monsterデータが読み込めなかった場合のフォールバック
+    document.getElementById('grid').innerHTML =
+      '<div style="padding:40px;text-align:center;color:#334433">データを読み込めませんでした</div>';
+  }
+});
+
+function render() {
+  const defeated = getDefeated();
+  const killCount = getKillCount();
+  const search = currentSearch.toLowerCase();
+
+  // killCountにあるものはdefatedに自動追加
+  Object.entries(killCount).forEach(([id, cnt]) => { if (cnt > 0) defeated.add(id); });
+
+  const filtered = monsters.filter(m => {
+    if (currentFilter !== 'all' && m.rarity !== currentFilter) return false;
+    if (search && !m.name.toLowerCase().includes(search) && !m.id.includes(search)) return false;
+    return true;
+  });
+
+  const countEl = document.getElementById('count');
+  const defeatedCount = filtered.filter(m => defeated.has(m.id)).length;
+  countEl.textContent = `討伐済 ${defeatedCount} / ${filtered.length}`;
+
+  const grid = document.getElementById('grid');
+  grid.innerHTML = filtered.map(m => {
+    const isDefeated = defeated.has(m.id);
+    const kills = killCount[m.id] || 0;
+    const stars = RARITY_STARS[m.rarity] || '☆☆☆☆☆';
+    const rClass = RARITY_CLASS[m.rarity] || '';
+    const icon = ICON_MAP[m.shape] || '👾';
+
+    if (!isDefeated) {
+      return `<div class="card unknown">
+        <div class="card-header">
+          <span class="card-icon silhouette">👾</span>
+          <div class="card-title">
+            <div class="card-name unknown-name">？？？？？</div>
+            <div class="card-rarity stars ${rClass}">${stars}</div>
+          </div>
+        </div>
+        <div class="card-desc hidden">？ 未討伐のモンスターです</div>
+      </div>`;
+    }
+
+    const statsHtml = [
+      `HP ${m.hp}`, `ATK ${m.atk}`, `DEF ${m.def}`, `SPD ${m.spd}`
+    ].map(s => `<span>${s}</span>`).join('');
+
+    const typesHtml = (m.types || []).map(t => `<span class="type-tag">${t}</span>`).join('');
+
+    return `<div class="card defeated">
+      <div class="defeated-badge">✔ 討伐済</div>
+      <div class="card-header">
+        <span class="card-icon">${icon}</span>
+        <div class="card-title">
+          <div class="card-name ${rClass}">${m.name}</div>
+          <div class="card-rarity stars ${rClass}">${stars}</div>
+        </div>
+      </div>
+      <div class="card-stats">${statsHtml}</div>
+      <div class="card-types">${typesHtml}</div>
+      <div class="card-desc">${m.desc || ''}</div>
+      <div class="kills-row">討伐数: <strong>${kills}</strong>${m.special ? ` <span style="color:#556655">— ${m.special}</span>` : ''}</div>
+    </div>`;
+  }).join('');
+}
+
+document.querySelectorAll('.filter-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentFilter = btn.dataset.rarity;
+    render();
+  });
+});
+
+document.getElementById('search').addEventListener('input', e => {
+  currentSearch = e.target.value;
+  render();
+});
+</script>
+</body>
+</html>
