@@ -10,7 +10,40 @@
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
+<!-- SVG Defs: paper noise + reusable ornaments -->
+<svg width="0" height="0" style="position:absolute">
+  <defs>
+    <filter id="paper-noise" x="0%" y="0%" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" stitchTiles="stitch" result="noise"/>
+      <feColorMatrix type="saturate" values="0" in="noise" result="gray"/>
+      <feBlend in="SourceGraphic" in2="gray" mode="multiply" result="blend"/>
+      <feComposite in="blend" in2="SourceGraphic" operator="in"/>
+    </filter>
+    <filter id="panel-noise" x="0%" y="0%" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" stitchTiles="stitch" result="noise"/>
+      <feColorMatrix type="saturate" values="0" in="noise" result="gray"/>
+      <feBlend in="SourceGraphic" in2="gray" mode="multiply"/>
+    </filter>
+  </defs>
+</svg>
+
 <div id="wrapper">
+
+  <!-- Title strip -->
+  <div id="title-strip">
+    <svg class="title-ornament" width="28" height="14" viewBox="0 0 28 14" fill="none">
+      <path d="M1 7 Q7 1 14 7 Q21 13 27 7" stroke="#a3812d" stroke-width="1.2" fill="none"/>
+      <path d="M1 7 Q7 13 14 7 Q21 1 27 7" stroke="#a3812d" stroke-width="0.5" fill="none" opacity="0.5"/>
+      <circle cx="14" cy="7" r="1.5" fill="#a3812d"/>
+    </svg>
+    <span class="title-strip-lat">ETERNAL · WANDERER</span>
+    <span class="title-strip-jp">永遠の旅人</span>
+    <svg class="title-ornament" width="28" height="14" viewBox="0 0 28 14" fill="none">
+      <path d="M1 7 Q7 1 14 7 Q21 13 27 7" stroke="#a3812d" stroke-width="1.2" fill="none"/>
+      <path d="M1 7 Q7 13 14 7 Q21 1 27 7" stroke="#a3812d" stroke-width="0.5" fill="none" opacity="0.5"/>
+      <circle cx="14" cy="7" r="1.5" fill="#a3812d"/>
+    </svg>
+  </div>
 
   <!-- Top HUD -->
   <div id="top-hud">
@@ -30,11 +63,11 @@
         <div id="exp-text" class="bar-text">0/100</div>
       </div>
       <div class="bar-wrap">
-        <div class="bar-label comp-label" style="color:#5588aa">エルン</div>
+        <div class="bar-label comp-label comp-ern">エルン</div>
         <div class="bar-bg"><div id="comp-hp-bar-0" class="bar comp0-fill"></div></div>
       </div>
       <div class="bar-wrap">
-        <div class="bar-label comp-label" style="color:#8866cc">サリア</div>
+        <div class="bar-label comp-label comp-saria">サリア</div>
         <div class="bar-bg"><div id="comp-hp-bar-1" class="bar comp1-fill"></div></div>
       </div>
     </div>
@@ -55,7 +88,13 @@
   <!-- Main area -->
   <div id="main-area">
     <!-- Game canvas container -->
-    <div id="game-container"></div>
+    <div id="game-wrap">
+      <div class="panel-corner panel-corner--tl"><svg width="16" height="16" viewBox="0 0 16 16"><path d="M1 15 L1 1 L15 1" stroke="#a3812d" stroke-width="1.2" fill="none"/><path d="M4 15 L4 4 L15 4" stroke="#a3812d" stroke-width="0.5" fill="none" opacity="0.5"/></svg></div>
+      <div class="panel-corner panel-corner--tr"><svg width="16" height="16" viewBox="0 0 16 16"><path d="M15 15 L15 1 L1 1" stroke="#a3812d" stroke-width="1.2" fill="none"/><path d="M12 15 L12 4 L1 4" stroke="#a3812d" stroke-width="0.5" fill="none" opacity="0.5"/></svg></div>
+      <div id="game-container"></div>
+      <div class="panel-corner panel-corner--bl"><svg width="16" height="16" viewBox="0 0 16 16"><path d="M1 1 L1 15 L15 15" stroke="#a3812d" stroke-width="1.2" fill="none"/><path d="M4 1 L4 12 L15 12" stroke="#a3812d" stroke-width="0.5" fill="none" opacity="0.5"/></svg></div>
+      <div class="panel-corner panel-corner--br"><svg width="16" height="16" viewBox="0 0 16 16"><path d="M15 1 L15 15 L1 15" stroke="#a3812d" stroke-width="1.2" fill="none"/><path d="M12 1 L12 12 L1 12" stroke="#a3812d" stroke-width="0.5" fill="none" opacity="0.5"/></svg></div>
+    </div>
 
     <!-- Battle log -->
     <div id="battle-log">
@@ -69,6 +108,8 @@
 
   <!-- Side panel -->
   <div id="side-panel">
+    <div class="panel-corner panel-corner--tl"><svg width="16" height="16" viewBox="0 0 16 16"><path d="M1 15 L1 1 L15 1" stroke="#a3812d" stroke-width="1.2" fill="none"/><path d="M4 15 L4 4 L15 4" stroke="#a3812d" stroke-width="0.5" fill="none" opacity="0.5"/></svg></div>
+    <div class="panel-corner panel-corner--tr"><svg width="16" height="16" viewBox="0 0 16 16"><path d="M15 15 L15 1 L1 1" stroke="#a3812d" stroke-width="1.2" fill="none"/><path d="M12 15 L12 4 L1 4" stroke="#a3812d" stroke-width="0.5" fill="none" opacity="0.5"/></svg></div>
     <div id="panel-tabs">
       <button class="tab-btn active" data-tab="equipment">装備<span class="tab-lat">ARMA</span></button>
       <button class="tab-btn" data-tab="inventory">荷物<span class="tab-lat">SACCVS</span></button>
@@ -122,12 +163,12 @@
         <div class="section-title">所属ギルド</div>
         <div id="guild-display-name">未所属</div>
         <div id="guild-bonus-text"></div>
-        <div id="guild-desc-text" style="font-size:11px;color:#aaa;margin-top:6px"></div>
+        <div id="guild-desc-text" class="muted-text" style="margin-top:6px"></div>
       </div>
-      <a href="#" onclick="openGuildHQ();return false;" id="guild-hq-btn" style="display:block;margin:10px 0 2px;padding:7px 0;background:linear-gradient(135deg,#1a3a1a,#2a5a2a);border:1px solid #4a8a4a;border-radius:6px;color:#7fff7f;font-size:12px;font-weight:bold;text-align:center;text-decoration:none;letter-spacing:0.05em;">🏰 ギルド本部へ</a>
-      <a href="#" onclick="goToEquipment();return false;" style="display:block;margin:4px 0 2px;padding:7px 0;background:linear-gradient(135deg,#1a1a3a,#2a2a5a);border:1px solid #4a4a8a;border-radius:6px;color:#aaaaff;font-size:12px;font-weight:bold;text-align:center;text-decoration:none;letter-spacing:0.05em;">⚔️ 装備の間へ</a>
+      <a href="#" onclick="openGuildHQ();return false;" id="guild-hq-btn" class="guild-nav-link">⚜ ギルド本部へ</a>
+      <a href="#" onclick="goToEquipment();return false;" class="guild-nav-link guild-nav-link--equip">⚔ 装備の間へ</a>
       <div class="section-title" style="margin-top:12px">自己紹介</div>
-      <div id="player-bio-text" style="font-size:11px;color:#aaa;line-height:1.6;min-height:16px"></div>
+      <div id="player-bio-text" class="muted-text bio-text"></div>
       <div class="section-title" style="margin-top:12px">統計</div>
       <div id="guild-stats"></div>
       <div class="section-title" style="margin-top:12px">📜 受注中の依頼</div>
