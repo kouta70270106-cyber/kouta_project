@@ -4,6 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>永遠の旅人 - 放置系RPG</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800&family=Shippori+Mincho:wght@500;600;700;800&family=Noto+Serif+JP:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -12,10 +15,12 @@
   <!-- Top HUD -->
   <div id="top-hud">
     <div id="player-block">
+      <div id="rank-badge">RANK <strong id="rank-display">F</strong></div>
+      <span class="name-lat">VIATOR ·</span>
       <span id="player-name-hud">勇者</span>
       <span id="player-level-hud" class="level-badge">Lv.1</span>
       <div class="bar-wrap">
-        <div class="bar-label">HP</div>
+        <div class="bar-label">HP<span class="lat-s">VITA</span></div>
         <div class="bar-bg"><div id="hp-bar" class="bar hp-fill"></div></div>
         <div id="hp-text" class="bar-text">100/100</div>
       </div>
@@ -54,6 +59,10 @@
 
     <!-- Battle log -->
     <div id="battle-log">
+      <div class="log-header">
+        <span class="log-header-title">CHRONICA</span>
+        <span class="log-header-sub">戦の記録</span>
+      </div>
       <div id="log-inner"></div>
     </div>
   </div>
@@ -61,12 +70,12 @@
   <!-- Side panel -->
   <div id="side-panel">
     <div id="panel-tabs">
-      <button class="tab-btn active" data-tab="equipment">装備</button>
-      <button class="tab-btn" data-tab="inventory">荷物</button>
-      <button class="tab-btn" data-tab="shop">防具屋</button>
-      <button class="tab-btn" data-tab="guild">ギルド</button>
-      <button class="tab-btn" data-tab="multi">マルチ</button>
-      <button class="tab-btn" data-tab="book">図鑑</button>
+      <button class="tab-btn active" data-tab="equipment">装備<span class="tab-lat">ARMA</span></button>
+      <button class="tab-btn" data-tab="inventory">荷物<span class="tab-lat">SACCVS</span></button>
+      <button class="tab-btn" data-tab="shop">防具屋<span class="tab-lat">EMPORIVS</span></button>
+      <button class="tab-btn" data-tab="guild">ギルド<span class="tab-lat">SODALITAS</span></button>
+      <button class="tab-btn" data-tab="multi">マルチ<span class="tab-lat">CONIVNCTI</span></button>
+      <button class="tab-btn" data-tab="book">図鑑<span class="tab-lat">LIBER</span></button>
     </div>
 
     <!-- Equipment Tab -->
