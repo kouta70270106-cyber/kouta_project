@@ -515,9 +515,64 @@
       text-decoration-color: rgba(91,64,35,0.3);
     }
 
+    /* ── 480px+: カードを画面中央に浮かせる ── */
     @media (min-width: 480px) {
       html, body { align-items: center; padding: 24px 0; }
       #page { min-height: unset; border-radius: 4px; box-shadow: 0 24px 80px rgba(0,0,0,0.6); }
+    }
+
+    /* ── 768px+: タブレット ── */
+    @media (min-width: 768px) {
+      html, body { padding: 32px 0; }
+      #page { max-width: 580px; }
+      #scroll { padding: 22px 32px 36px; }
+      .preamble { font-size: 12.5px; margin: 22px 12px 20px; }
+      .class-grid { gap: 7px; }
+    }
+
+    /* ── 1024px+: デスクトップ ── */
+    @media (min-width: 1024px) {
+      html, body { padding: 48px 0; }
+      #page { max-width: 700px; }
+      #scroll { padding: 28px 52px 48px; }
+
+      /* クレスト */
+      .crest-title, .crest-guild { font-size: 26px; }
+      .section-ttl { font-size: 14px; letter-spacing: 0.65em; }
+
+      /* 本文 */
+      .preamble { font-size: 13px; line-height: 2; margin: 26px 20px 22px; }
+
+      /* フィールドラベル */
+      .field-num { font-size: 12px; }
+      .field-jp  { font-size: 14px; }
+      .field-sub { font-size: 10px; }
+
+      /* 冒険者名 */
+      #f-name { font-size: 19px; padding: 10px 0 7px; }
+
+      /* クラスグリッド */
+      .class-grid { gap: 8px; }
+      .class-cell { padding: 10px 4px; }
+      .cls-glyph  { font-size: 18px; }
+      .cls-name   { font-size: 11px; }
+      .class-disc { width: 44px; height: 44px; font-size: 20px; }
+      .detail-jp  { font-size: 15px; }
+
+      /* 自己紹介 */
+      #f-bio { font-size: 14.5px; padding: 12px 14px; }
+
+      /* 封蝋ボタン */
+      .wax-seal  { width: 50px; height: 50px; font-size: 16px; }
+      .wax-label { font-size: 16px; }
+
+      /* SUCCESS */
+      .complete-title { font-size: 20px; }
+      .cert-name      { font-size: 26px; }
+      .cert-disc      { width: 64px; height: 64px; font-size: 28px; }
+      .cert-jp        { font-size: 18px; }
+      #game-link      { font-size: 15px; padding: 14px 16px; }
+      .board-cta      { font-size: 14px; padding: 12px 16px; }
     }
   </style>
 </head>
