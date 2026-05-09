@@ -3,7 +3,13 @@
 class BootScene extends Phaser.Scene {
   constructor() { super({ key: 'BootScene' }); }
 
-  preload() {}
+  preload() {
+    this.load.image('bg_grassland', 'images/bg/grassland.jpg');
+    this.load.image('bg_forest',    'images/bg/forest.jpg');
+    this.load.image('bg_storm',     'images/bg/storm.jpg');
+    this.load.image('bg_night',     'images/bg/night.jpg');
+    this.load.image('bg_fullmoon',  'images/bg/fullmoon.jpg');
+  }
 
   create() {
     try { createGameSprites(this); } catch(e) { console.error('Sprite init error:', e); }
