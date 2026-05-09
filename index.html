@@ -530,11 +530,15 @@
       .class-grid { gap: 7px; }
     }
 
-    /* ── 1024px+: デスクトップ ── */
+    /* ── 1024px+: デスクトップ（全画面羊皮紙） ── */
     @media (min-width: 1024px) {
-      html, body { padding: 48px 0; }
-      #page { max-width: 700px; }
-      #scroll { padding: 28px 52px 48px; }
+      html, body { padding: 0; align-items: flex-start; }
+      #page { max-width: none; width: 100%; min-height: 100vh; }
+      #scroll {
+        max-width: 700px;
+        margin: 0 auto;
+        padding: 48px 52px 64px;
+      }
 
       /* クレスト */
       .crest-title, .crest-guild { font-size: 26px; }
