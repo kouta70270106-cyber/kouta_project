@@ -24,6 +24,14 @@ class JourneyScene extends Phaser.Scene {
     this.bgMid    = this.add.graphics();
     this.bgGround = this.add.graphics();
 
+    // ---- Custom background image (user-uploaded) ----
+    this.customBgImg = null;
+    this._applyCustomBg();
+
+    // Listen for runtime background changes
+    this._bgChangeHandler = () => this._applyCustomBg();
+    window.addEventListener('customBgChanged', this._bgChangeHandler);
+
     // ---- Character sprites ----
     this.comp1Img   = this.add.image(PLAYER_X - 84,  GROUND_Y, 'saria').setOrigin(0.5, 1);
     this.comp0Img   = this.add.image(PLAYER_X - 42,  GROUND_Y, 'ern').setOrigin(0.5, 1);
@@ -411,21 +419,31 @@ class JourneyScene extends Phaser.Scene {
   // =========================================================
   _drawScene() {
     const area = this.currentArea || D.AREAS[0];
+    const hasCustomBg = !!this.customBgImg;
 
-    this.bgSky.clear();
-    this.bgSky.fillGradientStyle(area.skyA, area.skyA, area.skyB, area.skyB, 1);
-    this.bgSky.fillRect(0, 0, CANVAS_W, CANVAS_H);
+    if (hasCustomBg) {
+      // Hide procedural layers; custom image already placed at depth -10
+      this.bgSky.clear();
+      this.bgClouds.clear();
+      this.bgFar.clear();
+      this.bgMid.clear();
+      this.bgGround.clear();
+    } else {
+      this.bgSky.clear();
+      this.bgSky.fillGradientStyle(area.skyA, area.skyA, area.skyB, area.skyB, 1);
+      this.bgSky.fillRect(0, 0, CANVAS_W, CANVAS_H);
 
-    this._drawClouds(area);
+      this._drawClouds(area);
 
-    this.bgFar.clear();
-    this._drawFarLayer(this.bgFar, area);
+      this.bgFar.clear();
+      this._drawFarLayer(this.bgFar, area);
 
-    this.bgMid.clear();
-    this._drawMidLayer(this.bgMid, area);
+      this.bgMid.clear();
+      this._drawMidLayer(this.bgMid, area);
 
-    this.bgGround.clear();
-    this._drawGroundLayer(this.bgGround, area);
+      this.bgGround.clear();
+      this._drawGroundLayer(this.bgGround, area);
+    }
 
     // Bob animation for sprites
     const bob = this.state === 'walking' ? Math.sin(this.playerBobT) * 3 : 0;
@@ -667,6 +685,38 @@ class JourneyScene extends Phaser.Scene {
     // Sign
     g.fillStyle(0x664422, 1);
     g.fillRect(dx - 20, GROUND_Y - 95, 40, 18);
+  }
+
+  // =========================================================
+  //  CUSTOM BACKGROUND
+  // =========================================================
+  _applyCustomBg() {
+    const data = localStorage.getItem('idle_rpg_custom_bg');
+
+    // Remove existing custom bg image
+    if (this.customBgImg) {
+      this.customBgImg.destroy();
+      this.customBgImg = null;
+    }
+    // Remove old texture to allow re-adding
+    if (this.textures.exists('_custom_bg')) {
+      this.textures.remove('_custom_bg');
+    }
+
+    if (!data) return;
+
+    // Add as Phaser texture then create image
+    this.textures.addBase64('_custom_bg', data);
+    this.textures.once('onload', () => {
+      // Placed at depth -1 so it's behind everything
+      this.customBgImg = this.add.image(CANVAS_W / 2, CANVAS_H / 2, '_custom_bg')
+        .setDisplaySize(CANVAS_W, CANVAS_H)
+        .setDepth(-1);
+    });
+  }
+
+  shutdown() {
+    window.removeEventListener('customBgChanged', this._bgChangeHandler);
   }
 
   // =========================================================

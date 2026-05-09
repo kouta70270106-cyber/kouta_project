@@ -94,6 +94,10 @@
       <div id="game-container"></div>
       <div class="panel-corner panel-corner--bl"><svg width="16" height="16" viewBox="0 0 16 16"><path d="M1 1 L1 15 L15 15" stroke="#a3812d" stroke-width="1.2" fill="none"/><path d="M4 1 L4 12 L15 12" stroke="#a3812d" stroke-width="0.5" fill="none" opacity="0.5"/></svg></div>
       <div class="panel-corner panel-corner--br"><svg width="16" height="16" viewBox="0 0 16 16"><path d="M15 1 L15 15 L1 15" stroke="#a3812d" stroke-width="1.2" fill="none"/><path d="M12 1 L12 12 L1 12" stroke="#a3812d" stroke-width="0.5" fill="none" opacity="0.5"/></svg></div>
+      <!-- Background image picker button -->
+      <button id="bg-pick-btn" title="背景画像を変更" onclick="document.getElementById('bg-file-input').click()">🖼</button>
+      <button id="bg-reset-btn" title="背景をリセット" onclick="resetCustomBg()" style="display:none">✕</button>
+      <input type="file" id="bg-file-input" accept="image/*" style="display:none">
     </div>
 
     <!-- Battle log -->
@@ -254,6 +258,42 @@ function goToEquipment() {
   const token = localStorage.getItem('idle_rpg_token');
   location.href = token ? `/equipment.html?id=${token}` : '/equipment.html';
 }
+
+// ---- Custom background ----
+(function () {
+  function updateBgResetBtn() {
+    const btn = document.getElementById('bg-reset-btn');
+    if (btn) btn.style.display = localStorage.getItem('idle_rpg_custom_bg') ? 'flex' : 'none';
+  }
+
+  document.addEventListener('DOMContentLoaded', function () {
+    updateBgResetBtn();
+
+    const input = document.getElementById('bg-file-input');
+    input.addEventListener('change', function () {
+      const file = input.files[0];
+      if (!file) return;
+      if (file.size > 5 * 1024 * 1024) {
+        alert('ファイルサイズは5MB以下にしてください。');
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        localStorage.setItem('idle_rpg_custom_bg', e.target.result);
+        updateBgResetBtn();
+        window.dispatchEvent(new Event('customBgChanged'));
+      };
+      reader.readAsDataURL(file);
+      input.value = '';
+    });
+  });
+
+  window.resetCustomBg = function () {
+    localStorage.removeItem('idle_rpg_custom_bg');
+    updateBgResetBtn();
+    window.dispatchEvent(new Event('customBgChanged'));
+  };
+})();
 </script>
 <script src="/socket.io/socket.io.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser.min.js"></script>
