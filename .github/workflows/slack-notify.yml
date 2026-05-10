@@ -23,11 +23,15 @@ jobs:
           webhook_url    = os.environ["SLACK_WEBHOOK_URL"]
 
           text = (
-              f":rocket: *放置系RPG「永遠の旅人」がリリースされました！*\n"
+              f"⚔️ *さあ、新たなリリースが刻まれた！「永遠の旅人」が進化したぞ！*\n"
               f">*リポジトリ:* {repo}\n"
               f">*作者:* {author_name}\n"
-              f">*コミット:* {commit_message}\n"
-              f">*詳細:* {commit_url}"
+              f">*リリース内容:* {commit_message}\n"
+              f">*コミット詳細:* {commit_url}\n"
+              f"\n"
+              f"🌐 *プロダクト:* https://kouta70270106-cyber.github.io/kouta_project/\n"
+              f"\n"
+              f"_「リリースこそが旅人の証。さあ、次の冒険へ」— デスパー_"
           )
 
           payload = json.dumps({"text": text}).encode("utf-8")
