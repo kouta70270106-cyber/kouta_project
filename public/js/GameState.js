@@ -35,6 +35,7 @@ class GameState {
       hp: Math.floor(100 * c.hpRatio),
       downTimer: 0,
     }));
+    this.learnedSpells = [];
   }
 
   // ===== Stats with equipment =====
@@ -94,6 +95,19 @@ class GameState {
       this.companions[i].hp = this.getCompanionMaxHp(i);
       this.companions[i].downTimer = 0;
     }
+    this.checkSpellLearning(p.level);
+  }
+
+  checkSpellLearning(level, silent = false) {
+    if (!this.learnedSpells) this.learnedSpells = [];
+    const newSpells = D.SPELLS.filter(
+      sp => sp.learnLevel <= level && !this.learnedSpells.includes(sp.id)
+    );
+    for (const sp of newSpells) {
+      this.learnedSpells.push(sp.id);
+      if (!silent) this.addLog(`✨ 呪文「${sp.name}」を習得した！`, 'success');
+    }
+    return newSpells;
   }
 
   // ===== Gold =====
@@ -292,6 +306,7 @@ class GameState {
         gameTime: this.gameTime,
         stats: this.stats,
         companions: this.companions,
+        learnedSpells: this.learnedSpells,
       };
       localStorage.setItem('idle_rpg_save', JSON.stringify(data));
       // サーバーに非同期で同期（失敗しても無視）
@@ -318,6 +333,8 @@ class GameState {
       this.gameTime = data.gameTime || { day: 1, month: 1, tick: 0 };
       this.stats = data.stats || this.stats;
       if (data.companions) this.companions = data.companions;
+      this.learnedSpells = data.learnedSpells || [];
+      if (!data.learnedSpells) this.checkSpellLearning(this.player.level, true);
       return true;
     } catch(e) {
       return false;

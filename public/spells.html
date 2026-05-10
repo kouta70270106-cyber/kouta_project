@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>呪文書 — 永遠の旅人</title>
+  <script src="js/data.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: linear-gradient(160deg, #f0e8d0 0%, #e8dcc0 100%);
+      color: #3a2614;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      font-size: 13px;
+      min-height: 100vh;
+    }
+
+    #wrapper {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 14px 12px;
+    }
+
+    /* ===== Header ===== */
+    header {
+      background: linear-gradient(135deg, #f8f0dc, #ede0c0);
+      border: 1px solid #a3812d;
+      border-radius: 8px;
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+    }
+
+    .back-btn {
+      background: #e8dcc0;
+      border: 1px solid #a3812d;
+      color: #7a4a1a;
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-size: 12px;
+      cursor: pointer;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+    .back-btn:hover { background: #d8cc9c; }
+
+    .page-title {
+      font-size: 18px;
+      font-weight: bold;
+      color: #5a1d1d;
+      flex: 1;
+      letter-spacing: 0.05em;
+    }
+
+    #stat-bar {
+      display: flex;
+      gap: 14px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .stat-chip { font-size: 12px; color: #7a5a2a; }
+    .stat-chip b { color: #3a2614; }
+
+    /* ===== Progress Bar ===== */
+    #progress-box {
+      background: linear-gradient(135deg, #f8f0dc, #ede0c0);
+      border: 1px solid #a3812d;
+      border-radius: 8px;
+      padding: 12px 16px;
+      margin-bottom: 14px;
+    }
+
+    .progress-label {
+      font-size: 12px;
+      color: #7a5a2a;
+      margin-bottom: 6px;
+    }
+    .progress-label b { color: #3a2614; font-size: 14px; }
+
+    .progress-track {
+      height: 10px;
+      background: #d4c8a0;
+      border-radius: 5px;
+      overflow: hidden;
+      border: 1px solid #a3812d;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #c0a030, #e8c840);
+      border-radius: 5px;
+      transition: width 0.4s ease;
+    }
+
+    /* ===== Element Sections ===== */
+    .element-section {
+      background: linear-gradient(135deg, #f8f0dc, #ede0c0);
+      border: 1px solid #a3812d;
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 12px;
+    }
+
+    .element-title {
+      font-size: 13px;
+      font-weight: bold;
+      color: #5a1d1d;
+      padding-bottom: 8px;
+      margin-bottom: 10px;
+      border-bottom: 1px solid rgba(163, 129, 45, 0.4);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .spell-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 8px;
+    }
+
+    /* ===== Spell Cards ===== */
+    .spell-card {
+      border-radius: 6px;
+      padding: 10px 12px;
+      border: 1px solid #a3812d;
+      background: rgba(255, 250, 230, 0.7);
+    }
+
+    .spell-card.locked {
+      background: rgba(200, 190, 160, 0.4);
+      border-style: dashed;
+      border-color: rgba(163, 129, 45, 0.45);
+      opacity: 0.65;
+    }
+
+    .spell-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 5px;
+    }
+
+    .spell-icon { font-size: 20px; flex-shrink: 0; }
+
+    .spell-name {
+      font-size: 13px;
+      font-weight: bold;
+      color: #3a2614;
+    }
+    .spell-card.locked .spell-name { color: #8a7a5a; filter: blur(2.5px); }
+
+    .spell-lv {
+      font-size: 10px;
+      color: #a3812d;
+      margin-left: auto;
+      white-space: nowrap;
+    }
+
+    .spell-desc {
+      font-size: 11px;
+      color: #6a4a24;
+      line-height: 1.5;
+      margin-bottom: 5px;
+    }
+    .spell-card.locked .spell-desc { filter: blur(2px); color: #9a8a6a; }
+
+    .spell-meta {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .badge {
+      font-size: 9px;
+      padding: 1px 6px;
+      border-radius: 3px;
+      font-weight: bold;
+    }
+    .badge-attack  { background: #3a0808; color: #ff9999; border: 1px solid #7a2020; }
+    .badge-heal    { background: #083808; color: #77ee99; border: 1px solid #207a40; }
+    .badge-buff    { background: #080838; color: #9999ff; border: 1px solid #202078; }
+
+    .power-text {
+      font-size: 10px;
+      color: #8a6a3a;
+    }
+
+    .unlock-hint {
+      font-size: 10px;
+      color: #a3812d;
+      margin-top: 4px;
+    }
+
+    /* ===== No save ===== */
+    #no-save {
+      color: #7a5a2a;
+      text-align: center;
+      padding: 40px 20px;
+      font-size: 14px;
+      line-height: 1.9;
+    }
+
+    /* ===== Mobile ===== */
+    @media (max-width: 500px) {
+      .spell-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+<div id="wrapper">
+  <header>
+    <a href="#" onclick="goBackToGame();return false;" class="back-btn">← ゲームへ戻る</a>
+    <div class="page-title">📖 呪文書</div>
+    <div id="stat-bar"></div>
+  </header>
+
+  <div id="progress-box">
+    <div class="progress-label" id="progress-label">読み込み中...</div>
+    <div class="progress-track"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+  </div>
+
+  <div id="content"></div>
+</div>
+
+<script>
+  'use strict';
+
+  const ELEMENT_ORDER = ['fire','ice','thunder','heal','wind','arcane'];
+  const ELEMENT_LABELS = {
+    fire:'🔥 炎', ice:'❄️ 氷', thunder:'⚡ 雷',
+    heal:'💚 回復', wind:'💨 風', arcane:'🌌 秘術',
+  };
+  const CAT_LABEL = { attack:'攻撃', heal:'回復', buff:'補助' };
+
+  let saveToken = new URLSearchParams(location.search).get('id') || null;
+
+  async function fetchSave() {
+    if (saveToken) {
+      try {
+        const res = await fetch(`/api/save/${saveToken}`);
+        if (res.ok) return (await res.json()).save;
+      } catch(e) {}
+    }
+    try {
+      const r = localStorage.getItem('idle_rpg_save');
+      return r ? JSON.parse(r) : null;
+    } catch { return null; }
+  }
+
+  function getEffectiveLearnedSpells(save) {
+    if (save.learnedSpells && save.learnedSpells.length > 0) return save.learnedSpells;
+    return D.SPELLS.filter(sp => sp.learnLevel <= (save.player?.level || 1)).map(sp => sp.id);
+  }
+
+  function renderStatBar(save) {
+    const p = save.player;
+    document.getElementById('stat-bar').innerHTML =
+      `<span class="stat-chip">${p.name}&nbsp;<b>Lv.${p.level}</b></span>`;
+  }
+
+  function renderProgress(learnedIds) {
+    const total = D.SPELLS.length;
+    const learned = learnedIds.length;
+    const pct = Math.round(learned / total * 100);
+    document.getElementById('progress-label').innerHTML =
+      `習得済み呪文：<b>${learned} / ${total}</b> 種（${pct}%）`;
+    document.getElementById('progress-fill').style.width = pct + '%';
+  }
+
+  function spellCard(sp, isLearned, playerLevel) {
+    const locked = !isLearned;
+    return `<div class="spell-card${locked ? ' locked' : ''}">
+      <div class="spell-header">
+        <span class="spell-icon">${locked ? '❓' : sp.icon}</span>
+        <span class="spell-name">${locked ? '？？？' : sp.name}</span>
+        <span class="spell-lv">Lv.${sp.learnLevel}</span>
+      </div>
+      <div class="spell-desc">${locked ? '未習得の呪文' : sp.desc}</div>
+      <div class="spell-meta">
+        ${locked
+          ? `<span class="unlock-hint">Lv.${sp.learnLevel} で習得</span>`
+          : `<span class="badge badge-${sp.category}">${CAT_LABEL[sp.category]}</span>
+             ${sp.power > 0 ? `<span class="power-text">威力 ${sp.power}</span>` : ''}`
+        }
+      </div>
+    </div>`;
+  }
+
+  function renderSpells(save) {
+    const learnedIds = getEffectiveLearnedSpells(save);
+    const playerLevel = save.player?.level || 1;
+    renderProgress(learnedIds);
+
+    const byElement = {};
+    for (const el of ELEMENT_ORDER) byElement[el] = [];
+    for (const sp of D.SPELLS) {
+      if (byElement[sp.element]) byElement[sp.element].push(sp);
+    }
+
+    let html = '';
+    for (const el of ELEMENT_ORDER) {
+      const spells = byElement[el];
+      if (!spells.length) continue;
+      html += `<div class="element-section">
+        <div class="element-title">${ELEMENT_LABELS[el]}</div>
+        <div class="spell-grid">
+          ${spells.map(sp => spellCard(sp, learnedIds.includes(sp.id), playerLevel)).join('')}
+        </div>
+      </div>`;
+    }
+    document.getElementById('content').innerHTML = html;
+  }
+
+  function goBackToGame() {
+    location.href = saveToken ? `/?id=${saveToken}` : '/';
+  }
+
+  async function render() {
+    const save = await fetchSave();
+    if (!save) {
+      document.getElementById('progress-box').style.display = 'none';
+      document.getElementById('content').innerHTML =
+        `<div id="no-save">セーブデータが見つかりません。<br>ゲームをプレイしてからこのページを開いてください。</div>`;
+      return;
+    }
+    renderStatBar(save);
+    renderSpells(save);
+  }
+
+  render();
+</script>
+</body>
+</html>

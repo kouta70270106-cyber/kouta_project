@@ -283,4 +283,28 @@ const D = {
     const idx = monthNum % D.BOSSES.length;
     return D.BOSSES[idx];
   },
+
+  SPELLS: [
+    // ===== 🔥 炎属性 =====
+    { id:'fire_1',    name:'ファイア',         element:'fire',    category:'attack', learnLevel:1,  power:10,  icon:'🔥', desc:'小さな炎弾を放つ。' },
+    { id:'fire_2',    name:'ファイラ',         element:'fire',    category:'attack', learnLevel:8,  power:28,  icon:'🔥', desc:'中程度の火球で焼き払う。' },
+    { id:'fire_3',    name:'ファイガ',         element:'fire',    category:'attack', learnLevel:20, power:60,  icon:'🔥', desc:'猛烈な炎の渦を放つ。' },
+    // ===== ❄️ 氷属性 =====
+    { id:'ice_1',     name:'ブリザド',         element:'ice',     category:'attack', learnLevel:3,  power:12,  icon:'❄️', desc:'鋭い氷の礫を飛ばす。' },
+    { id:'ice_2',     name:'ブリザラ',         element:'ice',     category:'attack', learnLevel:12, power:32,  icon:'❄️', desc:'凍てつく吹雪を起こす。' },
+    // ===== ⚡ 雷属性 =====
+    { id:'thunder_1', name:'サンダー',         element:'thunder', category:'attack', learnLevel:5,  power:15,  icon:'⚡', desc:'稲妻を落として攻撃する。' },
+    { id:'thunder_2', name:'サンダラ',         element:'thunder', category:'attack', learnLevel:15, power:38,  icon:'⚡', desc:'強力な雷撃を放つ。' },
+    { id:'thunder_3', name:'サンダガ',         element:'thunder', category:'attack', learnLevel:30, power:75,  icon:'⚡', desc:'天を裂く超電磁嵐を呼ぶ。' },
+    // ===== 💚 回復属性 =====
+    { id:'heal_1',    name:'ケアル',           element:'heal',    category:'heal',   learnLevel:4,  power:20,  icon:'💚', desc:'小さな傷を癒す。' },
+    { id:'heal_2',    name:'ケアルラ',         element:'heal',    category:'heal',   learnLevel:14, power:50,  icon:'💚', desc:'体の傷を大きく回復する。' },
+    { id:'heal_3',    name:'ケアルガ',         element:'heal',    category:'heal',   learnLevel:25, power:120, icon:'💚', desc:'全ての傷を完全に回復する力。' },
+    // ===== 💨 風属性 =====
+    { id:'wind_1',    name:'エアロ',           element:'wind',    category:'attack', learnLevel:7,  power:18,  icon:'💨', desc:'鋭い風刃で敵を切り裂く。' },
+    { id:'wind_2',    name:'ヘイスト',         element:'wind',    category:'buff',   learnLevel:18, power:0,   icon:'💨', desc:'風の加護で行動速度を高める。' },
+    // ===== 🌌 秘術属性 =====
+    { id:'arcane_1',  name:'アルカナ',         element:'arcane',  category:'buff',   learnLevel:10, power:0,   icon:'🌌', desc:'古代の秘術で能力を底上げする。' },
+    { id:'arcane_2',  name:'グランドアルカナ', element:'arcane',  category:'buff',   learnLevel:40, power:0,   icon:'🌌', desc:'全属性を支配する究極の秘術。' },
+  ],
 };
