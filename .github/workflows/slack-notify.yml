@@ -1,0 +1,47 @@
+name: Slack Release Notification
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send Slack notification
+        run: |
+          python3 - <<'EOF'
+          import urllib.request
+          import json
+          import os
+
+          commit_message = os.environ["COMMIT_MESSAGE"]
+          author_name    = os.environ["AUTHOR_NAME"]
+          repo           = os.environ["REPO"]
+          commit_url     = os.environ["COMMIT_URL"]
+          webhook_url    = os.environ["SLACK_WEBHOOK_URL"]
+
+          text = (
+              f":rocket: *放置系RPG「永遠の旅人」がリリースされました！*\n"
+              f">*リポジトリ:* {repo}\n"
+              f">*作者:* {author_name}\n"
+              f">*コミット:* {commit_message}\n"
+              f">*詳細:* {commit_url}"
+          )
+
+          payload = json.dumps({"text": text}).encode("utf-8")
+          req = urllib.request.Request(
+              webhook_url,
+              data=payload,
+              headers={"Content-Type": "application/json"},
+          )
+          urllib.request.urlopen(req)
+          print("Slack notification sent successfully.")
+          EOF
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          COMMIT_MESSAGE:    ${{ github.event.head_commit.message }}
+          AUTHOR_NAME:       ${{ github.event.head_commit.author.name }}
+          REPO:              ${{ github.repository }}
+          COMMIT_URL:        ${{ github.event.head_commit.url }}
