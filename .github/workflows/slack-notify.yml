@@ -36,6 +36,8 @@ jobs:
           product_url    = "https://kouta70270106-cyber.github.io/kouta_project/"
           version        = os.environ.get("PKG_VERSION", "1.0.0")
 
+          SEP = "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
           # コミットメッセージを1行目（タイトル）と詳細行に分割
           lines = commit_message.split("\n")
           title = lines[0].strip()
@@ -45,29 +47,38 @@ jobs:
               if l.strip() and not l.strip().startswith("Co-Authored")
           ]
 
-          # 機能追加リストを整形
+          # 絵文字ローテーションで機能リストを装飾
+          BULLET_EMOJIS = ["⚔️", "🏰", "📜", "🔮", "👾", "🌟", "🗡️", "💎", "🎯", "✨"]
           if detail_lines:
-              feature_list = "\n".join(f"• {l}" for l in detail_lines if l)
+              feature_list = "\n".join(
+                  f"　{BULLET_EMOJIS[i % len(BULLET_EMOJIS)]}  {l}"
+                  for i, l in enumerate(detail_lines) if l
+              )
           else:
-              feature_list = f"• {title}"
+              feature_list = f"　✨  {title}"
 
           # クエスト起因の変更かどうか判定
           is_quest = bool(re.search(r'Quest\s*\d+', commit_message, re.IGNORECASE))
-          other_changes = "特になし" if is_quest else f"• {title}"
+          other_changes = "　特になし" if is_quest else f"　📝  {title}"
 
           text = (
-              f"⚔️ *アプリ: 永遠の旅人*\n"
-              f"🌐 *URL:* {product_url}\n"
-              f"📦 *バージョン:* v{version}\n"
+              f"{SEP}\n"
+              f"🏰  *永遠の旅人 — リリースノート*\n"
+              f"{SEP}\n"
+              f"🌐  *URL*　　<{product_url}|ゲームを開く ↗>\n"
+              f"📦  *バージョン*　`v{version}`\n"
+              f"{SEP}\n"
+              f"🆕  *機能追加*\n"
               f"\n"
-              f"📢 *リリース情報*\n"
-              f"*機能追加！！*\n"
               f"{feature_list}\n"
               f"\n"
-              f"*その他の変更*\n"
+              f"{SEP}\n"
+              f"📋  *その他の変更*\n"
+              f"\n"
               f"{other_changes}\n"
               f"\n"
-              f"_「新たな力が旅人に宿った。さあ、続きを歩め」— デスパー_"
+              f"{SEP}\n"
+              f"_「新たな力が旅人に宿った。さあ、続きを歩め」 — デスパー_ ⚡"
           )
 
           payload = json.dumps({"text": text}).encode("utf-8")
