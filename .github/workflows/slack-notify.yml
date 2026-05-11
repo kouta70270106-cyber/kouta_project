@@ -13,7 +13,9 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Get version from package.json
-        run: echo "PKG_VERSION=$(node -p \"require('./package.json').version\")" >> $GITHUB_ENV
+        run: |
+          PKG_VERSION=$(node -p "require('./package.json').version")
+          echo "PKG_VERSION=$PKG_VERSION" >> $GITHUB_ENV
 
       - name: Send Slack notification
         run: |
