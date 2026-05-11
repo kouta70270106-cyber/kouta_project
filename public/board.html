@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>冒険者の館 — 永遠の旅人</title>
+  <script src="js/data.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #060d08;
+      color: #c8d4c0;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      font-size: 13px;
+      min-height: 100vh;
+    }
+
+    #wrapper {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 14px 12px;
+    }
+
+    /* ===== Header ===== */
+    header {
+      background: linear-gradient(135deg, #0c1810, #142218);
+      border: 1px solid #1e3020;
+      border-radius: 8px;
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+    }
+
+    .back-btn {
+      background: #0c1810;
+      border: 1px solid #2a4030;
+      color: #7aaa88;
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-size: 12px;
+      cursor: pointer;
+      text-decoration: none;
+    }
+    .back-btn:hover { border-color: #4a7050; color: #aaddbb; }
+
+    .page-title {
+      font-size: 20px;
+      font-weight: bold;
+      color: #c0a850;
+      flex: 1;
+      letter-spacing: 0.06em;
+    }
+
+    /* ===== Layout ===== */
+    #layout {
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      gap: 14px;
+      align-items: start;
+    }
+
+    .panel {
+      background: #0a1610;
+      border: 1px solid #1e3020;
+      border-radius: 8px;
+      padding: 14px;
+    }
+
+    .panel-title {
+      font-size: 12px;
+      font-weight: bold;
+      color: #c0a850;
+      letter-spacing: 0.05em;
+      margin-bottom: 12px;
+      padding-bottom: 7px;
+      border-bottom: 1px solid #1e3020;
+    }
+
+    /* ===== キャラクターパネル ===== */
+    #char-name {
+      font-size: 16px;
+      font-weight: bold;
+      color: #e8d890;
+      margin-bottom: 4px;
+    }
+
+    #char-guild {
+      font-size: 11px;
+      color: #668877;
+      margin-bottom: 12px;
+    }
+
+    .char-lv {
+      display: inline-block;
+      background: #1a2a1c;
+      border: 1px solid #2a4a2a;
+      color: #88ddaa;
+      font-size: 11px;
+      font-weight: bold;
+      padding: 2px 8px;
+      border-radius: 4px;
+      margin-bottom: 12px;
+    }
+
+    /* HP・EXPバー */
+    .bar-row {
+      margin-bottom: 10px;
+    }
+
+    .bar-label {
+      font-size: 10px;
+      color: #557766;
+      margin-bottom: 3px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .bar-track {
+      height: 8px;
+      background: #0c1a0e;
+      border-radius: 4px;
+      overflow: hidden;
+      border: 1px solid #1e3020;
+    }
+
+    .bar-fill-hp  { height: 100%; background: linear-gradient(90deg, #2a7a38, #44aa55); border-radius: 4px; transition: width .4s; }
+    .bar-fill-exp { height: 100%; background: linear-gradient(90deg, #2a5870, #4a8090); border-radius: 4px; transition: width .4s; }
+
+    /* ステータス */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 7px;
+      margin-top: 12px;
+    }
+
+    .stat-box {
+      background: #060d08;
+      border: 1px solid #1a2a1c;
+      border-radius: 5px;
+      padding: 7px 10px;
+      text-align: center;
+    }
+
+    .stat-label { font-size: 9px; color: #557766; margin-bottom: 2px; }
+    .stat-val   { font-size: 16px; font-weight: bold; color: #c8d4c0; }
+
+    .gold-box .stat-val { color: #c0a850; }
+
+    /* 装備中 */
+    #equip-slots {
+      margin-top: 14px;
+    }
+
+    .equip-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 5px 0;
+      border-bottom: 1px solid #0e1e10;
+    }
+    .equip-row:last-child { border-bottom: none; }
+
+    .equip-slot-label { font-size: 9px; color: #446655; width: 46px; flex-shrink: 0; }
+    .equip-slot-name  { font-size: 11px; color: #88aa99; }
+    .equip-slot-name.empty { color: #334433; font-style: italic; }
+
+    /* ===== メニューパネル ===== */
+    .menu-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .menu-card {
+      background: #060d08;
+      border: 1px solid #1a2a1c;
+      border-radius: 7px;
+      padding: 16px 12px;
+      text-decoration: none;
+      color: inherit;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      transition: border-color .2s, background .2s;
+    }
+    .menu-card:hover { border-color: #3a7050; background: #0c1a10; }
+
+    .menu-card.battle-card { border-color: #4a2020; }
+    .menu-card.battle-card:hover { border-color: #aa3030; background: #140808; }
+
+    .menu-icon { font-size: 32px; }
+
+    .menu-label {
+      font-size: 13px;
+      font-weight: bold;
+      color: #c8d4c0;
+    }
+
+    .menu-card.battle-card .menu-label { color: #ee8888; }
+
+    .menu-desc {
+      font-size: 10px;
+      color: #557766;
+      text-align: center;
+      line-height: 1.5;
+    }
+
+    /* ===== 戦歴パネル ===== */
+    #stats-section {
+      margin-top: 14px;
+    }
+
+    .stats-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 6px 0;
+      border-bottom: 1px solid #0e1e10;
+      font-size: 12px;
+    }
+    .stats-row:last-child { border-bottom: none; }
+    .stats-row-label { color: #557766; }
+    .stats-row-val   { color: #88ddaa; font-weight: bold; }
+
+    /* ===== No save ===== */
+    #no-save {
+      color: #557766;
+      text-align: center;
+      padding: 60px 20px;
+      font-size: 14px;
+      line-height: 2;
+    }
+
+    /* ===== Mobile ===== */
+    @media (max-width: 620px) {
+      #layout { grid-template-columns: 1fr; }
+      .menu-grid { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 400px) {
+      .menu-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+<div id="wrapper">
+  <header>
+    <a href="#" onclick="goToGame();return false;" class="back-btn">← ゲームへ戻る</a>
+    <div class="page-title">🏰 冒険者の館</div>
+  </header>
+
+  <div id="main-content"></div>
+</div>
+
+<script>
+  'use strict';
+
+  let saveToken = new URLSearchParams(location.search).get('id') || null;
+  let currentSave = null;
+
+  const SLOT_LABELS = { weapon:'武器', shield:'盾', armor:'鎧', accessory:'アクセサリ', spellbook:'魔法書' };
+
+  async function fetchSave() {
+    if (saveToken) {
+      try {
+        const res = await fetch(`/api/save/${saveToken}`);
+        if (res.ok) return (await res.json()).save;
+      } catch(e) {}
+    }
+    try { const r = localStorage.getItem('idle_rpg_save'); return r ? JSON.parse(r) : null; }
+    catch { return null; }
+  }
+
+  function calcStats(save) {
+    const p = save.player;
+    let atk = p.baseAtk, def = p.baseDef, hp = p.maxHp;
+    for (const eq of Object.values(p.equipment || {})) {
+      if (!eq) continue;
+      const mult = 1 + (eq.refine || 0) * 0.1;
+      atk += Math.floor((eq.atk || 0) * mult);
+      def += Math.floor((eq.def || 0) * mult);
+      hp  += Math.floor((eq.hp  || 0) * mult);
+    }
+    return { atk, def, maxHp: hp };
+  }
+
+  function hpColor(ratio) {
+    if (ratio > 0.5) return 'linear-gradient(90deg, #2a7a38, #44aa55)';
+    if (ratio > 0.25) return 'linear-gradient(90deg, #7a6a20, #aaaa30)';
+    return 'linear-gradient(90deg, #7a2020, #aa3030)';
+  }
+
+  function pageUrl(path) {
+    return saveToken ? `${path}?id=${saveToken}` : path;
+  }
+
+  function battleUrl(monsterArea) {
+    const base = saveToken ? `/battle.html?id=${saveToken}` : '/battle.html';
+    return monsterArea ? `${base}&area=${monsterArea}` : base;
+  }
+
+  function goToGame() {
+    location.href = saveToken ? `/?id=${saveToken}` : '/';
+  }
+
+  function render(save) {
+    if (!save) {
+      document.getElementById('main-content').innerHTML =
+        `<div id="no-save">セーブデータが見つかりません。<br>ゲームをプレイしてからこのページを開いてください。<br><br><a href="/" style="color:#88ddaa">→ ゲームへ</a></div>`;
+      return;
+    }
+
+    const p = save.player;
+    const stats = calcStats(save);
+    const hpRatio = Math.min(1, p.hp / stats.maxHp);
+    const expRatio = Math.min(1, p.exp / (p.expToNext || 100));
+    const area = (save.journey && save.journey.area) ? save.journey.area : 'plains';
+    const areaData = D.AREAS.find(a => a.id === area) || D.AREAS[0];
+    const guild = save.guild ? save.guild : null;
+    const learnedCount = (save.learnedSpells || []).length;
+    const totalSpells = D.SPELLS.length;
+
+    const equip = p.equipment || {};
+
+    document.getElementById('main-content').innerHTML = `
+      <div id="layout">
+        <!-- 左：キャラパネル -->
+        <div>
+          <div class="panel">
+            <div class="panel-title">▌ 冒険者ステータス</div>
+            <div id="char-name">${p.name || '勇者'}</div>
+            <div id="char-guild">${guild ? guild.name : 'ギルド未加入'}</div>
+            <span class="char-lv">Lv. ${p.level}</span>
+
+            <div class="bar-row">
+              <div class="bar-label">
+                <span>HP</span>
+                <span>${p.hp} / ${stats.maxHp}</span>
+              </div>
+              <div class="bar-track">
+                <div class="bar-fill-hp" style="width:${hpRatio*100}%;background:${hpColor(hpRatio)}"></div>
+              </div>
+            </div>
+
+            <div class="bar-row">
+              <div class="bar-label">
+                <span>EXP</span>
+                <span>${p.exp} / ${p.expToNext}</span>
+              </div>
+              <div class="bar-track">
+                <div class="bar-fill-exp" style="width:${expRatio*100}%"></div>
+              </div>
+            </div>
+
+            <div class="stats-grid">
+              <div class="stat-box">
+                <div class="stat-label">攻撃力</div>
+                <div class="stat-val">${stats.atk}</div>
+              </div>
+              <div class="stat-box">
+                <div class="stat-label">防御力</div>
+                <div class="stat-val">${stats.def}</div>
+              </div>
+              <div class="stat-box gold-box" style="grid-column:span 2">
+                <div class="stat-label">ゴールド</div>
+                <div class="stat-val">💰 ${p.gold.toLocaleString()}</div>
+              </div>
+            </div>
+
+            <div id="equip-slots">
+              ${['weapon','shield','armor','accessory','spellbook'].map(slot => {
+                const item = equip[slot];
+                return `<div class="equip-row">
+                  <span class="equip-slot-label">${SLOT_LABELS[slot]}</span>
+                  <span class="equip-slot-name${item ? '' : ' empty'}">${item ? item.name : '未装備'}</span>
+                </div>`;
+              }).join('')}
+            </div>
+          </div>
+
+          <!-- 戦歴 -->
+          <div class="panel" id="stats-section">
+            <div class="panel-title">▌ 戦歴</div>
+            <div class="stats-row">
+              <span class="stats-row-label">討伐数</span>
+              <span class="stats-row-val">${(save.stats?.monstersKilled || 0).toLocaleString()} 体</span>
+            </div>
+            <div class="stats-row">
+              <span class="stats-row-label">クエスト完了</span>
+              <span class="stats-row-val">${save.stats?.questsCompleted || 0} 件</span>
+            </div>
+            <div class="stats-row">
+              <span class="stats-row-label">ダンジョン攻略</span>
+              <span class="stats-row-val">${save.stats?.dungeonsCleared || 0} 回</span>
+            </div>
+            <div class="stats-row">
+              <span class="stats-row-label">ボス討伐</span>
+              <span class="stats-row-val">${save.stats?.bossesDefeated || 0} 体</span>
+            </div>
+            <div class="stats-row">
+              <span class="stats-row-label">習得呪文</span>
+              <span class="stats-row-val">${learnedCount} / ${totalSpells} 種</span>
+            </div>
+            <div class="stats-row">
+              <span class="stats-row-label">現在地</span>
+              <span class="stats-row-val">${areaData.name}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 右：メニュー -->
+        <div>
+          <div class="panel">
+            <div class="panel-title">▌ メニュー</div>
+            <div class="menu-grid">
+              <a class="menu-card battle-card" href="${battleUrl(area)}">
+                <div class="menu-icon">⚔️</div>
+                <div class="menu-label">バトル</div>
+                <div class="menu-desc">ターン制バトルで<br>敵と戦う</div>
+              </a>
+              <a class="menu-card" href="${pageUrl('/equipment.html')}">
+                <div class="menu-icon">🛡️</div>
+                <div class="menu-label">装備の間</div>
+                <div class="menu-desc">装備の確認・<br>付け替え</div>
+              </a>
+              <a class="menu-card" href="${pageUrl('/spells.html')}">
+                <div class="menu-icon">📖</div>
+                <div class="menu-label">呪文書</div>
+                <div class="menu-desc">習得済み呪文を<br>確認する</div>
+              </a>
+              <a class="menu-card" href="${pageUrl('/')}">
+                <div class="menu-icon">🗺️</div>
+                <div class="menu-label">旅へ戻る</div>
+                <div class="menu-desc">放置ゲーム本体<br>に戻る</div>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  async function init() {
+    currentSave = await fetchSave();
+    render(currentSave);
+  }
+
+  init();
+</script>
+</body>
+</html>

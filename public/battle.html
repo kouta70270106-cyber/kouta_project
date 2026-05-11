@@ -1,0 +1,902 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>バトル — 永遠の旅人</title>
+  <script src="js/data.js"></script>
+  <script src="js/GameState.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #060d08;
+      color: #c8d4c0;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      font-size: 13px;
+      min-height: 100vh;
+    }
+
+    #wrapper {
+      max-width: 640px;
+      margin: 0 auto;
+      padding: 12px;
+    }
+
+    /* ===== Header ===== */
+    header {
+      background: linear-gradient(135deg, #0c1810, #142218);
+      border: 1px solid #1e3020;
+      border-radius: 8px;
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .back-btn {
+      background: #0c1810;
+      border: 1px solid #2a4030;
+      color: #7aaa88;
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-size: 12px;
+      cursor: pointer;
+      text-decoration: none;
+    }
+    .back-btn:hover { border-color: #4a7050; color: #aaddbb; }
+
+    .page-title {
+      font-size: 16px;
+      font-weight: bold;
+      color: #c0a850;
+    }
+
+    /* ===== Enemy panel ===== */
+    #enemy-panel {
+      border-radius: 8px;
+      border: 1px solid #3a2010;
+      padding: 14px;
+      margin-bottom: 10px;
+      text-align: center;
+      transition: background .1s;
+    }
+
+    #enemy-panel.hit { background: rgba(180, 40, 20, 0.18) !important; }
+
+    .enemy-shape-display {
+      font-size: 52px;
+      line-height: 1;
+      margin-bottom: 8px;
+      filter: drop-shadow(0 0 6px var(--enemy-glow, #ff4400));
+    }
+
+    #enemy-name {
+      font-size: 15px;
+      font-weight: bold;
+      color: #e8c880;
+      margin-bottom: 3px;
+    }
+
+    .rarity-badge {
+      font-size: 9px;
+      padding: 1px 6px;
+      border-radius: 3px;
+      font-weight: bold;
+      display: inline-block;
+      margin-bottom: 8px;
+    }
+    .r-common    { background: #181c10; color: #c8b888; border: 1px solid #383420; }
+    .r-uncommon  { background: #081808; color: #44ee88; border: 1px solid #185028; }
+    .r-rare      { background: #08081e; color: #5599ff; border: 1px solid #182858; }
+    .r-legendary { background: #180e04; color: #ffaa22; border: 1px solid #5a3008; }
+
+    /* ===== HP Bar ===== */
+    .hp-bar-wrap { margin-bottom: 2px; }
+    .hp-bar-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 10px;
+      margin-bottom: 3px;
+    }
+    .hp-bar-label .label { color: #88aa88; }
+    .hp-bar-label .nums  { color: #aaccaa; }
+
+    .hp-track {
+      height: 9px;
+      background: #0c1a0e;
+      border-radius: 5px;
+      overflow: hidden;
+      border: 1px solid #1e3020;
+    }
+    .hp-fill {
+      height: 100%;
+      border-radius: 5px;
+      transition: width .4s ease;
+    }
+    .hp-fill.green  { background: linear-gradient(90deg, #2a7a38, #44aa55); }
+    .hp-fill.yellow { background: linear-gradient(90deg, #7a6a20, #cccc30); }
+    .hp-fill.red    { background: linear-gradient(90deg, #7a2020, #cc3030); }
+
+    /* ===== Player panel ===== */
+    #player-panel {
+      background: #0a1610;
+      border: 1px solid #1e3020;
+      border-radius: 8px;
+      padding: 12px 14px;
+      margin-bottom: 10px;
+      transition: background .1s;
+    }
+
+    #player-panel.hit { background: rgba(40, 20, 180, 0.18); }
+
+    #player-info-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    #player-name-lv { font-size: 13px; font-weight: bold; color: #88ddbb; }
+    #player-stats-mini { font-size: 10px; color: #557766; }
+
+    /* ===== Status badges ===== */
+    #status-badges {
+      display: flex;
+      gap: 5px;
+      flex-wrap: wrap;
+      margin-top: 6px;
+    }
+
+    .status-badge {
+      font-size: 9px;
+      padding: 1px 7px;
+      border-radius: 3px;
+      font-weight: bold;
+    }
+    .status-guard   { background: #1a2040; color: #8899ff; border: 1px solid #2a3870; }
+    .status-haste   { background: #204020; color: #66ee66; border: 1px solid #308830; }
+    .status-arcane  { background: #201840; color: #aa88ff; border: 1px solid #5030a0; }
+
+    /* ===== Battle log ===== */
+    #battle-log {
+      background: #040a06;
+      border: 1px solid #0e1e10;
+      border-radius: 6px;
+      padding: 10px 12px;
+      height: 130px;
+      overflow-y: auto;
+      margin-bottom: 10px;
+      display: flex;
+      flex-direction: column-reverse;
+    }
+
+    .log-line {
+      font-size: 12px;
+      padding: 2px 0;
+      border-bottom: 1px solid #0a150c;
+      line-height: 1.5;
+    }
+    .log-line:last-child { border-bottom: none; }
+    .log-line.damage-player { color: #ee7777; }
+    .log-line.damage-enemy  { color: #77ddaa; }
+    .log-line.heal          { color: #66ee99; }
+    .log-line.buff          { color: #aaaaff; }
+    .log-line.system        { color: #c0a850; }
+    .log-line.escape        { color: #ccaa44; }
+    .log-line.default       { color: #88aa88; }
+
+    /* ===== Action bar ===== */
+    #action-bar {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .action-btn {
+      padding: 12px 6px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: bold;
+      cursor: pointer;
+      border: 1px solid;
+      transition: background .15s, border-color .15s;
+      text-align: center;
+    }
+    .action-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+    .btn-attack { background: #1a0808; border-color: #6a2020; color: #ff8888; }
+    .btn-attack:hover:not(:disabled) { background: #2a1010; border-color: #aa3030; }
+
+    .btn-magic  { background: #0a0820; border-color: #4a2880; color: #bb99ff; }
+    .btn-magic:hover:not(:disabled)  { background: #150e30; border-color: #7744cc; }
+
+    .btn-defend { background: #08101a; border-color: #204080; color: #88bbff; }
+    .btn-defend:hover:not(:disabled) { background: #0e1828; border-color: #3060aa; }
+
+    .btn-flee   { background: #0c100a; border-color: #3a5020; color: #88cc66; }
+    .btn-flee:hover:not(:disabled)   { background: #121808; border-color: #558030; }
+
+    /* ===== Spell Selector ===== */
+    #spell-selector {
+      display: none;
+      background: #080e0a;
+      border: 1px solid #2a2060;
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 10px;
+    }
+
+    #spell-selector-title {
+      font-size: 11px;
+      color: #9988cc;
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    #spell-close-btn {
+      background: none;
+      border: 1px solid #3a2870;
+      color: #7766aa;
+      padding: 2px 8px;
+      border-radius: 3px;
+      font-size: 10px;
+      cursor: pointer;
+    }
+    #spell-close-btn:hover { border-color: #6655bb; color: #aaaadd; }
+
+    .spell-list {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+
+    .spell-btn {
+      background: #0c0a1a;
+      border: 1px solid #2a2050;
+      border-radius: 5px;
+      padding: 7px 10px;
+      cursor: pointer;
+      text-align: left;
+      color: #c8d4c0;
+      transition: background .1s;
+    }
+    .spell-btn:hover { background: #181030; border-color: #5040aa; }
+
+    .spell-btn-name { font-size: 12px; font-weight: bold; }
+    .spell-btn-meta { font-size: 9px; color: #7766aa; margin-top: 2px; }
+
+    .spell-btn.cat-attack .spell-btn-name { color: #ffaaaa; }
+    .spell-btn.cat-heal   .spell-btn-name { color: #88ffaa; }
+    .spell-btn.cat-buff   .spell-btn-name { color: #aaaaff; }
+
+    #no-spells { color: #445544; font-size: 12px; text-align: center; padding: 12px 0; }
+
+    /* ===== Result Panel ===== */
+    #result-panel {
+      display: none;
+      background: #0a1610;
+      border: 1px solid #1e3020;
+      border-radius: 8px;
+      padding: 24px 20px;
+      text-align: center;
+    }
+
+    #result-title {
+      font-size: 22px;
+      font-weight: bold;
+      margin-bottom: 14px;
+    }
+    .result-victory { color: #c0a850; }
+    .result-defeat  { color: #cc4444; }
+    .result-escape  { color: #88cc66; }
+
+    #result-rewards {
+      font-size: 13px;
+      line-height: 2;
+      color: #88ddaa;
+      margin-bottom: 14px;
+    }
+
+    #result-levelup {
+      background: #1a2a10;
+      border: 1px solid #4a8030;
+      border-radius: 6px;
+      padding: 8px 14px;
+      color: #aaffaa;
+      font-size: 13px;
+      font-weight: bold;
+      margin-bottom: 14px;
+      display: none;
+    }
+
+    .result-btns {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+    }
+
+    .result-btn {
+      padding: 10px 22px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: bold;
+      cursor: pointer;
+      border: 1px solid;
+    }
+
+    .btn-again {
+      background: #1a0808; border-color: #6a2020; color: #ff9999;
+    }
+    .btn-again:hover { background: #2a1010; border-color: #aa3030; }
+
+    .btn-back {
+      background: #082008; border-color: #2a6838; color: #55dd77;
+    }
+    .btn-back:hover { background: #143020; border-color: #4a9058; }
+
+    /* ===== Mobile ===== */
+    @media (max-width: 440px) {
+      .spell-list { grid-template-columns: 1fr; }
+      #action-bar { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+<div id="wrapper">
+  <header>
+    <a href="#" onclick="goBack();return false;" class="back-btn">← 冒険者の館</a>
+    <div class="page-title">⚔️ ターン制バトル</div>
+  </header>
+
+  <!-- 敵パネル -->
+  <div id="enemy-panel" style="background:#0e0808">
+    <div class="enemy-shape-display" id="enemy-emoji">⏳</div>
+    <div id="enemy-name">読み込み中...</div>
+    <div id="enemy-rarity-badge"></div>
+    <div class="hp-bar-wrap" style="max-width:320px;margin:0 auto;">
+      <div class="hp-bar-label">
+        <span class="label">HP</span>
+        <span class="nums" id="enemy-hp-nums">—</span>
+      </div>
+      <div class="hp-track">
+        <div class="hp-fill green" id="enemy-hp-bar" style="width:100%"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- プレイヤーパネル -->
+  <div id="player-panel">
+    <div id="player-info-row">
+      <span id="player-name-lv">—</span>
+      <span id="player-stats-mini">—</span>
+    </div>
+    <div class="hp-bar-wrap">
+      <div class="hp-bar-label">
+        <span class="label">HP</span>
+        <span class="nums" id="player-hp-nums">—</span>
+      </div>
+      <div class="hp-track">
+        <div class="hp-fill green" id="player-hp-bar" style="width:100%"></div>
+      </div>
+    </div>
+    <div id="status-badges"></div>
+  </div>
+
+  <!-- バトルログ -->
+  <div id="battle-log"></div>
+
+  <!-- アクションバー -->
+  <div id="action-bar">
+    <button class="action-btn btn-attack" id="btn-attack" onclick="doAttack()" disabled>⚔️ 攻撃</button>
+    <button class="action-btn btn-magic"  id="btn-magic"  onclick="toggleSpells()" disabled>🔮 魔法</button>
+    <button class="action-btn btn-defend" id="btn-defend" onclick="doDefend()" disabled>🛡️ 防御</button>
+    <button class="action-btn btn-flee"   id="btn-flee"   onclick="doFlee()" disabled>💨 逃走</button>
+  </div>
+
+  <!-- 呪文選択 -->
+  <div id="spell-selector">
+    <div id="spell-selector-title">
+      <span>🔮 呪文を選択</span>
+      <button id="spell-close-btn" onclick="toggleSpells()">✕ 閉じる</button>
+    </div>
+    <div class="spell-list" id="spell-list"></div>
+  </div>
+
+  <!-- 結果パネル -->
+  <div id="result-panel">
+    <div id="result-title"></div>
+    <div id="result-rewards"></div>
+    <div id="result-levelup"></div>
+    <div class="result-btns">
+      <button class="result-btn btn-again" onclick="startNewBattle()">⚔️ もう一度</button>
+      <button class="result-btn btn-back"  onclick="goBack()">🏰 館へ戻る</button>
+    </div>
+  </div>
+</div>
+
+<script>
+'use strict';
+
+/* ===== URL params & save token ===== */
+const params    = new URLSearchParams(location.search);
+const saveToken = params.get('id') || null;
+const areaParam = params.get('area') || null;
+
+/* ===== Battle state ===== */
+let enemy        = null;
+let playerHp     = 0;
+let playerMaxHp  = 0;
+let enemyHp      = 0;
+let isDefending  = false;
+let actionLocked = false;
+let battleDone   = false;
+
+let spellBuffs = { atkMult: 1, defMult: 1, hasteActive: false, arcaneActive: false };
+
+/* ===== Shape → emoji ===== */
+const SHAPE_EMOJI = {
+  blob:'🟢', small:'👺', human:'💀', large:'👾',
+  quad:'🐾', fly:'🦇', multi:'🕷️',
+  gold_blob:'🟡', silver_blob:'⚪', default:'👹'
+};
+
+const RARITY_LABELS = { common:'普通', uncommon:'珍しい', rare:'レア', legendary:'伝説' };
+const CAT_LABEL     = { attack:'攻撃', heal:'回復', buff:'補助' };
+const ELEM_LABEL    = { fire:'🔥炎', ice:'❄️氷', thunder:'⚡雷', heal:'💚回復', wind:'💨風', arcane:'🌌秘術' };
+
+/* ===== Save helpers ===== */
+async function loadSave() {
+  if (saveToken) {
+    try {
+      const ok = await window.gameState.loadFromServer(saveToken);
+      if (ok) { window.gameState.load(); return true; }
+    } catch(e) {}
+  }
+  return window.gameState.load();
+}
+
+async function writeSave() {
+  window.gameState.save();
+}
+
+/* ===== DOM helpers ===== */
+function addLog(msg, cls = 'default') {
+  const log = document.getElementById('battle-log');
+  const line = document.createElement('div');
+  line.className = `log-line ${cls}`;
+  line.textContent = msg;
+  log.prepend(line);
+}
+
+function setButtons(enabled) {
+  ['btn-attack','btn-magic','btn-defend','btn-flee'].forEach(id => {
+    document.getElementById(id).disabled = !enabled;
+  });
+}
+
+function flashPanel(id) {
+  const el = document.getElementById(id);
+  el.classList.add('hit');
+  setTimeout(() => el.classList.remove('hit'), 250);
+}
+
+function hpFillClass(ratio) {
+  if (ratio > 0.5) return 'green';
+  if (ratio > 0.25) return 'yellow';
+  return 'red';
+}
+
+function updateEnemyHpBar() {
+  const ratio = Math.max(0, enemyHp / enemy.maxHp);
+  const fill = document.getElementById('enemy-hp-bar');
+  fill.style.width = (ratio * 100) + '%';
+  fill.className = `hp-fill ${hpFillClass(ratio)}`;
+  document.getElementById('enemy-hp-nums').textContent = `${Math.max(0, enemyHp)} / ${enemy.maxHp}`;
+}
+
+function updatePlayerHpBar() {
+  const ratio = Math.max(0, playerHp / playerMaxHp);
+  const fill = document.getElementById('player-hp-bar');
+  fill.style.width = (ratio * 100) + '%';
+  fill.className = `hp-fill ${hpFillClass(ratio)}`;
+  document.getElementById('player-hp-nums').textContent = `${Math.max(0, playerHp)} / ${playerMaxHp}`;
+}
+
+function updateStatusBadges() {
+  const badges = [];
+  if (isDefending) badges.push(`<span class="status-badge status-guard">🛡️ ガード中</span>`);
+  if (spellBuffs.hasteActive) badges.push(`<span class="status-badge status-haste">💨 ヘイスト</span>`);
+  if (spellBuffs.arcaneActive) badges.push(`<span class="status-badge status-arcane">🌌 アルカナ</span>`);
+  document.getElementById('status-badges').innerHTML = badges.join('');
+}
+
+/* ===== Damage calculations ===== */
+function calcPhysicalDamage(atk, def) {
+  return Math.max(1, Math.floor(atk * spellBuffs.atkMult) - Math.floor(def / 2));
+}
+
+function calcMagicDamage(spell, playerAtk, enemyDef) {
+  return Math.max(1,
+    spell.power +
+    Math.floor(playerAtk * 0.3 * spellBuffs.atkMult) -
+    Math.floor(enemyDef * 0.3)
+  );
+}
+
+function calcHeal(spell, level) {
+  return Math.floor(spell.power * (1 + level * 0.05));
+}
+
+/* ===== Spellbook passive effects ===== */
+function applySpellbookPassive(rawDmg) {
+  const sb = window.gameState.player.equipment.spellbook;
+  if (!sb) return rawDmg;
+  let dmg = rawDmg;
+  if (sb.element === 'thunder' && Math.random() < 0.20) {
+    dmg *= 2;
+    addLog('⚡ 雷撃が炸裂！ダメージ2倍！', 'buff');
+  } else if (sb.element === 'fire' && Math.random() < 0.15) {
+    dmg = Math.floor(dmg * 1.5);
+    addLog('🔥 炎のバーストが発動！', 'buff');
+  }
+  return Math.floor(dmg);
+}
+
+function checkIceShield() {
+  const sb = window.gameState.player.equipment.spellbook;
+  if (sb && sb.element === 'ice' && Math.random() < 0.20) {
+    addLog('❄️ 氷の魔法盾が発動！被ダメージ半減！', 'buff');
+    return true;
+  }
+  return false;
+}
+
+/* ===== Enemy turn ===== */
+function enemyAttack() {
+  const pDef = Math.floor(window.gameState.getStats().def * spellBuffs.defMult);
+  let dmg = Math.max(1, enemy.atk - Math.floor(pDef / 2));
+  if (isDefending) dmg = Math.floor(dmg * 0.5);
+  if (checkIceShield()) dmg = Math.floor(dmg * 0.5);
+  playerHp = Math.max(0, playerHp - dmg);
+  flashPanel('player-panel');
+  addLog(`${enemy.name}の攻撃！ ${dmg} ダメージ！`, 'damage-player');
+  updatePlayerHpBar();
+}
+
+/* ===== Turn execution ===== */
+function endTurn() {
+  isDefending = false;
+  updateStatusBadges();
+
+  if (enemyHp <= 0) { handleVictory(); return; }
+
+  enemyAttack();
+
+  if (playerHp <= 0) { handleDefeat(); return; }
+}
+
+/* ===== Player actions ===== */
+function doAttack() {
+  if (actionLocked || battleDone) return;
+  actionLocked = true;
+  setButtons(false);
+  closeSpells();
+
+  const stats = window.gameState.getStats();
+  let dmg = calcPhysicalDamage(stats.atk, enemy.def);
+  dmg = applySpellbookPassive(dmg);
+
+  enemyHp = Math.max(0, enemyHp - dmg);
+  flashPanel('enemy-panel');
+  addLog(`攻撃した！ ${dmg} ダメージ！`, 'damage-enemy');
+  updateEnemyHpBar();
+
+  setTimeout(() => {
+    endTurn();
+    if (!battleDone) {
+      actionLocked = false;
+      setButtons(true);
+    }
+  }, 350);
+}
+
+function doDefend() {
+  if (actionLocked || battleDone) return;
+  actionLocked = true;
+  setButtons(false);
+  closeSpells();
+
+  isDefending = true;
+  addLog('防御体勢をとった！ このターンの被ダメージが半減する。', 'buff');
+  updateStatusBadges();
+
+  setTimeout(() => {
+    endTurn();
+    if (!battleDone) {
+      actionLocked = false;
+      setButtons(true);
+    }
+  }, 350);
+}
+
+function doFlee() {
+  if (actionLocked || battleDone) return;
+  closeSpells();
+  battleDone = true;
+  setButtons(false);
+
+  if (Math.random() < 0.5) {
+    addLog('逃げ出した！', 'escape');
+    setTimeout(() => showResult('escape'), 500);
+  } else {
+    actionLocked = true;
+    addLog('逃げられなかった！', 'damage-player');
+    setTimeout(() => {
+      enemyAttack();
+      if (playerHp <= 0) { handleDefeat(); return; }
+      battleDone = false;
+      actionLocked = false;
+      setButtons(true);
+    }, 350);
+  }
+}
+
+function castSpell(spellId) {
+  if (actionLocked || battleDone) return;
+  const spell = D.SPELLS.find(s => s.id === spellId);
+  if (!spell) return;
+
+  actionLocked = true;
+  setButtons(false);
+  closeSpells();
+
+  const stats  = window.gameState.getStats();
+  const level  = window.gameState.player.level;
+
+  if (spell.category === 'attack') {
+    const dmg = calcMagicDamage(spell, stats.atk, enemy.def);
+    enemyHp = Math.max(0, enemyHp - dmg);
+    flashPanel('enemy-panel');
+    addLog(`${spell.icon} ${spell.name}！ ${dmg} の魔法ダメージ！`, 'damage-enemy');
+    updateEnemyHpBar();
+
+  } else if (spell.category === 'heal') {
+    const heal = calcHeal(spell, level);
+    playerHp = Math.min(playerMaxHp, playerHp + heal);
+    addLog(`${spell.icon} ${spell.name}！ HP が ${heal} 回復した！`, 'heal');
+    updatePlayerHpBar();
+
+  } else if (spell.category === 'buff') {
+    if (spell.element === 'wind') {
+      if (!spellBuffs.hasteActive) {
+        spellBuffs.atkMult = Math.max(spellBuffs.atkMult, 1.5);
+        spellBuffs.hasteActive = true;
+        addLog(`${spell.icon} ${spell.name}！ 攻撃力が大幅に上昇した！`, 'buff');
+      } else {
+        addLog(`${spell.icon} ${spell.name}は既に効いている。`, 'buff');
+      }
+    } else if (spell.element === 'arcane') {
+      if (!spellBuffs.arcaneActive) {
+        const mult = spell.id === 'arcane_2' ? 1.5 : 1.3;
+        spellBuffs.atkMult = Math.max(spellBuffs.atkMult, mult);
+        spellBuffs.defMult = Math.max(spellBuffs.defMult, mult);
+        spellBuffs.arcaneActive = true;
+        addLog(`${spell.icon} ${spell.name}！ 全能力が上昇した！`, 'buff');
+      } else {
+        addLog(`${spell.icon} ${spell.name}は既に効いている。`, 'buff');
+      }
+    }
+    updateStatusBadges();
+  }
+
+  setTimeout(() => {
+    endTurn();
+    if (!battleDone) {
+      actionLocked = false;
+      setButtons(true);
+    }
+  }, 350);
+}
+
+/* ===== Spell UI ===== */
+function toggleSpells() {
+  const sel = document.getElementById('spell-selector');
+  if (sel.style.display === 'none') {
+    buildSpellList();
+    sel.style.display = 'block';
+  } else {
+    sel.style.display = 'none';
+  }
+}
+
+function closeSpells() {
+  document.getElementById('spell-selector').style.display = 'none';
+}
+
+function buildSpellList() {
+  const learned = window.gameState.learnedSpells || [];
+  const spells  = D.SPELLS.filter(s => learned.includes(s.id));
+  const list    = document.getElementById('spell-list');
+
+  if (spells.length === 0) {
+    list.innerHTML = `<div id="no-spells">習得済みの呪文がありません</div>`;
+    return;
+  }
+
+  list.innerHTML = spells.map(sp => `
+    <button class="spell-btn cat-${sp.category}" onclick="castSpell('${sp.id}')">
+      <div class="spell-btn-name">${sp.icon} ${sp.name}</div>
+      <div class="spell-btn-meta">${ELEM_LABEL[sp.element] || sp.element} ｜ ${CAT_LABEL[sp.category]}${sp.power > 0 ? ` ｜ 威力${sp.power}` : ''}</div>
+    </button>
+  `).join('');
+}
+
+/* ===== Victory & Defeat ===== */
+function handleVictory() {
+  battleDone = true;
+  setButtons(false);
+  addLog(`${enemy.name}を倒した！`, 'system');
+
+  const gs = window.gameState;
+  const p  = gs.player;
+  const prevLevel = p.level;
+
+  const goldMin = Array.isArray(enemy.gold) ? enemy.gold[0] : enemy.gold;
+  const goldMax = Array.isArray(enemy.gold) ? enemy.gold[1] : enemy.gold;
+  const goldGained = goldMin + Math.floor(Math.random() * (goldMax - goldMin + 1));
+  const expGained  = gs.gainExp(enemy.exp);
+  gs.gainGold(goldGained);
+
+  gs.stats.monstersKilled = (gs.stats.monstersKilled || 0) + 1;
+  if (!gs.stats.killCount) gs.stats.killCount = {};
+  gs.stats.killCount[enemy.id] = (gs.stats.killCount[enemy.id] || 0) + 1;
+
+  // HP sync after possible level up
+  p.hp = Math.min(p.hp, gs.getStats().maxHp);
+
+  // Spellbook arcane: +30% EXP bonus note (already handled in gainExp via guild logic, but show flavor)
+  const sbArcane = p.equipment.spellbook && p.equipment.spellbook.element === 'arcane';
+
+  gs.save();
+
+  setTimeout(() => {
+    const leveledUp = p.level > prevLevel;
+    showResult('victory', {
+      exp: expGained,
+      gold: goldGained,
+      leveledUp,
+      newLevel: p.level,
+      sbArcane,
+    });
+  }, 400);
+}
+
+function handleDefeat() {
+  battleDone = true;
+  setButtons(false);
+  playerHp = 0;
+  updatePlayerHpBar();
+  addLog('力尽きてしまった...', 'damage-player');
+
+  window.gameState.player.hp = 1;
+  window.gameState.save();
+
+  setTimeout(() => showResult('defeat'), 600);
+}
+
+/* ===== Result Panel ===== */
+function showResult(type, data = {}) {
+  document.getElementById('action-bar').style.display = 'none';
+  document.getElementById('spell-selector').style.display = 'none';
+
+  const panel  = document.getElementById('result-panel');
+  const title  = document.getElementById('result-title');
+  const rewards = document.getElementById('result-rewards');
+  const lvUp   = document.getElementById('result-levelup');
+
+  if (type === 'victory') {
+    title.textContent = '勝利！';
+    title.className = 'result-victory';
+    rewards.innerHTML =
+      `EXP +${data.exp}${data.sbArcane ? '（秘術ボーナス）' : ''}<br>Gold +${data.gold}`;
+    if (data.leveledUp) {
+      lvUp.textContent = `🎉 レベルアップ！ Lv.${data.newLevel} になった！`;
+      lvUp.style.display = 'block';
+    }
+  } else if (type === 'defeat') {
+    title.textContent = '敗北...';
+    title.className = 'result-defeat';
+    rewards.innerHTML = '力尽きてしまった。HP が 1 で館に戻る。';
+  } else if (type === 'escape') {
+    title.textContent = '逃走！';
+    title.className = 'result-escape';
+    rewards.innerHTML = '戦闘から離脱した。';
+  }
+
+  panel.style.display = 'block';
+}
+
+function startNewBattle() {
+  document.getElementById('result-panel').style.display = 'none';
+  document.getElementById('action-bar').style.display = 'grid';
+  document.getElementById('result-levelup').style.display = 'none';
+  initBattle();
+}
+
+/* ===== Battle init ===== */
+async function initBattle() {
+  battleDone   = false;
+  actionLocked = true;
+  isDefending  = false;
+  spellBuffs   = { atkMult: 1, defMult: 1, hasteActive: false, arcaneActive: false };
+  setButtons(false);
+  document.getElementById('battle-log').innerHTML = '';
+  updateStatusBadges();
+
+  await loadSave();
+
+  const gs    = window.gameState;
+  const p     = gs.player;
+  const stats = gs.getStats();
+  playerHp    = p.hp;
+  playerMaxHp = stats.maxHp;
+
+  const area  = areaParam || (gs.journey && gs.journey.area) || 'plains';
+  const guildId = gs.guild ? gs.guild.id : null;
+  const baseEnemy = D.pickMonster(area, guildId);
+  const scaled    = gs.scaleMonster(baseEnemy);
+
+  enemy = {
+    ...scaled,
+    maxHp: scaled.hp,
+    gold: baseEnemy.gold,
+  };
+  enemyHp = enemy.maxHp;
+
+  /* --- Render enemy panel --- */
+  const colorHex = '#' + enemy.color.toString(16).padStart(6, '0');
+  document.getElementById('enemy-panel').style.background =
+    `linear-gradient(135deg, ${colorHex}22, ${colorHex}11)`;
+  document.getElementById('enemy-panel').style.borderColor = colorHex + '66';
+  document.getElementById('enemy-panel').style.setProperty('--enemy-glow', colorHex);
+
+  document.getElementById('enemy-emoji').textContent =
+    SHAPE_EMOJI[enemy.shape] || SHAPE_EMOJI.default;
+  document.getElementById('enemy-name').textContent = enemy.name;
+
+  const rarityBadge = document.getElementById('enemy-rarity-badge');
+  rarityBadge.textContent = RARITY_LABELS[enemy.rarity] || enemy.rarity;
+  rarityBadge.className = `rarity-badge r-${enemy.rarity}`;
+
+  updateEnemyHpBar();
+
+  /* --- Render player panel --- */
+  document.getElementById('player-name-lv').textContent =
+    `${p.name} Lv.${p.level}`;
+  document.getElementById('player-stats-mini').textContent =
+    `ATK ${stats.atk}  DEF ${stats.def}`;
+  updatePlayerHpBar();
+
+  addLog(`${enemy.name} が現れた！`, 'system');
+
+  actionLocked = false;
+  setButtons(true);
+}
+
+/* ===== Navigation ===== */
+function goBack() {
+  location.href = saveToken ? `/board.html?id=${saveToken}` : '/board.html';
+}
+
+/* ===== Start ===== */
+initBattle();
+</script>
+</body>
+</html>
