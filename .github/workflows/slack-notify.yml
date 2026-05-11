@@ -4,6 +4,12 @@ on:
   push:
     branches:
       - master
+  workflow_dispatch:
+    inputs:
+      custom_message:
+        description: '手動送信するメッセージ'
+        required: true
+        default: ''
 
 jobs:
   notify:
@@ -25,7 +31,7 @@ jobs:
           import os
           import re
 
-          commit_message = os.environ["COMMIT_MESSAGE"].strip()
+          commit_message = (os.environ.get("CUSTOM_MESSAGE") or os.environ.get("COMMIT_MESSAGE", "")).strip()
           webhook_url    = os.environ["SLACK_WEBHOOK_URL"]
           product_url    = "https://kouta70270106-cyber.github.io/kouta_project/"
           version        = os.environ.get("PKG_VERSION", "1.0.0")
@@ -76,4 +82,5 @@ jobs:
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
           COMMIT_MESSAGE:    ${{ github.event.head_commit.message }}
+          CUSTOM_MESSAGE:    ${{ github.event.inputs.custom_message }}
           PKG_VERSION:       ${{ env.PKG_VERSION }}
