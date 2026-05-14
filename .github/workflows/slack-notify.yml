@@ -1,0 +1,87 @@
+﻿name: Slack Release Notification
+
+on:
+  push:
+    branches:
+      - gh-pages
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Get version from package.json
+        run: |
+          PKG_VERSION=$(node -p "require('./package.json').version")
+          echo "PKG_VERSION=$PKG_VERSION" >> $GITHUB_ENV
+
+      - name: Send Slack notification
+        run: |
+          python3 - <<'EOF'
+          import urllib.request
+          import json
+          import os
+          import re
+
+          commit_message = os.environ.get("COMMIT_MESSAGE", "").strip()
+          webhook_url    = os.environ["SLACK_WEBHOOK_URL"]
+          product_url    = "https://kouta70270106-cyber.github.io/kouta_project/"
+          version        = os.environ.get("PKG_VERSION", "1.0.0")
+
+          SEP = "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+          lines = commit_message.split("\n")
+          title = lines[0].strip()
+          detail_lines = [
+              l.strip().lstrip("- ").strip()
+              for l in lines[1:]
+              if l.strip() and not l.strip().startswith("Co-Authored")
+          ]
+
+          BULLET_EMOJIS = ["⚔️", "🏰", "📜", "🔮", "👾", "🌟", "🗡️", "💎", "🎯", "✨"]
+          if detail_lines:
+              feature_list = "\n".join(
+                  f"　{BULLET_EMOJIS[i % len(BULLET_EMOJIS)]}  {l}"
+                  for i, l in enumerate(detail_lines) if l
+              )
+          else:
+              feature_list = f"　✨  {title}"
+
+          is_quest = bool(re.search(r'Quest\s*\d+', commit_message, re.IGNORECASE))
+          other_changes = "　特になし" if is_quest else f"　📝  {title}"
+
+          text = (
+              f"{SEP}\n"
+              f"🏰  *永遠の旅人 — リリースノート*\n"
+              f"{SEP}\n"
+              f"🌐  *URL*　　<{product_url}|ゲームを開く ↗>\n"
+              f"📦  *バージョン*　`v{version}`\n"
+              f"{SEP}\n"
+              f"🆕  *機能追加*\n"
+              f"\n"
+              f"{feature_list}\n"
+              f"\n"
+              f"{SEP}\n"
+              f"📋  *その他の変更*\n"
+              f"\n"
+              f"{other_changes}\n"
+              f"\n"
+              f"{SEP}\n"
+              f"_「新たな力が旅人に宿った。さあ、続きを歩め」 — デスパー_ ⚡"
+          )
+
+          payload = json.dumps({"text": text}).encode("utf-8")
+          req = urllib.request.Request(
+              webhook_url,
+              data=payload,
+              headers={"Content-Type": "application/json"},
+          )
+          urllib.request.urlopen(req)
+          print("Slack notification sent successfully.")
+          EOF
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          COMMIT_MESSAGE:    ${{ github.event.head_commit.message }}
+          PKG_VERSION:       ${{ env.PKG_VERSION }}
