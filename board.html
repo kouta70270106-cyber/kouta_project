@@ -3,391 +3,495 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ギルド本部</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=DotGothic16&display=swap" rel="stylesheet">
+  <title>ギルド本部 · CASTRVM GVILDAE</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700;800&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Shippori+Mincho:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --parchment:       #efe2c0;
+      --parchment-light: #f7eed2;
+      --parchment-dark:  #ddc999;
+      --parchment-edge:  #c9b27d;
+      --ink:             #2a1a08;
+      --ink-soft:        #5a4220;
+      --ink-faded:       #8a7548;
+      --sepia:           #8a6a36;
+      --gold:            #a8842a;
+      --gold-light:      #c9a449;
+      --crimson:         #7a2418;
+      --crimson-deep:    #581308;
+      --wax-hi:          #9c2c1d;
+      --rule:            1px solid #b59a5e;
+      --rule-soft:       1px solid #c2a86c66;
+      --f-display: "Cinzel", "Shippori Mincho", serif;
+      --f-body:    "EB Garamond", "Shippori Mincho", serif;
+      --f-jp:      "Shippori Mincho", "EB Garamond", serif;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
 
     body {
-      background: #000828;
+      font-family: var(--f-body);
+      color: var(--ink);
+      background: var(--parchment);
+      background-image:
+        radial-gradient(ellipse 80% 60% at 50% 0%, #f7eed2 0%, transparent 60%),
+        radial-gradient(ellipse 70% 60% at 50% 100%, #f7eed2 0%, transparent 60%),
+        radial-gradient(ellipse 120% 100% at 0% 50%, #e8d5a6 0%, transparent 50%),
+        radial-gradient(ellipse 120% 100% at 100% 50%, #e8d5a6 0%, transparent 50%),
+        radial-gradient(circle at 15% 25%, #d8c08a55 0%, transparent 8%),
+        radial-gradient(circle at 82% 60%, #d8c08a55 0%, transparent 9%),
+        radial-gradient(circle at 30% 80%, #d8c08a55 0%, transparent 6%),
+        radial-gradient(circle at 70% 12%, #d8c08a55 0%, transparent 5%);
+      background-color: var(--parchment);
       min-height: 100vh;
-      color: #c8d4ff;
-      font-family: 'DotGothic16', 'Segoe UI', system-ui, sans-serif;
-      font-size: 14px;
-      padding: 16px;
-      position: relative;
-      overflow-x: hidden;
+      line-height: 1.55;
+      font-size: 17px;
     }
 
-    /* ===== 星空背景 ===== */
     body::before {
-      content: '';
-      position: fixed;
-      inset: 0;
-      background-image:
-        radial-gradient(1px 1px at 10% 15%, #fff 0%, transparent 100%),
-        radial-gradient(1px 1px at 25% 40%, rgba(255,255,255,.7) 0%, transparent 100%),
-        radial-gradient(1px 1px at 40%  8%, #fff 0%, transparent 100%),
-        radial-gradient(1px 1px at 55% 55%, rgba(255,255,255,.6) 0%, transparent 100%),
-        radial-gradient(1px 1px at 70% 20%, #fff 0%, transparent 100%),
-        radial-gradient(1px 1px at 80% 70%, rgba(255,255,255,.8) 0%, transparent 100%),
-        radial-gradient(1px 1px at 90% 35%, #fff 0%, transparent 100%),
-        radial-gradient(1px 1px at 15% 75%, rgba(255,255,255,.5) 0%, transparent 100%),
-        radial-gradient(1px 1px at 35% 90%, rgba(255,255,255,.7) 0%, transparent 100%),
-        radial-gradient(1px 1px at 60% 80%, #fff 0%, transparent 100%),
-        radial-gradient(1px 1px at 5%  50%, rgba(255,255,255,.6) 0%, transparent 100%),
-        radial-gradient(1px 1px at 48% 30%, rgba(255,255,255,.4) 0%, transparent 100%),
-        radial-gradient(1.5px 1.5px at 72% 5%, #fff 0%, transparent 100%),
-        radial-gradient(1.5px 1.5px at 20% 60%, rgba(255,255,255,.9) 0%, transparent 100%),
-        radial-gradient(2px 2px at 85% 90%, rgba(200,200,255,.8) 0%, transparent 100%);
+      content: "";
+      position: fixed; inset: 0;
       pointer-events: none;
       z-index: 0;
+      opacity: .35;
+      mix-blend-mode: multiply;
+      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='320' height='320'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.32  0 0 0 0 0.22  0 0 0 0 0.08  0 0 0 0.18 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
     }
 
-    /* ===== Header ===== */
-    .page-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      max-width: 900px;
-      margin: 0 auto 20px;
-      padding-bottom: 12px;
-      border-bottom: 1px solid #1e2860;
+    body::after {
+      content: "";
+      position: fixed; inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      background: radial-gradient(ellipse 110% 80% at 50% 50%, transparent 55%, #6a4f1f55 100%);
+    }
+
+    .page {
       position: relative;
       z-index: 1;
-    }
-    .page-header h1 {
-      font-size: 22px;
-      color: #f0c840;
-      letter-spacing: 3px;
-      text-shadow: 0 0 12px rgba(240,200,64,.5);
-    }
-    .page-header a {
-      font-size: 12px;
-      color: #6080cc;
-      text-decoration: none;
-      border: 1px solid #2a3a80;
-      padding: 4px 12px;
-      border-radius: 4px;
-    }
-    .page-header a:hover { color: #aabbff; border-color: #4a60cc; }
-
-    /* ===== Layout ===== */
-    .board {
-      max-width: 900px;
+      max-width: 1180px;
       margin: 0 auto;
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-      position: relative;
-      z-index: 1;
+      padding: 56px 48px 96px;
     }
 
-    /* ===== Section Card ===== */
-    .section-card {
-      background: linear-gradient(135deg, #050d28 0%, #08122a 100%);
-      border: 1px solid #1e2e70;
-      border-radius: 8px;
-      padding: 24px;
-      position: relative;
-    }
-    .section-card::before {
-      content: '';
-      position: absolute;
-      top: 0; left: 0; right: 0;
-      height: 2px;
-      background: linear-gradient(90deg, transparent, #3a6aff, transparent);
-      border-radius: 8px 8px 0 0;
-    }
-    .section-title {
-      font-size: 13px;
-      color: #8899dd;
-      letter-spacing: 2px;
-      margin-bottom: 16px;
+    /* TOPBAR */
+    .topbar {
       display: flex;
+      justify-content: space-between;
       align-items: center;
-      gap: 8px;
-    }
-    .section-title::after {
-      content: '';
-      flex: 1;
-      height: 1px;
-      background: #1e2e60;
-    }
-
-    /* ===== Character Panel ===== */
-    .char-panel {
-      display: grid;
-      grid-template-columns: auto 1fr;
-      gap: 20px;
-      align-items: start;
-    }
-    .char-avatar {
-      width: 80px; height: 80px;
-      background: linear-gradient(135deg, #050a20, #0a1540);
-      border: 2px solid #f0c840;
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 40px;
-      box-shadow: 0 0 16px rgba(240,200,64,.3);
-    }
-    .char-info-main .char-name {
-      font-size: 22px;
-      color: #f0c840;
-      margin-bottom: 2px;
-      text-shadow: 0 0 8px rgba(240,200,64,.4);
-    }
-    .char-info-main .char-job { font-size: 13px; color: #88aaff; margin-bottom: 12px; }
-    .char-stats-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
-      gap: 8px;
-      margin-top: 4px;
-    }
-    .stat-chip {
-      background: #030918;
-      border: 1px solid #1a2860;
-      border-radius: 6px;
-      padding: 6px 10px;
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-    }
-    .stat-chip .s-label { font-size: 9px; color: #4a6aaa; letter-spacing: 1px; }
-    .stat-chip .s-value { font-size: 15px; color: #c8d4ff; }
-    .stat-chip .s-bar {
-      height: 3px; background: #0a1440; border-radius: 2px;
-      margin-top: 3px; overflow: hidden;
-    }
-    .stat-chip .s-bar-fill { height: 100%; border-radius: 2px; transition: width 0.5s ease; }
-    .bar-hp  { background: linear-gradient(90deg, #2a7a38, #44aa55); }
-    .bar-mp  { background: linear-gradient(90deg, #2a4880, #4a70c0); }
-    .bar-atk { background: linear-gradient(90deg, #7a2020, #cc4030); }
-    .bar-def { background: linear-gradient(90deg, #2a4070, #4a70aa); }
-    .bar-spd { background: linear-gradient(90deg, #5a6020, #88aa30); }
-    .char-level-badge {
-      display: inline-block;
-      background: #0a1440;
-      border: 1px solid #2a4aaa;
-      color: #7a9aff;
+      font-family: var(--f-display);
       font-size: 11px;
-      padding: 2px 10px;
-      border-radius: 10px;
-      margin-bottom: 10px;
+      letter-spacing: 0.32em;
+      color: var(--ink-faded);
+      text-transform: uppercase;
+      padding-bottom: 10px;
+      border-bottom: var(--rule-soft);
     }
-    .char-bio { font-size: 11px; color: #5a70aa; font-style: italic; margin-top: 8px; }
-    .no-profile { text-align: center; padding: 20px; color: #4a60aa; }
-    .no-profile a { color: #88aaff; text-decoration: underline; }
+    .topbar a { color: var(--ink-soft); text-decoration: none; border-bottom: 1px dotted var(--ink-faded); padding-bottom: 2px; }
+    .topbar a:hover { color: var(--crimson); }
 
-    /* ===== Quest Log ===== */
-    .quest-input-row { display: flex; gap: 8px; margin-bottom: 14px; }
-    .quest-input {
-      flex: 1; padding: 9px 12px;
-      background: #030818; border: 1px solid #1a2a60;
-      border-radius: 6px; color: #c0d0ff; font-size: 13px;
-      font-family: 'DotGothic16', system-ui, sans-serif;
-    }
-    .quest-input:focus { outline: none; border-color: #4a6acc; }
-    .quest-input::placeholder { color: #3a4a80; }
-    .quest-add-btn {
-      padding: 9px 16px;
-      background: linear-gradient(135deg, #0a1440, #142060);
-      border: 1px solid #2a4aaa; border-radius: 6px;
-      color: #88aaff; font-size: 13px; cursor: pointer;
-      font-family: 'DotGothic16', system-ui, sans-serif;
-      white-space: nowrap;
-    }
-    .quest-add-btn:hover { background: linear-gradient(135deg, #142060, #1e2e80); }
-    .quest-list { display: flex; flex-direction: column; gap: 6px; }
-    .quest-item {
-      display: flex; align-items: center; gap: 10px;
-      padding: 9px 12px;
-      background: #030818; border: 1px solid #131f50;
-      border-radius: 6px; transition: border-color 0.2s;
-    }
-    .quest-item:hover { border-color: #2a3a80; }
-    .quest-item.done { opacity: 0.5; }
-    .quest-item.done .quest-text { text-decoration: line-through; color: #3a4a80; }
-    .quest-check {
-      width: 18px; height: 18px;
-      border: 1px solid #2a4aaa; border-radius: 4px;
-      background: #030818; cursor: pointer;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 11px; flex-shrink: 0; transition: background 0.2s;
-    }
-    .quest-item.done .quest-check { background: #0a1a60; border-color: #3a60cc; }
-    .quest-text { flex: 1; font-size: 13px; color: #c0d0ff; }
-    .quest-del {
-      background: none; border: none; color: #2a3060; font-size: 14px;
-      cursor: pointer; padding: 2px 6px; border-radius: 3px; transition: color 0.2s;
-    }
-    .quest-del:hover { color: #cc4030; }
-    .quest-empty { text-align: center; padding: 20px; color: #2a3060; font-size: 12px; }
-    .quest-footer { margin-top: 10px; font-size: 10px; color: #2a3a80; text-align: right; }
+    /* HERO */
+    .hero { text-align: center; padding: 56px 0 40px; }
+    .hero .crest { font-size: 44px; color: var(--gold); line-height: 1; text-shadow: 0 1px 0 #fff8, 0 2px 6px #8a6a3633; }
+    .hero .kicker { font-family: var(--f-display); font-size: 12px; letter-spacing: 0.55em; color: var(--ink-faded); margin-top: 14px; text-transform: uppercase; }
+    .hero h1 { font-family: var(--f-display); font-weight: 800; font-size: clamp(48px, 7vw, 96px); margin: 14px 0 6px; letter-spacing: 0.06em; color: var(--ink); line-height: .98; }
+    .hero .jp-title { font-family: var(--f-jp); font-weight: 700; font-size: clamp(22px, 2.6vw, 30px); letter-spacing: 0.6em; padding-left: 0.6em; color: var(--ink-soft); margin-top: 10px; }
+    .hero .lede { font-family: var(--f-jp); font-style: italic; color: var(--ink-soft); max-width: 520px; margin: 22px auto 0; font-size: 16px; line-height: 1.85; }
 
-    /* ===== Adventure Locations ===== */
-    .locations-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 12px;
-    }
-    .location-card {
-      background: #020510;
-      border: 1px solid #1a2a60;
-      border-radius: 6px;
-      padding: 20px 16px 16px;
-      text-align: center;
-      text-decoration: none;
-      color: inherit;
-      transition: all 0.2s;
+    .rule { display: flex; align-items: center; gap: 18px; margin: 28px auto; color: var(--gold); font-size: 14px; }
+    .rule::before, .rule::after { content: ""; flex: 1; height: 1px; background: linear-gradient(to right, transparent, #b59a5e, transparent); }
+    .rule .glyph { font-family: var(--f-display); letter-spacing: .4em; color: var(--ink-faded); font-size: 11px; }
+
+    /* CHAPTER */
+    .chapter { margin-top: 56px; }
+    .chapter-head { display: flex; align-items: baseline; gap: 24px; margin-bottom: 28px; padding-bottom: 14px; border-bottom: var(--rule); position: relative; }
+    .chapter-head::after { content: ""; position: absolute; left: 0; right: 0; bottom: -4px; height: 1px; background: #b59a5e44; }
+    .chapter-numeral { font-family: var(--f-display); font-weight: 700; color: var(--crimson); font-size: 28px; letter-spacing: 0.1em; min-width: 56px; }
+    .chapter-titles { display: flex; flex-direction: column; gap: 4px; flex: 1; }
+    .chapter-latin { font-family: var(--f-display); font-size: 22px; font-weight: 600; letter-spacing: 0.32em; color: var(--ink); text-transform: uppercase; }
+    .chapter-jp { font-family: var(--f-jp); font-size: 14px; letter-spacing: 0.5em; color: var(--ink-faded); }
+    .chapter-note { font-family: var(--f-body); font-style: italic; color: var(--ink-faded); font-size: 13px; letter-spacing: 0.05em; text-align: right; max-width: 280px; }
+
+    /* CARD */
+    .card {
+      background: linear-gradient(180deg, #f6ecce 0%, #ecdcae 100%);
+      border: 1px solid #b9a065;
+      border-radius: 2px;
+      box-shadow: inset 0 0 0 1px #fff8, inset 0 0 40px #c4a76b33, 0 2px 0 #b59a5e22, 0 6px 20px #5a422026;
       position: relative;
-      display: block;
     }
-    .location-card.unlocked {
-      border-color: #2244aa;
-      cursor: pointer;
-    }
-    .location-card.unlocked:hover {
-      border-color: #4466ff;
-      background: #040a20;
-      box-shadow: 0 0 12px rgba(68,102,255,.25);
-      transform: translateY(-2px);
-    }
-    .location-card.locked {
-      opacity: 0.4;
-      cursor: not-allowed;
-    }
-    .loc-icon { font-size: 32px; margin-bottom: 10px; display: block; }
-    .loc-name {
-      font-size: 14px;
-      color: #f0c840;
-      margin-bottom: 6px;
-      text-shadow: 0 0 6px rgba(240,200,64,.3);
-    }
-    .location-card.locked .loc-name { color: #3a4060; text-shadow: none; }
-    .loc-desc { font-size: 11px; color: #5a70aa; line-height: 1.6; }
-    .location-card.locked .loc-desc { color: #2a3050; }
+    .card::before { content: ""; position: absolute; inset: 6px; border: 1px solid #c2a86c66; border-radius: 1px; pointer-events: none; }
 
-    .loc-badge {
-      position: absolute;
-      top: 8px; right: 8px;
-      font-size: 9px; font-weight: bold;
-      padding: 2px 7px;
-      border-radius: 3px;
-      letter-spacing: 1px;
+    /* I · STATUS */
+    .status-grid { display: grid; grid-template-columns: 280px 1fr; gap: 0; }
+    .status-card { padding: 0; overflow: hidden; }
+    .status-portrait {
+      grid-column: 1; padding: 24px; border-right: var(--rule);
+      background: repeating-linear-gradient(45deg, #e6d29d 0 8px, #e0ca91 8px 16px);
+      display: flex; flex-direction: column; align-items: center; justify-content: space-between; gap: 12px; position: relative;
     }
-    .badge-open { background: #003a10; color: #00ff44; border: 1px solid #00aa33; }
-    .badge-new  { background: #3a0020; color: #ff3388; border: 1px solid #aa0044; }
-    .badge-lock { background: #0a0a1a; color: #4a4a60; border: 1px solid #1a1a30; font-size: 10px; }
+    .status-portrait::after { content: ""; position: absolute; top: 12px; right: 12px; bottom: 12px; left: 12px; border: 1px dashed #8a6a3677; pointer-events: none; }
+    .sigil-frame { width: 140px; height: 180px; background: var(--parchment-light); border: 1px solid var(--parchment-edge); display: flex; align-items: center; justify-content: center; box-shadow: inset 0 0 30px #c4a76b55; }
+    .sigil-frame .sigil { font-size: 64px; color: var(--gold); text-shadow: 0 1px 0 #fff8; }
+    .portrait-caption { font-family: var(--f-display); font-size: 10px; letter-spacing: 0.4em; color: var(--ink-faded); text-transform: uppercase; text-align: center; z-index: 1; }
 
-    /* ===== Responsive ===== */
+    .status-body { grid-column: 2; padding: 28px 32px; display: flex; flex-direction: column; gap: 22px; }
+    .status-header { display: flex; justify-content: space-between; align-items: flex-start; padding-bottom: 16px; border-bottom: var(--rule-soft); gap: 24px; }
+    .name-block .label { font-family: var(--f-display); font-size: 10px; letter-spacing: 0.4em; color: var(--ink-faded); text-transform: uppercase; }
+    .name-block .name-jp { font-family: var(--f-jp); font-weight: 700; font-size: 32px; letter-spacing: 0.08em; color: var(--ink); margin: 2px 0 0; line-height: 1.15; }
+    .name-block .name-latin { font-family: var(--f-display); font-style: italic; color: var(--ink-soft); font-size: 14px; letter-spacing: 0.15em; margin-top: 4px; }
+    .rank-badge { text-align: center; padding: 10px 18px; border: 1px solid var(--crimson); background: #f7eed2; border-radius: 1px; min-width: 110px; }
+    .rank-badge .rank-letter { font-family: var(--f-display); font-weight: 800; font-size: 36px; color: var(--crimson); line-height: 1; }
+    .rank-badge .rank-text { font-family: var(--f-display); font-size: 9px; letter-spacing: 0.4em; color: var(--ink-faded); margin-top: 4px; text-transform: uppercase; }
+
+    .class-row { display: flex; gap: 28px; flex-wrap: wrap; }
+    .meta-item { display: flex; flex-direction: column; gap: 2px; }
+    .meta-item .meta-k { font-family: var(--f-display); font-size: 10px; letter-spacing: 0.35em; color: var(--ink-faded); text-transform: uppercase; }
+    .meta-item .meta-v { font-family: var(--f-jp); font-weight: 600; font-size: 17px; color: var(--ink); letter-spacing: 0.08em; }
+
+    .stats { display: grid; grid-template-columns: repeat(6, 1fr); gap: 0; border: var(--rule-soft); }
+    .stat { padding: 14px 10px; text-align: center; border-right: var(--rule-soft); background: #f5e9c544; }
+    .stat:last-child { border-right: 0; }
+    .stat .stat-k { font-family: var(--f-display); font-size: 10px; letter-spacing: 0.3em; color: var(--ink-faded); }
+    .stat .stat-v { font-family: var(--f-display); font-weight: 700; font-size: 22px; color: var(--ink); margin-top: 4px; }
+    .stat.featured .stat-v { color: var(--crimson); }
+
+    .narratio { font-family: var(--f-jp); font-style: italic; color: var(--ink-soft); font-size: 14px; line-height: 1.85; padding-left: 16px; border-left: 2px solid var(--gold); letter-spacing: 0.08em; }
+
+    .no-profile-msg { text-align: center; padding: 40px 20px; font-family: var(--f-jp); color: var(--ink-faded); font-size: 15px; line-height: 2; }
+    .no-profile-msg a { color: var(--crimson); }
+
+    /* II · QUESTS */
+    .quest-input-row { display: flex; gap: 10px; margin-bottom: 18px; }
+    .quest-input {
+      flex: 1; padding: 10px 14px;
+      background: var(--parchment-light);
+      border: 1px solid var(--parchment-edge);
+      border-radius: 1px;
+      color: var(--ink); font-family: var(--f-jp); font-size: 14px;
+      letter-spacing: 0.05em;
+    }
+    .quest-input:focus { outline: none; border-color: var(--sepia); box-shadow: 0 0 0 2px #c9b27d44; }
+    .quest-input::placeholder { color: var(--ink-faded); font-style: italic; }
+    .quest-add-btn {
+      padding: 10px 20px;
+      background: var(--ink); border: none;
+      color: var(--gold-light);
+      font-family: var(--f-display); font-size: 11px; letter-spacing: 0.3em;
+      cursor: pointer; text-transform: uppercase; white-space: nowrap; transition: background .2s;
+    }
+    .quest-add-btn:hover { background: var(--crimson-deep); }
+
+    .quest-grid { display: grid; grid-template-columns: 1.4fr 1fr; gap: 32px; }
+    .quest-card { padding: 28px 32px; }
+    .quest-title-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; padding-bottom: 12px; border-bottom: 1px dashed #b59a5e88; }
+    .quest-section-title { font-family: var(--f-display); font-size: 13px; letter-spacing: 0.4em; color: var(--ink); text-transform: uppercase; }
+    .quest-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 4px; }
+    .quest-item { display: grid; grid-template-columns: 32px 1fr auto; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px dotted #b59a5e55; }
+    .quest-item:last-child { border-bottom: 0; }
+    .quest-item.done .quest-text { text-decoration: line-through; text-decoration-color: var(--ink-faded); color: var(--ink-faded); }
+    .quest-check {
+      width: 28px; height: 28px;
+      border: 1px solid var(--parchment-edge);
+      background: var(--parchment-light);
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      font-family: var(--f-display); font-size: 14px; color: var(--crimson);
+      transition: all .2s; flex-shrink: 0;
+    }
+    .quest-check:hover { border-color: var(--sepia); background: var(--parchment-dark); }
+    .quest-item.done .quest-check { color: var(--gold); background: #f0e4b8; }
+    .quest-text { font-family: var(--f-jp); font-size: 14px; color: var(--ink); letter-spacing: 0.05em; }
+    .quest-del { background: none; border: none; color: var(--ink-faded); font-size: 12px; cursor: pointer; padding: 4px 8px; transition: color .2s; font-family: var(--f-display); }
+    .quest-del:hover { color: var(--crimson); }
+    .quest-empty { text-align: center; padding: 28px; font-family: var(--f-jp); color: var(--ink-faded); font-size: 14px; font-style: italic; }
+
+    .ledger-card { padding: 28px; display: flex; flex-direction: column; gap: 18px; }
+    .ledger-title { font-family: var(--f-display); font-size: 12px; letter-spacing: 0.4em; color: var(--ink); text-transform: uppercase; padding-bottom: 10px; border-bottom: 1px dashed #b59a5e88; }
+    .ledger-list { display: flex; flex-direction: column; gap: 14px; }
+    .ledger-row { display: flex; justify-content: space-between; align-items: baseline; font-family: var(--f-jp); font-size: 14px; letter-spacing: 0.08em; color: var(--ink-soft); border-bottom: 1px dotted #b59a5e55; padding-bottom: 6px; }
+    .ledger-row .v { font-family: var(--f-display); font-weight: 700; font-size: 18px; color: var(--ink); }
+    .ledger-row .v small { font-weight: 400; font-size: 11px; letter-spacing: 0.3em; color: var(--ink-faded); margin-left: 4px; }
+    .ledger-total { background: var(--ink); color: var(--parchment-light); padding: 14px 18px; margin: 4px -4px -4px; display: flex; justify-content: space-between; align-items: center; font-family: var(--f-display); letter-spacing: 0.3em; font-size: 12px; }
+    .ledger-total .v { font-size: 22px; letter-spacing: 0.06em; color: var(--gold-light); }
+
+    /* III · LOCATIONS */
+    .loc-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; }
+    .loc-card { padding: 0; display: flex; flex-direction: column; min-height: 300px; overflow: hidden; position: relative; }
+    .loc-card .frame { flex: 1; display: flex; flex-direction: column; padding: 26px 24px 22px; gap: 14px; position: relative; }
+    .loc-stamp { position: absolute; top: 16px; right: 16px; font-family: var(--f-display); font-size: 10px; letter-spacing: 0.3em; padding: 4px 10px; border: 1px solid currentColor; text-transform: uppercase; }
+    .loc-stamp.open  { color: var(--crimson); border-color: var(--crimson); }
+    .loc-stamp.new   { color: var(--gold); border-color: var(--gold); background: #fff5d5; }
+    .loc-icon-box { width: 80px; height: 80px; margin: 8px auto 4px; background: radial-gradient(circle at 30% 30%, #fff8 0%, transparent 60%), #ecdcae; border: 1px solid var(--parchment-edge); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 36px; color: var(--ink-soft); box-shadow: inset 0 0 20px #c4a76b66; }
+    .loc-roman { text-align: center; font-family: var(--f-display); font-size: 10px; letter-spacing: 0.5em; color: var(--ink-faded); text-transform: uppercase; }
+    .loc-name-jp { text-align: center; font-family: var(--f-jp); font-weight: 700; font-size: 20px; letter-spacing: 0.2em; padding-left: 0.2em; color: var(--ink); margin: 2px 0 0; }
+    .loc-name-latin { text-align: center; font-family: var(--f-display); font-style: italic; font-size: 11px; letter-spacing: 0.18em; color: var(--sepia); }
+    .loc-desc { font-family: var(--f-jp); font-size: 12px; color: var(--ink-soft); text-align: center; line-height: 1.8; letter-spacing: 0.04em; margin-top: auto; padding-top: 8px; border-top: 1px dotted #b59a5e66; }
+    .loc-cta { display: block; text-align: center; font-family: var(--f-display); font-size: 11px; letter-spacing: 0.35em; padding: 10px 14px; background: var(--ink); color: var(--gold-light); text-decoration: none; text-transform: uppercase; border-top: 1px solid var(--parchment-edge); transition: background .2s; }
+    .loc-cta:hover { background: var(--crimson-deep); }
+    .loc-cta.sealed { background: #5a4220; color: #c2a86c; pointer-events: none; }
+    .loc-card.locked { filter: saturate(0.7); }
+    .loc-card.locked .loc-icon-box { color: var(--ink-faded); opacity: .55; }
+    .loc-card.locked .loc-name-jp, .loc-card.locked .loc-name-latin, .loc-card.locked .loc-desc { color: var(--ink-faded); }
+    .loc-card.locked .frame { opacity: .85; }
+    .loc-card.open { box-shadow: inset 0 0 0 1px #fff8, inset 0 0 40px #c9a44966, 0 2px 0 #b59a5e22, 0 10px 30px #5a422033, 0 0 0 2px #a8842a33; }
+    .loc-card.open .loc-icon-box { background: radial-gradient(circle at 30% 30%, #fff8 0%, transparent 60%), #f3d985; color: var(--crimson); }
+
+    .wax { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-8deg); width: 116px; height: 116px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #d04030 0%, var(--wax-hi) 25%, var(--crimson) 55%, var(--crimson-deep) 100%); box-shadow: 0 4px 12px #4a1208aa, inset 0 -8px 14px #3a0a06aa, inset 0 6px 10px #ff998866; display: flex; align-items: center; justify-content: center; color: #f4d8a4; font-family: var(--f-display); font-weight: 800; text-align: center; line-height: 1.1; z-index: 2; pointer-events: none; }
+    .wax::before { content: ""; position: absolute; inset: 8px; border-radius: 50%; border: 1px dashed #f4d8a455; }
+    .wax .top { font-size: 9px; letter-spacing: 0.3em; opacity: .85; }
+    .wax .mid { font-size: 22px; letter-spacing: 0.04em; margin: 2px 0; }
+    .wax .bot { font-size: 9px; letter-spacing: 0.3em; opacity: .85; }
+    .wax-inner { display: flex; flex-direction: column; align-items: center; text-shadow: 0 1px 1px #00000066; }
+
+    /* FOOTER */
+    .footer { margin-top: 80px; padding-top: 32px; border-top: var(--rule); text-align: center; font-family: var(--f-display); font-size: 10px; letter-spacing: 0.4em; color: var(--ink-faded); text-transform: uppercase; }
+    .footer .glyph { font-size: 22px; color: var(--gold); margin-bottom: 14px; }
+    .footer .latin { font-family: var(--f-body); font-style: italic; font-size: 13px; color: var(--ink-soft); margin: 12px auto 0; letter-spacing: 0.1em; text-transform: none; max-width: 480px; }
+    .footer .marks { margin-top: 18px; display: flex; justify-content: center; gap: 28px; font-size: 9px; letter-spacing: 0.35em; }
+
+    /* RESPONSIVE */
+    @media (max-width: 980px) {
+      .page { padding: 32px 24px 64px; }
+      .status-grid { grid-template-columns: 1fr; }
+      .status-portrait { border-right: 0; border-bottom: var(--rule); padding: 22px; }
+      .status-portrait .sigil-frame { width: 120px; height: 150px; }
+      .stats { grid-template-columns: repeat(3, 1fr); }
+      .stat { border-right: var(--rule-soft); border-bottom: var(--rule-soft); }
+      .stat:nth-child(3n) { border-right: 0; }
+      .stat:nth-last-child(-n+3) { border-bottom: 0; }
+      .quest-grid { grid-template-columns: 1fr; gap: 24px; }
+      .loc-grid { grid-template-columns: repeat(2, 1fr); gap: 20px; }
+      .chapter-note { display: none; }
+      .hero { padding: 32px 0 24px; }
+    }
     @media (max-width: 600px) {
-      .char-panel { grid-template-columns: 1fr; }
-      .char-avatar { width: 60px; height: 60px; font-size: 30px; }
-      .locations-grid { grid-template-columns: 1fr; }
+      body { font-size: 16px; }
+      .page { padding: 24px 18px 56px; }
+      .topbar { font-size: 9px; letter-spacing: 0.2em; gap: 8px; }
+      .topbar .center { display: none; }
+      .hero h1 { font-size: 44px; }
+      .hero .jp-title { font-size: 18px; letter-spacing: 0.45em; }
+      .chapter-head { flex-wrap: wrap; gap: 12px; }
+      .chapter-numeral { font-size: 22px; min-width: auto; }
+      .chapter-latin { font-size: 17px; letter-spacing: 0.25em; }
+      .stats { grid-template-columns: repeat(2, 1fr); }
+      .stat:nth-child(3n) { border-right: var(--rule-soft); }
+      .stat:nth-child(2n) { border-right: 0; }
+      .stat:nth-last-child(-n+3) { border-bottom: var(--rule-soft); }
+      .stat:nth-last-child(-n+2) { border-bottom: 0; }
+      .loc-grid { grid-template-columns: 1fr; }
+      .status-body { padding: 22px 20px; }
+      .status-header { flex-direction: column; gap: 16px; }
+      .rank-badge { align-self: flex-start; min-width: auto; padding: 8px 14px; }
+      .rank-badge .rank-letter { font-size: 28px; }
+      .name-block .name-jp { font-size: 24px; }
+      .quest-card, .ledger-card, .loc-card .frame { padding: 22px 20px; }
+      .wax { width: 96px; height: 96px; }
+      .wax .mid { font-size: 18px; }
     }
   </style>
 </head>
 <body>
+<div class="page">
 
-<header class="page-header">
-  <h1>🏰 ギルド本部</h1>
-  <a href="index.html">← 登録ページへ</a>
-</header>
+  <div class="topbar">
+    <a href="index.html">← REGISTRATIO · 登録所へ</a>
+    <span class="center">CASTRVM · GVILDAE · CENTRALIS</span>
+    <span id="topbar-rank">EST. MMXXVI</span>
+  </div>
 
-<main class="board">
+  <header class="hero">
+    <div class="crest">⚜</div>
+    <div class="kicker">CASTRVM · GVILDAE</div>
+    <h1>GUILD HEADQUARTERS</h1>
+    <div class="jp-title">ギ ル ド 本 部</div>
+    <p class="lede">壁を埋める依頼書、火の絶えぬ炉、巻物の山。<br>ここは冒険者が戻る場所、そして次なる旅へと出る場所。</p>
+    <div class="rule"><span class="glyph">✦ &nbsp; AVENTVRA · CONTINVAT &nbsp; ✦</span></div>
+  </header>
 
-  <!-- ===== キャラクター情報 ===== -->
-  <section class="section-card">
-    <div class="section-title">⚔️ 冒険者情報</div>
-    <div id="char-panel-content"></div>
-  </section>
-
-  <!-- ===== 個人クエストログ ===== -->
-  <section class="section-card">
-    <div class="section-title">📜 個人クエストログ</div>
-    <div class="quest-input-row">
-      <input type="text" id="quest-input" class="quest-input" placeholder="タスクを入力して Enter で追加" maxlength="60">
-      <button class="quest-add-btn" onclick="addQuest()">＋ 追加</button>
-    </div>
-    <div id="quest-list" class="quest-list"></div>
-    <div class="quest-footer" id="quest-footer"></div>
-  </section>
-
-  <!-- ===== 冒険の場所 ===== -->
-  <section class="section-card">
-    <div class="section-title">📖 冒険の場所</div>
-    <div class="locations-grid">
-      <a href="https://kouta-project.onrender.com" target="_blank" class="location-card unlocked">
-        <div class="loc-badge badge-open">OPEN</div>
-        <span class="loc-icon">🌍</span>
-        <div class="loc-name">永遠の旅人</div>
-        <div class="loc-desc">メインゲーム。放置系 RPG で魔物を倒し続ける</div>
-      </a>
-      <a href="https://kouta-project.onrender.com/equipment.html" target="_blank" class="location-card unlocked">
-        <div class="loc-badge badge-new">NEW</div>
-        <span class="loc-icon">⚔️</span>
-        <div class="loc-name">装備の間</div>
-        <div class="loc-desc">所持装備を確認し、4スロットに装着・解除する</div>
-      </a>
-      <a href="lore.html" class="location-card unlocked">
-        <div class="loc-badge badge-new">NEW</div>
-        <span class="loc-icon">📜</span>
-        <div class="loc-name">伝承録</div>
-        <div class="loc-desc">NPC と魔物の伝承を古書風に記録した文書。謎の手がかりが眠る</div>
-      </a>
-      <a href="monsters.html" class="location-card unlocked">
-        <div class="loc-badge badge-open">OPEN</div>
-        <span class="loc-icon">📖</span>
-        <div class="loc-name">魔物図鑑</div>
-        <div class="loc-desc">倒した魔物の記録を閲覧する。討伐済みの魔物の詳細が解放される</div>
-      </a>
-      <a href="https://kouta-project.onrender.com/spells.html" target="_blank" class="location-card unlocked">
-        <div class="loc-badge badge-new">NEW</div>
-        <span class="loc-icon">📖</span>
-        <div class="loc-name">呪文書</div>
-        <div class="loc-desc">習得した呪文を確認する。レベルに応じて新たな魔法が解放される</div>
-      </a>
-      <a href="https://kouta-project.onrender.com/battle.html" target="_blank" class="location-card unlocked">
-        <div class="loc-badge badge-new">NEW</div>
-        <span class="loc-icon">⚔️</span>
-        <div class="loc-name">ターン制バトル</div>
-        <div class="loc-desc">敵と1対1で戦う。攻撃・魔法・防御・逃走を選んで勝利を目指す</div>
-      </a>
-      <div class="location-card locked">
-        <div class="loc-badge badge-lock">🔒 封印中</div>
-        <span class="loc-icon">🌆</span>
-        <div class="loc-name">冒険者街</div>
-        <div class="loc-desc">安息してステータスを回復する</div>
+  <!-- I · STATUS -->
+  <section class="chapter">
+    <div class="chapter-head">
+      <div class="chapter-numeral">I.</div>
+      <div class="chapter-titles">
+        <div class="chapter-latin">STATVS ADVENTORIS</div>
+        <div class="chapter-jp">冒 険 者 情 報</div>
       </div>
+      <div class="chapter-note" id="chapter-note-1">登録番号 №&nbsp;0001 · ANNO MMXXVI</div>
+    </div>
+    <div id="char-section"></div>
+  </section>
+
+  <!-- II · QUESTS -->
+  <section class="chapter">
+    <div class="chapter-head">
+      <div class="chapter-numeral">II.</div>
+      <div class="chapter-titles">
+        <div class="chapter-latin">ACTA QVESTORVM</div>
+        <div class="chapter-jp">個 人 ク エ ス ト ロ グ</div>
+      </div>
+      <div class="chapter-note" id="chapter-note-2">巻物 · 個人記録</div>
+    </div>
+    <div class="quest-grid">
+      <div class="card quest-card">
+        <div class="quest-input-row">
+          <input type="text" id="quest-input" class="quest-input" placeholder="依頼内容を記せ……" maxlength="60">
+          <button class="quest-add-btn" onclick="addQuest()">＋ ADDERE</button>
+        </div>
+        <div class="quest-title-row">
+          <div class="quest-section-title">依 頼 状 · IN PROGRESSV</div>
+        </div>
+        <ul id="quest-list" class="quest-list"></ul>
+      </div>
+      <aside class="card ledger-card">
+        <div class="ledger-title">LIBER · RATIONVM · 台 帳</div>
+        <div class="ledger-list" id="quest-ledger"></div>
+        <div class="ledger-total">
+          <span>PROGRESSVS</span>
+          <span class="v" id="ledger-total-val">0 / 0</span>
+        </div>
+      </aside>
     </div>
   </section>
 
-</main>
+  <!-- III · LOCATIONS -->
+  <section class="chapter">
+    <div class="chapter-head">
+      <div class="chapter-numeral">III.</div>
+      <div class="chapter-titles">
+        <div class="chapter-latin">LOCA EXPLORATIONIS</div>
+        <div class="chapter-jp">冒 険 の 場 所</div>
+      </div>
+      <div class="chapter-note">七つの扉 · 六つ開かれ、一つは封じられたり</div>
+    </div>
+    <div class="loc-grid">
+
+      <article class="card loc-card open">
+        <div class="frame">
+          <span class="loc-stamp open">APERTVS · 開</span>
+          <div class="loc-icon-box">🌍</div>
+          <div class="loc-roman">PORTA · I</div>
+          <h3 class="loc-name-jp">永 遠 の 旅 人</h3>
+          <div class="loc-name-latin">Viator · Aeternvs</div>
+          <p class="loc-desc">放置の旅路。絶え間なく魔物と相見え、レベルを刻め。</p>
+        </div>
+        <a href="https://kouta-project.onrender.com" target="_blank" class="loc-cta">入る · INTRARE →</a>
+      </article>
+
+      <article class="card loc-card open">
+        <div class="frame">
+          <span class="loc-stamp open">APERTVS · 開</span>
+          <div class="loc-icon-box">⚔️</div>
+          <div class="loc-roman">PORTA · II</div>
+          <h3 class="loc-name-jp">バ ト ル</h3>
+          <div class="loc-name-latin">Pvgna · Victoriae</div>
+          <p class="loc-desc">ターン制の戦場。知略を尽くして敵を打ち倒せ。</p>
+        </div>
+        <a href="https://kouta-project.onrender.com/battle.html" target="_blank" class="loc-cta">入る · INTRARE →</a>
+      </article>
+
+      <article class="card loc-card open">
+        <div class="frame">
+          <span class="loc-stamp open">APERTVS · 開</span>
+          <div class="loc-icon-box">🛡️</div>
+          <div class="loc-roman">PORTA · III</div>
+          <h3 class="loc-name-jp">装 備 の 間</h3>
+          <div class="loc-name-latin">Cubicvlvm · Armorvm</div>
+          <p class="loc-desc">所持装備を確かめ、四つの枠に意のままに着けよ。</p>
+        </div>
+        <a href="https://kouta-project.onrender.com/equipment.html" target="_blank" class="loc-cta">入る · INTRARE →</a>
+      </article>
+
+      <article class="card loc-card open">
+        <div class="frame">
+          <span class="loc-stamp open">APERTVS · 開</span>
+          <div class="loc-icon-box">📖</div>
+          <div class="loc-roman">PORTA · IV</div>
+          <h3 class="loc-name-jp">呪 文 書</h3>
+          <div class="loc-name-latin">Liber · Incantationvm</div>
+          <p class="loc-desc">習得済みの呪文を確認し、その力の深淵を知れ。</p>
+        </div>
+        <a href="https://kouta-project.onrender.com/spells.html" target="_blank" class="loc-cta">入る · INTRARE →</a>
+      </article>
+
+      <article class="card loc-card open">
+        <div class="frame">
+          <span class="loc-stamp new">NOVVM · 新</span>
+          <div class="loc-icon-box">📜</div>
+          <div class="loc-roman">PORTA · V</div>
+          <h3 class="loc-name-jp">伝 承 録</h3>
+          <div class="loc-name-latin">Liber · Traditionvm</div>
+          <p class="loc-desc">NPC と魔物の伝承を古書風に記録した文書。謎の手がかりが眠る。</p>
+        </div>
+        <a href="lore.html" class="loc-cta">入る · INTRARE →</a>
+      </article>
+
+      <article class="card loc-card open">
+        <div class="frame">
+          <span class="loc-stamp open">APERTVS · 開</span>
+          <div class="loc-icon-box">📗</div>
+          <div class="loc-roman">PORTA · VI</div>
+          <h3 class="loc-name-jp">魔 物 図 鑑</h3>
+          <div class="loc-name-latin">Bestiarivm</div>
+          <p class="loc-desc">見し魔物の記録を綴る書。討伐済みの魔物の詳細が解放される。</p>
+        </div>
+        <a href="monsters.html" class="loc-cta">入る · INTRARE →</a>
+      </article>
+
+      <article class="card loc-card locked">
+        <div class="wax"><div class="wax-inner"><div class="top">SIG·</div><div class="mid">封印</div><div class="bot">·LLVM</div></div></div>
+        <div class="frame">
+          <div class="loc-icon-box">🌆</div>
+          <div class="loc-roman">PORTA · VII</div>
+          <h3 class="loc-name-jp">冒 険 者 街</h3>
+          <div class="loc-name-latin">Vrbs · Adventorvm</div>
+          <p class="loc-desc">束の間の安息。酒と歌、そして傷の癒える場所。</p>
+        </div>
+        <div class="loc-cta sealed">封印中 · SIGILLATVM</div>
+      </article>
+
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="glyph">⚜</div>
+    <div>CASTRVM · GVILDAE · CENTRALIS</div>
+    <p class="latin">"Qvi non est hodie, cras minvs aptvs erit."<br>— 今日為さざる者、明日は更に為さざらん。</p>
+    <div class="marks"><span>EST. MMXXVI</span><span>·</span><span>FOLIVM · I</span><span>·</span><span>SIGILLVM · GVILDAE</span></div>
+  </footer>
+
+</div>
 
 <script>
-  const JOB_ICONS = {
-    '⚔️ 勇者':'⚔️','🗡️ 戦士':'🗡️','🧙 魔法使い':'🧙',
-    '🏹 弓使い':'🏹','🛡️ 騎士':'🛡️','🗝️ 盗賊':'🗝️',
-    '✨ 賢者':'✨','⚡ 魔導士':'⚡','🌿 僧侶':'🌿','🔥 魔王':'🔥'
-  };
+  'use strict';
+
   const JOB_STATS = {
-    '⚔️ 勇者':  { hp:120, mp:60,  atk:14, def:8,  spd:10 },
-    '🗡️ 戦士':  { hp:150, mp:30,  atk:18, def:14, spd:7  },
-    '🧙 魔法使い':{ hp:80,  mp:120, atk:22, def:5,  spd:9  },
-    '🏹 弓使い':  { hp:90,  mp:70,  atk:16, def:7,  spd:14 },
-    '🛡️ 騎士':  { hp:160, mp:40,  atk:15, def:18, spd:6  },
-    '🗝️ 盗賊':  { hp:100, mp:80,  atk:17, def:9,  spd:16 },
-    '✨ 賢者':   { hp:100, mp:110, atk:20, def:10, spd:11 },
-    '⚡ 魔導士':  { hp:85,  mp:130, atk:24, def:4,  spd:10 },
-    '🌿 僧侶':   { hp:110, mp:100, atk:12, def:12, spd:9  },
-    '🔥 魔王':   { hp:130, mp:90,  atk:25, def:12, spd:12 },
+    '⚔️ 勇者':   { hp:120, mp:60,  atk:14, def:8,  spd:10 },
+    '🗡️ 戦士':   { hp:150, mp:30,  atk:18, def:14, spd:7  },
+    '🧙 魔法使い': { hp:80,  mp:120, atk:22, def:5,  spd:9  },
+    '🏹 弓使い':   { hp:90,  mp:70,  atk:16, def:7,  spd:14 },
+    '🛡️ 騎士':   { hp:160, mp:40,  atk:15, def:18, spd:6  },
+    '🗝️ 盗賊':   { hp:100, mp:80,  atk:17, def:9,  spd:16 },
+    '✨ 賢者':    { hp:100, mp:110, atk:20, def:10, spd:11 },
+    '⚡ 魔導士':   { hp:85,  mp:130, atk:24, def:4,  spd:10 },
+    '🌿 僧侶':    { hp:110, mp:100, atk:12, def:12, spd:9  },
+    '🔥 魔王':    { hp:130, mp:90,  atk:25, def:12, spd:12 },
   };
   const DEFAULT_STATS = { hp:100, mp:50, atk:10, def:5, spd:8 };
+
+  function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+  function levelToRank(lv) {
+    if (lv >= 51) return { letter:'A', text:'英雄' };
+    if (lv >= 36) return { letter:'B', text:'古参' };
+    if (lv >= 21) return { letter:'C', text:'熟練' };
+    if (lv >= 11) return { letter:'D', text:'冒険者' };
+    if (lv >= 6)  return { letter:'E', text:'見習' };
+    return { letter:'F', text:'新人' };
+  }
 
   function syncStatsFromURL() {
     const params = new URLSearchParams(window.location.search);
@@ -405,84 +509,106 @@
   }
 
   function renderCharPanel() {
-    const el = document.getElementById('char-panel-content');
     const raw = localStorage.getItem('guild_profile');
     if (!raw) {
-      el.innerHTML = `<div class="no-profile">🔑 未登録です。<a href="index.html">冒険者登録</a>を先に行ってください</div>`;
+      document.getElementById('char-section').innerHTML = `
+        <div class="card" style="padding:40px 32px">
+          <div class="no-profile-msg">
+            名簿に登録がありませぬ。<br>
+            まずは<a href="index.html">冒険者登録</a>を行われよ。
+          </div>
+        </div>`;
       return;
     }
+
     const p     = JSON.parse(raw);
     const saved = JSON.parse(localStorage.getItem('guild_char_stats') || 'null');
     const base  = JOB_STATS[p.job] || DEFAULT_STATS;
-    const icon  = JOB_ICONS[p.job] || '⚔️';
-
+    const lv    = saved?.lv ?? 1;
+    const rank  = levelToRank(lv);
     const stats = {
-      lv:  saved?.lv  ?? 1,
+      lv,
       hp:  saved?.hp  ?? base.hp,
       mp:  base.mp,
       atk: saved?.atk ?? base.atk,
       def: saved?.def ?? base.def,
       spd: base.spd,
     };
-    const atkMax = Math.max(stats.atk, 50);
-    const defMax = Math.max(stats.def, 30);
 
-    el.innerHTML = `
-      <div class="char-panel">
-        <div class="char-avatar">${icon}</div>
-        <div class="char-info-main">
-          <div class="char-name">${esc(p.name)}</div>
-          <div class="char-job">${esc(p.job)}</div>
-          <span class="char-level-badge">Lv. ${stats.lv}</span>
-          <div class="char-stats-grid">
-            ${statChip('HP',  stats.hp,  stats.hp,  'hp')}
-            ${statChip('MP',  stats.mp,  stats.mp,  'mp')}
-            ${statChip('ATK', stats.atk, atkMax,    'atk')}
-            ${statChip('DEF', stats.def, defMax,    'def')}
-            ${statChip('SPD', stats.spd, 20,        'spd')}
+    document.getElementById('topbar-rank').textContent = `Lv.${lv} · ${rank.letter} RANK`;
+    document.getElementById('chapter-note-1').textContent = `${esc(p.job || '冒険者')} · Lv.${lv} ${rank.letter}`;
+
+    document.getElementById('char-section').innerHTML = `
+      <div class="card status-card status-grid">
+        <div class="status-portrait">
+          <div class="sigil-frame"><span class="sigil">${esc(p.job ? p.job.split(' ')[0] : '⚔')}</span></div>
+          <div class="portrait-caption">SIGILLVM · 紋&nbsp;章</div>
+        </div>
+        <div class="status-body">
+          <div class="status-header">
+            <div class="name-block">
+              <div class="label">NOMEN · 名</div>
+              <div class="name-jp">${esc(p.name || '名も無き旅人')}</div>
+              <div class="name-latin">${esc(p.job || '冒険者')}</div>
+            </div>
+            <div class="rank-badge">
+              <div class="rank-letter">${rank.letter}</div>
+              <div class="rank-text">RANK · ${rank.text}</div>
+            </div>
           </div>
-          ${p.bio ? `<div class="char-bio">「${esc(p.bio)}」</div>` : ''}
-          ${saved?.lv ? `<div style="font-size:10px;color:#3a5080;margin-top:6px">⚔️ ゲームデータ同期済み</div>` : ''}
+          <div class="class-row">
+            <div class="meta-item">
+              <span class="meta-k">GRADUS · 段階</span>
+              <span class="meta-v">Lv. ${lv}</span>
+            </div>
+            <div class="meta-item">
+              <span class="meta-k">VOCATIO · 職</span>
+              <span class="meta-v">${esc((p.job || '').replace(/\S+\s*/, '') || '冒険者')}</span>
+            </div>
+          </div>
+          <div class="stats">
+            <div class="stat featured"><div class="stat-k">HP</div><div class="stat-v">${stats.hp}</div></div>
+            <div class="stat"><div class="stat-k">MP</div><div class="stat-v">${stats.mp}</div></div>
+            <div class="stat featured"><div class="stat-k">ATK</div><div class="stat-v">${stats.atk}</div></div>
+            <div class="stat"><div class="stat-k">DEF</div><div class="stat-v">${stats.def}</div></div>
+            <div class="stat"><div class="stat-k">SPD</div><div class="stat-v">${stats.spd}</div></div>
+            <div class="stat"><div class="stat-k">LV</div><div class="stat-v">${lv}</div></div>
+          </div>
+          ${p.bio ? `<div class="narratio">「${esc(p.bio)}」</div>` : ''}
+          ${saved?.lv ? `<div style="font-family:var(--f-display);font-size:10px;color:var(--ink-faded);letter-spacing:0.3em">⚔ ゲームデータ同期済み</div>` : ''}
         </div>
       </div>`;
   }
 
-  function statChip(label, val, max, cls) {
-    const pct = Math.min(100, Math.round(val / max * 100));
-    return `<div class="stat-chip">
-      <span class="s-label">${label}</span>
-      <span class="s-value">${val}</span>
-      <div class="s-bar"><div class="s-bar-fill bar-${cls}" style="width:${pct}%"></div></div>
-    </div>`;
-  }
-
-  function esc(s) {
-    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-  }
-
   function loadQuests() {
     try { return JSON.parse(localStorage.getItem('guild_quests') || '[]'); }
-    catch(e) { return []; }
+    catch { return []; }
   }
   function saveQuests(qs) { localStorage.setItem('guild_quests', JSON.stringify(qs)); }
 
   function renderQuests() {
     const qs = loadQuests();
     const el = document.getElementById('quest-list');
-    const footer = document.getElementById('quest-footer');
-    if (qs.length === 0) {
-      el.innerHTML = '<div class="quest-empty">📜 タスクはまだありません</div>';
-      footer.textContent = '';
-      return;
-    }
-    el.innerHTML = qs.map(q => `
-      <div class="quest-item${q.done ? ' done' : ''}" data-id="${q.id}">
-        <div class="quest-check" onclick="toggleQuest('${q.id}')">${q.done ? '✓' : ''}</div>
-        <div class="quest-text">${esc(q.text)}</div>
-        <button class="quest-del" onclick="deleteQuest('${q.id}')" title="削除">✕</button>
-      </div>`).join('');
+    const ledger = document.getElementById('quest-ledger');
+    const total = document.getElementById('ledger-total-val');
     const done = qs.filter(q => q.done).length;
-    footer.textContent = `${done} / ${qs.length} 完了`;
+
+    el.innerHTML = qs.length === 0
+      ? `<li><div class="quest-empty">受領中の依頼なし</div></li>`
+      : qs.map(q => `
+          <li class="quest-item${q.done ? ' done' : ''}">
+            <div class="quest-check" onclick="toggleQuest('${q.id}')">${q.done ? '✓' : '❦'}</div>
+            <span class="quest-text">${esc(q.text)}</span>
+            <button class="quest-del" onclick="deleteQuest('${q.id}')" title="削除">✕</button>
+          </li>`).join('');
+
+    ledger.innerHTML = `
+      <div class="ledger-row"><span>依頼数</span><span class="v">${qs.length}<small>件</small></span></div>
+      <div class="ledger-row"><span>完了済み</span><span class="v">${done}<small>件</small></span></div>
+      <div class="ledger-row"><span>未完了</span><span class="v">${qs.length - done}<small>件</small></span></div>`;
+
+    total.textContent = `${done} / ${qs.length}`;
+    document.getElementById('chapter-note-2').textContent = `受領 ${qs.length - done} · 完了 ${done}`;
   }
 
   function addQuest() {
@@ -490,7 +616,7 @@
     const text = input.value.trim();
     if (!text) return;
     const qs = loadQuests();
-    qs.unshift({ id: Date.now().toString(36), text, done: false, createdAt: new Date().toISOString() });
+    qs.unshift({ id: Date.now().toString(36), text, done: false });
     saveQuests(qs);
     renderQuests();
     input.value = '';
