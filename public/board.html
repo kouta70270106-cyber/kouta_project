@@ -488,13 +488,13 @@
           <aside class="card ledger-card">
             <div class="ledger-title">LIBER · RATIONVM · 台 帳</div>
             <div class="ledger-list">
-              <div class="ledger-row"><span>所持金</span><span class="v">${p.gold.toLocaleString()}<small>G</small></span></div>
-              <div class="ledger-row"><span>討伐数</span><span class="v">${(st.monstersKilled||0).toLocaleString()}<small>体</small></span></div>
+              <div class="ledger-row"><span>所持金</span><span class="v">${(p.gold||0).toLocaleString()}<small>G</small></span></div>
+              <div class="ledger-row"><span>討伐数</span><span class="v">${(+(st.monstersKilled||0)).toLocaleString()}<small>体</small></span></div>
               <div class="ledger-row"><span>ダンジョン攻略</span><span class="v">${st.dungeonsCleared||0}<small>回</small></span></div>
               <div class="ledger-row"><span>ボス討伐</span><span class="v">${st.bossesDefeated||0}<small>体</small></span></div>
               <div class="ledger-row"><span>習得呪文</span><span class="v">${(save.learnedSpells||[]).length}<small>種</small></span></div>
             </div>
-            <div class="ledger-total"><span>EXPERIENTIA</span><span class="v">${p.exp.toLocaleString()} XP</span></div>
+            <div class="ledger-total"><span>EXPERIENTIA</span><span class="v">${(p.exp||0).toLocaleString()} XP</span></div>
           </aside>
         </div>
       </section>
@@ -616,9 +616,17 @@
   }
 
   async function init() {
-    const save = await fetchSave();
-    if (!save) { renderNoSave(); return; }
-    renderPage(save);
+    try {
+      const save = await fetchSave();
+      if (!save) { renderNoSave(); return; }
+      renderPage(save);
+    } catch(err) {
+      document.getElementById('page-root').innerHTML = `
+        <div style="padding:40px;font-family:monospace;background:#fff8f0;border:2px solid #c00;margin:40px;border-radius:4px;">
+          <strong style="color:#c00">JavaScript Error:</strong><br><br>
+          <pre style="white-space:pre-wrap;color:#333">${String(err)}\n\n${err.stack||''}</pre>
+        </div>`;
+    }
   }
 
   init();
