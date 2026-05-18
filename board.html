@@ -134,8 +134,12 @@
       display: flex; flex-direction: column; align-items: center; justify-content: space-between; gap: 12px; position: relative;
     }
     .status-portrait::after { content: ""; position: absolute; top: 12px; right: 12px; bottom: 12px; left: 12px; border: 1px dashed #8a6a3677; pointer-events: none; }
-    .sigil-frame { width: 140px; height: 180px; background: var(--parchment-light); border: 1px solid var(--parchment-edge); display: flex; align-items: center; justify-content: center; box-shadow: inset 0 0 30px #c4a76b55; }
+    .sigil-frame { width: 140px; height: 180px; background: var(--parchment-light); border: 1px solid var(--parchment-edge); display: flex; align-items: center; justify-content: center; box-shadow: inset 0 0 30px #c4a76b55; position: relative; cursor: pointer; overflow: hidden; }
     .sigil-frame .sigil { font-size: 64px; color: var(--gold); text-shadow: 0 1px 0 #fff8; }
+    .sigil-frame img { width: 100%; height: 100%; object-fit: cover; }
+    .sigil-frame .sigil-overlay { position: absolute; inset: 0; background: rgba(42,26,8,.55); display: flex; flex-direction: column; align-items: center; justify-content: center; opacity: 0; transition: opacity .2s; gap: 4px; color: #f7eed2; font-size: 22px; }
+    .sigil-frame .sigil-overlay small { font-family: var(--f-display); font-size: 9px; letter-spacing: .25em; text-transform: uppercase; color: #ddc999; }
+    .sigil-frame:hover .sigil-overlay { opacity: 1; }
     .portrait-caption { font-family: var(--f-display); font-size: 10px; letter-spacing: 0.4em; color: var(--ink-faded); text-transform: uppercase; text-align: center; z-index: 1; }
 
     .status-body { grid-column: 2; padding: 28px 32px; display: flex; flex-direction: column; gap: 22px; }
@@ -482,6 +486,30 @@
   };
   const DEFAULT_STATS = { hp:100, mp:50, atk:10, def:5, spd:8 };
 
+  function openPortraitPicker() {
+    let input = document.getElementById('portrait-input');
+    if (!input) {
+      input = document.createElement('input');
+      input.type = 'file';
+      input.id = 'portrait-input';
+      input.accept = 'image/*';
+      input.style.display = 'none';
+      document.body.appendChild(input);
+      input.addEventListener('change', e => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = ev => {
+          localStorage.setItem('guild_portrait', ev.target.result);
+          renderCharPanel();
+        };
+        reader.readAsDataURL(file);
+        input.value = '';
+      });
+    }
+    input.click();
+  }
+
   function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
   function levelToRank(lv) {
@@ -521,11 +549,12 @@
       return;
     }
 
-    const p     = JSON.parse(raw);
-    const saved = JSON.parse(localStorage.getItem('guild_char_stats') || 'null');
-    const base  = JOB_STATS[p.job] || DEFAULT_STATS;
-    const lv    = saved?.lv ?? 1;
-    const rank  = levelToRank(lv);
+    const p       = JSON.parse(raw);
+    const saved   = JSON.parse(localStorage.getItem('guild_char_stats') || 'null');
+    const base    = JOB_STATS[p.job] || DEFAULT_STATS;
+    const lv      = saved?.lv ?? 1;
+    const rank    = levelToRank(lv);
+    const portrait = localStorage.getItem('guild_portrait');
     const stats = {
       lv,
       hp:  saved?.hp  ?? base.hp,
@@ -541,7 +570,10 @@
     document.getElementById('char-section').innerHTML = `
       <div class="card status-card status-grid">
         <div class="status-portrait">
-          <div class="sigil-frame"><span class="sigil">${esc(p.job ? p.job.split(' ')[0] : '⚔')}</span></div>
+          <div class="sigil-frame" onclick="openPortraitPicker()" title="クリックで写真を変更">
+            ${portrait ? `<img src="${portrait}" alt="portrait">` : `<span class="sigil">${esc(p.job ? p.job.split(' ')[0] : '⚔')}</span>`}
+            <div class="sigil-overlay">📷<small>${portrait ? '変 更' : '写真を追加'}</small></div>
+          </div>
           <div class="portrait-caption">SIGILLVM · 紋&nbsp;章</div>
         </div>
         <div class="status-body">
