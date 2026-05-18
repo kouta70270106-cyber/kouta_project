@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>伝承録 — 永遠の旅人</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #060d08;
+      color: #c8d4c0;
+      font-family: 'Segoe UI', 'Hiragino Kaku Gothic ProN', system-ui, sans-serif;
+      font-size: 13px;
+      min-height: 100vh;
+      background-image:
+        radial-gradient(ellipse at 20% 20%, rgba(30,48,32,0.3) 0%, transparent 60%),
+        radial-gradient(ellipse at 80% 80%, rgba(20,34,22,0.2) 0%, transparent 60%);
+    }
+
+    #wrapper {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 16px 12px 40px;
+    }
+
+    /* ===== Header ===== */
+    header {
+      background: linear-gradient(135deg, #0c1810, #142218);
+      border: 1px solid #2a4030;
+      border-radius: 10px;
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.5);
+    }
+
+    .back-btn {
+      background: #0c1810;
+      border: 1px solid #2a4030;
+      color: #7aaa88;
+      padding: 5px 12px;
+      border-radius: 5px;
+      font-size: 12px;
+      cursor: pointer;
+      text-decoration: none;
+      transition: border-color .2s, color .2s;
+    }
+    .back-btn:hover { border-color: #4a7050; color: #aaddbb; }
+
+    .header-text { flex: 1; }
+    .page-title {
+      font-size: 22px;
+      font-weight: bold;
+      color: #c0a850;
+      letter-spacing: 0.1em;
+      margin-bottom: 4px;
+    }
+    .page-subtitle {
+      font-size: 11px;
+      color: #557766;
+      letter-spacing: 0.05em;
+    }
+
+    /* ===== Section titles ===== */
+    .section-heading {
+      font-size: 15px;
+      font-weight: bold;
+      color: #c0a850;
+      letter-spacing: 0.08em;
+      border-bottom: 1px solid #2a4030;
+      padding-bottom: 8px;
+      margin: 28px 0 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .section-heading::before {
+      content: '';
+      display: inline-block;
+      width: 3px;
+      height: 18px;
+      background: linear-gradient(180deg, #c0a850, #886633);
+      border-radius: 2px;
+    }
+
+    /* ===== NPC Cards ===== */
+    .npc-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 14px;
+    }
+
+    .npc-card {
+      background: linear-gradient(160deg, #0d1a10, #0a1410);
+      border: 1px solid #2a4030;
+      border-radius: 10px;
+      padding: 16px;
+      position: relative;
+      overflow: hidden;
+      transition: border-color .2s, box-shadow .2s;
+    }
+    .npc-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, #c0a850, transparent);
+      opacity: 0.5;
+    }
+    .npc-card:hover { border-color: #4a7050; box-shadow: 0 0 16px rgba(192,168,80,0.08); }
+
+    .npc-role {
+      font-size: 10px;
+      color: #7a9a80;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+    .npc-name {
+      font-size: 17px;
+      font-weight: bold;
+      color: #e8d890;
+      margin-bottom: 12px;
+      letter-spacing: 0.04em;
+    }
+
+    .npc-lines {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .npc-line {
+      font-size: 12px;
+      color: #b0bea8;
+      line-height: 1.75;
+      padding: 10px 12px;
+      background: rgba(0,0,0,0.3);
+      border-left: 2px solid #2a4030;
+      border-radius: 0 5px 5px 0;
+      font-style: italic;
+      position: relative;
+    }
+    .npc-line::before {
+      content: '「';
+      color: #c0a850;
+      font-size: 14px;
+      font-style: normal;
+    }
+    .npc-line::after {
+      content: '」';
+      color: #c0a850;
+      font-size: 14px;
+      font-style: normal;
+    }
+
+    /* コーデックス強調 */
+    .codex-hint .npc-line:last-child {
+      border-left-color: #c0a850;
+      background: rgba(192,168,80,0.06);
+      color: #d4c890;
+    }
+
+    /* ===== Monster Section ===== */
+    .rarity-group {
+      margin-bottom: 24px;
+    }
+
+    .rarity-label {
+      font-size: 11px;
+      font-weight: bold;
+      letter-spacing: 0.12em;
+      padding: 3px 10px;
+      border-radius: 3px;
+      display: inline-block;
+      margin-bottom: 12px;
+    }
+    .rarity-common    { background: rgba(212,200,168,0.15); color: #d4c8a8; border: 1px solid rgba(212,200,168,0.3); }
+    .rarity-uncommon  { background: rgba(68,255,136,0.1);  color: #44ff88; border: 1px solid rgba(68,255,136,0.3);  }
+    .rarity-rare      { background: rgba(68,136,255,0.1);  color: #6699ff; border: 1px solid rgba(68,136,255,0.3);  }
+    .rarity-legendary { background: rgba(255,170,34,0.12); color: #ffaa22; border: 1px solid rgba(255,170,34,0.3);  }
+
+    .monster-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 10px;
+    }
+
+    .monster-card {
+      background: #0a1610;
+      border: 1px solid #1e3020;
+      border-radius: 8px;
+      padding: 13px 14px;
+      transition: border-color .2s;
+    }
+    .monster-card:hover { border-color: #3a6040; }
+
+    .monster-name {
+      font-size: 13px;
+      font-weight: bold;
+      color: #c8d4c0;
+      margin-bottom: 7px;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .monster-lore {
+      font-size: 11.5px;
+      color: #8a9e90;
+      line-height: 1.8;
+    }
+
+    /* legend glow */
+    .monster-card.legendary {
+      border-color: rgba(255,170,34,0.25);
+      background: linear-gradient(160deg, #0d1208, #0a1010);
+    }
+    .monster-card.legendary .monster-name { color: #ffaa22; }
+    .monster-card.legendary:hover { border-color: rgba(255,170,34,0.5); box-shadow: 0 0 12px rgba(255,170,34,0.08); }
+
+    .monster-card.rare { border-color: rgba(68,136,255,0.2); }
+    .monster-card.rare .monster-name { color: #88aaff; }
+
+    /* ===== Footer note ===== */
+    .ancient-note {
+      margin-top: 36px;
+      padding: 14px 18px;
+      background: #080e0a;
+      border: 1px solid #1a2a1c;
+      border-radius: 8px;
+      font-size: 11px;
+      color: #446655;
+      line-height: 2;
+      text-align: center;
+      letter-spacing: 0.04em;
+    }
+
+    /* ===== Mobile ===== */
+    @media (max-width: 600px) {
+      .npc-grid { grid-template-columns: 1fr; }
+      .monster-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+<div id="wrapper">
+  <header>
+    <a href="board.html" class="back-btn">← 冒険者の館へ</a>
+    <div class="header-text">
+      <div class="page-title">📜 伝承録</div>
+      <div class="page-subtitle">大陸縦断記録・第七巻 写本 — 伝承の守り人による口承記録</div>
+    </div>
+  </header>
+
+  <div id="content"></div>
+</div>
+
+<script>
+'use strict';
+
+const LORE = {
+  "meta": {
+    "note": "以下に記すは、大陸各地を旅した者たちの証言・廃墟の壁画・古老の口伝を集めたものなり。その真偽は読む者の判断に委ねる。"
+  },
+  "npcs": [
+    {
+      "id": "gandwin",
+      "name": "ガルドウィン老師",
+      "role": "老魔法使い",
+      "codex": true,
+      "lines": [
+        "……ふむ。若き旅人よ、その目に宿る光は、かつての王宮の廊下で見た光に似ておるな。二百年と少し昔のことじゃ。わしがまだ宮廷に仕えていた頃——そう、あの大戦の前夜——王城の奥書庫には、人が容易には近づけぬ封印の間があった。魔術師の長老たちは皆、その扉の前で足を止め、誰ひとり中を覗こうとはせなんだ。わしだけが一度だけ……ほんの一度だけ、扉の向こうに何かが在ると確かめた。ある書物が封印されし場所よ。それがコーデックスと呼ばれるものかどうか、今となっては確かめる術もないが……。",
+        "魔王の力が完全に消えたとは思うておらぬ。残滓とは言うが、あれは『眠り』に過ぎぬ。世界には力を求める者が常に現れる。かの書物が正しき者の手に渡れば世界を救う灯となろうが、誤れる者が触れれば……まあ、わしが見てきた二百年の歴史が証明しておる。人は力を手にすると、必ず試される。君はどうじゃ。試される準備はできておるか？",
+        "最後にひとつだけ教えよう——老い先短い爺の戯言と思うてもよい。コーデックスの在り処は、一枚の地図には描かれておらぬ。旅そのものの中にしか現れぬのじゃ。草原の露、森の梢、山の岩肌、砂の粒、沼の泡——それぞれに断片が刻まれていると、書には書かれておった。旅を続けること自体が、封印を解く鍵になるのかもしれぬ……とは、わしの見立てじゃが。真相は、果てまで歩いた者にしかわからぬ。"
+      ]
+    },
+    {
+      "id": "lina",
+      "name": "リナ",
+      "role": "村の少女",
+      "lines": [
+        "……ねえ、旅人さん。また変な夢を見たの。昨夜も、昨夜も、その前の夜も。兵士さんたちが整列して、大きな旗を掲げて進んでいく夢。旗には見たことのない紋章が描いてあって——でも不思議なことに、その紋章を見るたびに、胸がぽかぽかするの。怖い夢じゃないんだ。むしろ……懐かしいっていうか、帰ってきたような気がするっていうか。お母さんには話したけど、「食べすぎよ」って笑われちゃった。",
+        "旅人さんは、遠い国から来たの？わたしは生まれてからずっとここにいるけれど、夢の中では遠いところを歩いてるの。剣を持った人の隣に立って、一緒に戦ってる夢。わたし、剣なんて触ったこともないのに。……ねえ、ひとつだけ聞いていい？ 英雄って、みんな最初から英雄だったの？ それとも、旅をしているうちになったの？"
+      ]
+    },
+    {
+      "id": "eldras",
+      "name": "エルドラス",
+      "role": "謎の賢者",
+      "lines": [
+        "魔物の発生源とな……ほう、面白い問いじゃ。旅人よ、石を池に投げてみよ。波紋はどこから来ると思う？ 石の落ちた点から、と答えるじゃろう。では、その石を投げた者の意志はどこから来る？ 魔物とは波紋に過ぎぬ。肝心なのは石を投げた者の意志——そしてその意志がまだ残っているかどうかじゃ。魔王の残滓と呼ばれる地に、わしは三度足を運んだ。三度とも、同じものを感じた。あれは力の残骸ではない。まだ『息をしている』のじゃよ。",
+        "お前が向かう先に何があるか、わしは言わぬ。言葉にした瞬間、真実が歪む。ただ……魔族の廃城で出会う者たちは、元々は敵ではなかったかもしれぬ、とだけ申しておこう。問い続ける者だけが答えを見つける。答えを持つ者に会うのではなく、問いを深める旅をせよ。行き着いた先に見えるものが——それがこの大陸の、本当の伝承となる。"
+      ]
+    },
+    {
+      "id": "beldia",
+      "name": "ベルディア",
+      "role": "神官",
+      "lines": [
+        "光の神殿に伝わる記録には、太古の大陸がいかなるものであったかが綴られておる。かのモンスターたちは——そう、旅人よ、今汝が剣を向ける者たちは——かつてはこの地を共に歩んだ存在なりしと記されておる。瘴気が生まれたのは戦争の後。人の憎しみが大地に染み込み、魂が変容した。番人たる我らはその歴史を忘れぬよう、封印の碑を守り続けておる。だが……歴史を知ることと、剣を止めることは同じではない。汝の旅に、我が神の加護を。",
+        "……時々、夜の礼拝の後にひとり碑文を読む。そこには無数の名前が刻まれておる。人の名も、かつて人であった者の名も。封印とは閉じ込めることではない——忘れぬための行為なり。いつか封印が不要になる日が来るとしたら、それは力で魔を打ち倒した時ではなく、魔が生まれた理由を人が理解した時であろう。……旅を続けよ。しかし問い続けることも、忘れるでない。"
+      ]
+    },
+    {
+      "id": "kyle",
+      "name": "カイル",
+      "role": "傷ついた旅人",
+      "lines": [
+        "……俺に話しかけるな。いや……すまない。あんたが悪いわけじゃない。ただ……旅人の顔を見るたびに、かつての仲間を思い出す。俺はかつて七人で行った。魔族の廃城で戦った。フラメルの炎を、グラシアの氷嵐を、シャルテンの闇を——全部まともに受けて……帰ってきたのは俺だけだ。英雄と呼ばれたよ。唯一の生還者として。だがな……生き残ったことが英雄の証か？ そんなもの……今も答えが出ない。",
+        "もしあんたが魔族の廃城まで行く気なら——一つだけ教えてやる。大魔族どもは、力で押せば倒せる。だが、奥にいる守護者だけは別だ。ヴォイドと俺たちは戦った……いや、正確には、会った。あいつは俺の仲間を倒しながら、ずっと何かを問い続けていた。『なぜ来た』と。俺は答えられなかった。今なら……少しは答えられる気がする。だが、俺にはもう行く力が残っていない。あんたに、託す。"
+      ]
+    }
+  ],
+  "monsters": [
+    { "id":"slime",         "name":"泥の魔物",          "rarity":"common",    "lore":"旅路の草原にて、見習い冒険者ミアの記録に曰く——「緑なる泥の塊が道端より現れたり。剣を向けたれど、刃は沼の中に消えるが如く手応えなく。されど仲間と共に押せば程なく消えたり」と。群れを成す習性は古くより伝えられ、単体では脅威なれど、油断は禁物なり。" },
+    { "id":"goblin",        "name":"盗賊の小鬼",        "rarity":"common",    "lore":"草原地帯の番人の手記に曰く——「旅人の荷を狙う小鬼、今月だけで十七件の被害を受けたり。単体では弱き存在なれど、笛の音を合図に仲間を呼ぶ習性あり。笛を持つ頭目を先に仕留めれば群れは散ると、百年前の討伐記録にも記されておる」と。その賢しさは同格の魔物の中でも群を抜くと伝えられる。" },
+    { "id":"bat",           "name":"夜行の翼鬼",        "rarity":"common",    "lore":"洞窟探索者ドーレンの証言——「松明を掲げた瞬間、頭上より無数の羽音が降り注いだ。翼鬼の群れは光を恐れず、むしろ炎に引き寄せられるように飛び回った」と。古記録には「暗闇の中では目を閉じ、耳で迎え撃つべし」との一文が残されておる。不意を打つ速さは目を追えぬほどなり。" },
+    { "id":"wolf",          "name":"牙狼の魔物",        "rarity":"common",    "lore":"草原の牧場主ガーネットの記録——「夜明け前、羊の悲鳴で目覚めた。四頭の牙狼が囲みを作り、一頭ずつ役割を分担して狩りをしておった。まるで人のように戦略的にて、驚愕した」と。群れ狩りを学んで百代が過ぎ、今や魔物の中でも最も知恵ある狩人の一つと語り継がれる。" },
+    { "id":"skeleton",      "name":"骸骨の亡者",        "rarity":"common",    "lore":"沼地の廃墟にて記されし断片——「討伐してなお、倒れた骸は翌朝また立ち上がりたり。邪気が濃い地においては、骸自体が媒体となり不死の輪廻を繰り返すと見ゆ。哀れと思う余裕もなく、我らは再び剣を抜きたり」と。無念の死を遂げた者が邪気に引き寄せられ起ち上がると、神官の古い記録にも記されておる。" },
+    { "id":"treant",        "name":"古木の精霊",        "rarity":"common",    "lore":"エルフの古老が語るに——「千年を超えた樹は魂を宿すと我らは伝えてきた。邪気が森に満ちた時、その魂は守護から攻撃へと転じる。古木の精霊はもとより森の番人なり。侵す者を排除するは彼らの本能にして義務」と。古書には「古木を倒すは止むを得ぬ時のみとせよ」との戒めが刻まれておる。" },
+    { "id":"spider",        "name":"毒蜘蛛の魔物",      "rarity":"common",    "lore":"沼地の探索記録より抜粋——「木々の間に張られた透明の糸は、日光の当たらぬ場所では全く見えぬ。前衛の戦士が糸に触れた瞬間、四方より蜘蛛が降り注いだ。糸の強度は鉄の鎖にも匹敵すると、古い冒険者組合の注意書きに記されておる」と。森から沼へ移った種は、より大型になると伝えられる。" },
+    { "id":"sand_worm",     "name":"砂中の大蛇",        "rarity":"common",    "lore":"砂塵の荒野を渡ったガーデル隊の記録——「砂の波紋を見た瞬間、隊長が叫んだ。全員が跳び退った刹那、地面が爆ぜて巨大な蛇頭が現れたり。下顎の牙は地に刺さって足場と化し、さらに深く潜るための楔となると後に判明した。荒野では砂の静かな揺れに常に注意を払うべし」と。" },
+    { "id":"ice_wolf",      "name":"凍土の牙狼",        "rarity":"common",    "lore":"果ての凍土の探索者セルナの証言——「牙狼の牙は触れた瞬間に凍りついた。革手袋を貫いた一咬みで、右腕の感覚が失われた。傷口が凍ることで出血は止まるが、その冷気は骨まで伝わると仲間の術師が警告した」と。極寒の地で千代を生き抜いた末裔と伝えられ、毛皮は氷の結晶を帯びて銀青に輝く。" },
+    { "id":"lava_lizard",   "name":"炎石の爬虫鬼",      "rarity":"common",    "lore":"炎の峡谷を踏破したガーレン一行の記録——「溶岩の岩場に腰を落ち着けた瞬間、岩が動いた。蜥蜴が岩に化けておったのじゃ。その体表は赤熱した炭の如く、触れれば瞬く間に皮膚を焼く。前衛の戦士が盾で受けた際、盾の金属が変形した」と。擬態の精度は熟練の術師でも見抜けぬことがあると記されておる。" },
+    { "id":"orc",           "name":"山岳の岩鬼",        "rarity":"uncommon",  "lore":"北の山脈の番人トークの証言——「岩鬼の一族は山の麓に村を作り、独自の階級社会を持つと古い記録にある。単体で現れる個体は群れからはぐれた若い者か、村の命令で斥候に出た者。その背後には必ず集団が控えておる。鈍器の一振りは岩をも砕き、盾を正面から受ければ腕がもたぬ」と。" },
+    { "id":"harpy",         "name":"嵐羽の魔鳥",        "rarity":"uncommon",  "lore":"山脈越えの商隊記録——「晴れていた空が突然掻き曇り、羽音が空を覆った。魔鳥の群れが現れ、先頭の一羽が翼を広げると局地的な嵐が起きた。地上の者は立つことも困難になり、その隙に急降下した個体に荷物を奪われた。嵐の中を追うは自殺行為なり」と記されておる。" },
+    { "id":"lizardman",     "name":"沼の鱗鬼",          "rarity":"uncommon",  "lore":"瘴気の沼地の探索記録より——「鱗鬼の部族は沼の深奥に村を持ち、縄張りの境に標識石を立てておる。その石を越えた者は敵と見なされ、水中から囲まれる。古い記録には『鱗鬼の縄張り標識を見たら引き返せ』と一行だけ書かれておった。その一行の重みよ」と。" },
+    { "id":"skeleton_mage", "name":"骸の術師",          "rarity":"uncommon",  "lore":"廃城の奥で発見された記録の断片——「骸の術師はその眼窩に宿る青白い炎が魔法の発動中に揺れ、詠唱の呪文は古代語なり。かつては人であり、魔術を極めんとして禁断の儀式に手を出したと伝えられる。肉体は朽ちても魔力だけが残り、死してなお魔法を紡ぎ続けるとは——これを悲劇と見るか脅威と見るか」と。" },
+    { "id":"troll",         "name":"岩橋の怪物",        "rarity":"uncommon",  "lore":"北の山脈の関所番の口伝——「橋の下に棲む怪物は三代にわたって橋を守っておる。父が倒せど子が現れ、子が倒せど孫が現れた。驚異的な再生力を持ち、炎で焼いた傷のみが癒えぬと先代の番人が書き残した。力での排除よりも、交渉の余地を探った者もおったのじゃ」と伝えられる。" },
+    { "id":"cave_guard",    "name":"岩窟の番兵",        "rarity":"uncommon",  "lore":"廃鉱を調査した技師ヴァルグの記録——「洞窟の入口に立つ石鎧の兵は、最初は岩柱と見まがうた。近づいた瞬間に動き出し、槍を構えた。古代の魔術師が番人として作り出したものか、それとも石に変じた人の成れの果てか——判断のつかぬまま、我らは迂回路を探した」と記しておる。" },
+    { "id":"dark_elf",      "name":"堕ちた森人",        "rarity":"uncommon",  "lore":"廃城近郊で発見された書簡の写し——「かの者たちは確かにエルフの面影を残しておった。古エルフの長老に問うたところ『我らの同胞が、千年前の大戦で魔族に与したことは事実じゃ。その末裔が今もどこかに生きておるとしたら——それは我らの罪でもある』と静かに答えた」と。" },
+    { "id":"frost_knight",  "name":"凍てつく騎士の霊",  "rarity":"uncommon",  "lore":"果ての凍土の廃砦にて記録された証言——「氷の鎧を纏いし霊は、声を持たぬ。だがその剣の構えは明らかに訓練を受けた騎士のそれなり。この凍土はかつて大戦の激戦地なりしことが古地図で判明した。無念の死を遂げた騎士が、永遠の冬の中でなおも任務を続けておるとしたら——誰が彼らを責められようか」と。" },
+    { "id":"fire_imp",      "name":"炎の悪鬼",          "rarity":"uncommon",  "lore":"炎の峡谷の調査報告より——「小柄ゆえに侮ってはならぬ。その跳躍力は岩壁を駆け登り、炎魔法は急所を確実に狙う。魔界から来たと言われるが、この峡谷を百年以上前から縄張りとしておる個体群がおり、生まれが人の世か魔界かも今や判然とせぬ。悪鬼と呼ぶは人の都合なり」と観察記録に記されておる。" },
+    { "id":"minotaur",      "name":"鉄角の巨獣",        "rarity":"rare",      "lore":"迷宮探索者ドーレン・ハルトの証言——「廃城の地下迷宮、第三層。鉄の角を持つ牛頭の巨人と遭遇したり。その咆哮は石壁を震わせ、大斧の一振りは岩盤に深く刻まれた。周囲の遺骨から、あれは迷宮を代々受け継ぎ侵入者を排除し続けてきたものと見ゆ。鉄の角は人の手で磨かれたもの——かつて誰かに仕えた存在やもしれぬ」と。" },
+    { "id":"wyvern",        "name":"翼竜の魔物",        "rarity":"rare",      "lore":"山岳隊の飛行調査記録——「ワイバーンは龍の遠縁と伝えられるが、空中での機動力は他の追随を許さず、急降下の際の速度は弓矢でも追えぬ。毒尾の一撃は装甲を溶かす腐食性を持ち、討伐隊の三人に二人は傷を負うて帰還した。峡谷の上空を縄張りとする群れは、今も大陸で最も危険な空域を形成しておる」と記す。" },
+    { "id":"vampire",       "name":"不死の吸血魔",      "rarity":"rare",      "lore":"廃城の古文書庫で発見された紙片——「かの吸血鬼の貴族は、大戦以前は人の王族であったと言われる。不死を求めて魔術の禁忌に触れ、肉体を変容させた。幾百年を経た今も廃城の奥に棲み、血を糧として力を維持する。夜に単独で挑んだ者の話は、帰還者がおらぬゆえ伝えられておらぬ」と。" },
+    { "id":"golem",         "name":"石造りの番人",      "rarity":"rare",      "lore":"古代魔術研究者フィールダの考察より——「ゴーレムは感情を持たぬ。命令のみに従い、その命令が消えぬ限り永遠に番人としての任を続ける。命令を出した主はすでに存在せぬが、ゴーレムはそれを知らぬ——あるいは知ることができぬ。これを哀れと感じるは人の感傷に過ぎぬか」と記しておる。" },
+    { "id":"frost_dragon",  "name":"氷霧の龍",          "rarity":"rare",      "lore":"果ての凍土における伝説の記録——「氷霧の龍は凍土に降り立った時、吐息だけで周囲十歩を氷原に変えたと目撃者は語る。討伐隊は三十名で挑み、十二名が帰還した。帰還者の一人が残した記録には『あの龍は我らを憎んでいなかった。ただ、領域を侵した者への応答であった』と記されておる」と。" },
+    { "id":"demon_knight",  "name":"魔族の戦士",        "rarity":"rare",      "lore":"魔王の残滓域での接触記録——「魔族の精鋭戦士は、人の言葉を話す個体がいる。討伐に向かった探索者の証言では『奴は剣を構えながら、なぜ来たと問うた』とある。問いに答えられなかった者は即座に攻撃を受け、答えた者には一瞬の躊躇いがあったという」と記されておる。漆黒の剣は魔力を帯び、接触するだけで魔力を吸い取ると伝えられる。" },
+    { "id":"gold_slime",    "name":"黄金のスライム王",  "rarity":"legendary", "lore":"冒険者組合の極秘資料、目撃情報の集積より——「七十二の証言を集めたれど、真に討伐に成功した者は六名のみ。黄金の魔物はあらゆる攻撃を弾く。しかし生来の臆病さゆえか、戦わずとも隙を見せれば逃げ去ろうとする。倒した者が持ち帰りし財宝の量は、普通の冒険者が生涯稼ぐ金額に匹敵すると言われる。出会うこと自体が奇跡なり」と。" },
+    { "id":"silver_slime",  "name":"白銀のスライム王",  "rarity":"legendary", "lore":"伝説の記録人ガルドが残した書——「銀色の魔物を討伐せし者は、その夜に不思議な夢を見ると複数の証言が重なる。夢の中で膨大な知識と記憶が流れ込み、翌朝には力が増していたという。その出現は百年に一度とも千年に一度とも言われ、遭遇した者は生涯の運を使い果たした幸運な者と呼ばれる」と。" },
+    { "id":"dragon",        "name":"古の大龍",          "rarity":"legendary", "lore":"大陸記録の最古の写本より——「大龍フラーガを見た者は語る。山が歩いているようだと。炎の息吹が一度吹けば、森が灰になり、石が溶けた。かの龍は人の言葉を知っており、討伐隊の隊長に問いかけた——『なぜ我を滅ぼそうとする。我は何百年も眠っていたのに』と。隊長は答えられなかった。その問いを一生忘れられなかったという」と伝えられる。" },
+    { "id":"lich",          "name":"不死の大魔術師",    "rarity":"legendary", "lore":"封印された禁書の断片——「かつての王宮魔術師長、その名は今も記録から消されておる。不老不死を求めた彼が最後に行った儀式の記録は全て抹消された。肉体なき魔力の集合体となり果てた今も、膨大な知識と術式を保持し続けておる。その目的が今もなお達成されていないとすれば——何を、いまだ求めているのか」と。謎のみが残る。" },
+    { "id":"chimera",       "name":"合成の魔獣",        "rarity":"legendary", "lore":"大陸最後の魔術戦争期の記録より——「残滓域で作られたという合成の魔獣は、複数の生き物の特性を一体に凝縮させた存在なり。その誕生は人の手による実験の結果と伝えられるが、誰がいかなる目的で作ったかは不明。討伐した者の証言が毎回異なる攻撃手段を示すのは、個体ごとに異なる組み合わせが施されているためとも言われる」と記されておる。" }
+  ]
+};
+
+const RARITY_LABELS = {
+  common: 'コモン',
+  uncommon: 'アンコモン',
+  rare: 'レア',
+  legendary: 'レジェンダリー'
+};
+
+function renderNPCs() {
+  return `
+    <div class="section-heading">主要人物録</div>
+    <div class="npc-grid">
+      ${LORE.npcs.map(npc => `
+        <div class="npc-card${npc.codex ? ' codex-hint' : ''}">
+          <div class="npc-role">${npc.role}</div>
+          <div class="npc-name">${npc.name}</div>
+          <div class="npc-lines">
+            ${npc.lines.map(line => `<div class="npc-line">${line}</div>`).join('')}
+          </div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
+function renderMonsters() {
+  const groups = ['common', 'uncommon', 'rare', 'legendary'];
+  return `
+    <div class="section-heading">魔物図鑑 — 伝承録</div>
+    ${groups.map(rarity => {
+      const monsters = LORE.monsters.filter(m => m.rarity === rarity);
+      if (!monsters.length) return '';
+      return `
+        <div class="rarity-group">
+          <span class="rarity-label rarity-${rarity}">${RARITY_LABELS[rarity]}</span>
+          <div class="monster-grid">
+            ${monsters.map(m => `
+              <div class="monster-card ${m.rarity}">
+                <div class="monster-name">${m.name}</div>
+                <div class="monster-lore">${m.lore}</div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `;
+    }).join('')}
+  `;
+}
+
+function render() {
+  document.getElementById('content').innerHTML = `
+    <div style="font-size:11px;color:#446655;text-align:center;margin-bottom:20px;line-height:2;padding:10px 16px;border:1px solid #1a2a1c;border-radius:6px;background:#080e0a;">
+      ${LORE.meta.note}
+    </div>
+    ${renderNPCs()}
+    ${renderMonsters()}
+    <div class="ancient-note">
+      この伝承録は、伝承の守り人によって編纂された口承記録の写本なり。<br>
+      記された証言の真偽・年代については、読む者の判断に委ねる。<br>
+      ——大陸縦断記録・第七巻、終——
+    </div>
+  `;
+}
+
+render();
+</script>
+</body>
+</html>
