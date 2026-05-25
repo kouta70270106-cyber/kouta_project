@@ -81,6 +81,9 @@ class JourneyScene extends Phaser.Scene {
 
     this._drawScene();
     updateUI();
+
+    // 旅BGM再生（タイトルBGMから切り替え）
+    window.bgmManager.play('bgm_journey');
   }
 
   // =========================================================

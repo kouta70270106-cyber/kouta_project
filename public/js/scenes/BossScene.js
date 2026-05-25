@@ -44,6 +44,9 @@ class BossScene extends Phaser.Scene {
 
     gs.addLog(`⚡ 月末決戦！ ${boss.name} との戦い！`, 'legendary');
     updateUI();
+
+    // ボスBGM再生
+    window.bgmManager.play('bgm_boss');
   }
 
   update(time, delta) {
@@ -146,6 +149,9 @@ class BossScene extends Phaser.Scene {
   }
 
   _returnToJourney() {
+    // ボスBGMを止めて旅BGMに戻す
+    window.bgmManager.play('bgm_journey');
+
     // Show guild selection for new month
     showGuildModal(() => {
       this.scene.stop('BossScene');
