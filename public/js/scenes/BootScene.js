@@ -11,7 +11,6 @@ class BootScene extends Phaser.Scene {
     this.load.image('bg_fullmoon',  'images/bg/fullmoon.jpg');
 
     // --- BGM ---
-    this.load.audio('bgm_title',   'audio/bgm_title.mp3');
     this.load.audio('bgm_journey', 'audio/bgm_journey.mp3');
     this.load.audio('bgm_boss',    'audio/bgm_boss.mp3');
     // bgm_dungeon は後で追加: this.load.audio('bgm_dungeon', 'audio/bgm_dungeon.mp3');
@@ -55,6 +54,28 @@ class BootScene extends Phaser.Scene {
       },
     };
     window.bgmManager._init(this);
+
+    // ---- SEマネージャー（ボタンクリック音）----
+    // Phaser の AudioContext を借りて使う（新規作成による競合を回避）
+    window.playSE = function () {
+      try {
+        const ctx = window.game?.sound?.context;
+        if (!ctx || ctx.state === 'closed') return;
+        if (ctx.state === 'suspended') ctx.resume();
+        const t    = ctx.currentTime;
+        const osc  = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.type = 'square'; // レトロゲーム風の矩形波
+        osc.frequency.setValueAtTime(660, t);
+        osc.frequency.exponentialRampToValueAtTime(440, t + 0.06);
+        gain.gain.setValueAtTime(0.3, t);          // 音量 30%（以前の2.5倍）
+        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.08);
+        osc.start(t);
+        osc.stop(t + 0.08);
+      } catch (e) { /* 非対応ブラウザは無視 */ }
+    };
 
     try { createGameSprites(this); } catch(e) { console.error('Sprite init error:', e); }
 
@@ -111,7 +132,6 @@ class BootScene extends Phaser.Scene {
   }
 
   _startGame() {
-    window.bgmManager.play('bgm_title'); // タイトルBGM再生
     const gs = window.gameState;
     if (!gs.guild) {
       showGuildModal(() => { this.scene.start('JourneyScene'); });

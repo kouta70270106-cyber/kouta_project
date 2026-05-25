@@ -41,14 +41,14 @@ class DungeonScene extends Phaser.Scene {
     const exitBtn = this.add.text(60, CANVAS_H - 20, '[ 退出 ]', {
       fontSize: '13px', color: '#ff8888', stroke: '#000', strokeThickness: 2
     }).setOrigin(0.5).setInteractive({ useHandCursor: true });
-    exitBtn.on('pointerdown', () => this._exitDungeon(false));
+    exitBtn.on('pointerdown', () => { window.playSE?.(); this._exitDungeon(false); });
 
     // Auto/Manual toggle button (bottom-right)
     this.toggleBtn = this.add.text(CANVAS_W - 60, CANVAS_H - 20, '', {
       fontSize: '12px', stroke: '#000', strokeThickness: 2,
       backgroundColor: '#1a2a1a', padding: { x: 8, y: 3 }
     }).setOrigin(0.5).setInteractive({ useHandCursor: true });
-    this.toggleBtn.on('pointerdown', () => this._toggleAutoMode());
+    this.toggleBtn.on('pointerdown', () => { window.playSE?.(); this._toggleAutoMode(); });
     this._updateToggleBtn();
 
     this._drawAll();
@@ -203,6 +203,7 @@ class DungeonScene extends Phaser.Scene {
       }).setOrigin(0.5).setInteractive({ useHandCursor: true });
 
       btn.on('pointerdown', () => {
+        window.playSE?.();
         this.playerCell.col = nc;
         this.playerCell.row = nr;
         this._clearMoveButtons();

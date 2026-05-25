@@ -383,6 +383,13 @@ function showItemModal(item) {
 //  Tab switching
 // ============================================================
 document.addEventListener('DOMContentLoaded', () => {
+  // ---- クリック音（全DOMボタン共通） ----
+  // button要素・タブ・ギルドカード・インベントリアイテムをまとめてカバー
+  document.addEventListener('click', e => {
+    const el = e.target.closest('button, .tab-btn, .guild-choice-card, .inv-item, .shop-filter-btn');
+    if (el) window.playSE?.();
+  });
+
   // Tab buttons
   document.querySelectorAll('.tab-btn').forEach(btn => {
     btn.addEventListener('click', () => {
