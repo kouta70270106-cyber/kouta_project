@@ -583,23 +583,59 @@ function _drawSilverSlime(ctx) {
 }
 
 // ============================================================
+//  白背景を透明にする処理
+//  Canvas API で各ピクセルを検査し、白に近い色を透明に置き換える
+// ============================================================
+function _removeWhiteBg(scene, key) {
+  const src = scene.textures.get(key).getSourceImage();
+  const cvs = document.createElement('canvas');
+  cvs.width  = src.width;
+  cvs.height = src.height;
+  const ctx  = cvs.getContext('2d');
+  ctx.drawImage(src, 0, 0);
+  const imgData = ctx.getImageData(0, 0, cvs.width, cvs.height);
+  const d = imgData.data;
+  for (let i = 0; i < d.length; i += 4) {
+    if (d[i] > 220 && d[i+1] > 220 && d[i+2] > 220) d[i+3] = 0;
+  }
+  ctx.putImageData(imgData, 0, 0);
+  scene.textures.remove(key);
+  scene.textures.addCanvas(key, cvs);
+}
+
+// ============================================================
 //  メインエクスポート
 // ============================================================
 function createGameSprites(scene) {
   // キャラクター (武器分のpxを含む幅)
-  _sprite(scene, 'hero',     16, 22, _drawHero);
-  _sprite(scene, 'ern',      16, 22, _drawErn);
-  _sprite(scene, 'saria',    16, 22, _drawSaria);
+  // PNG が preload で読み込み済みならそちらを優先し、Canvas描画はスキップ
+  if (!scene.textures.exists('hero'))  _sprite(scene, 'hero',  16, 22, _drawHero);
+  if (!scene.textures.exists('ern'))   _sprite(scene, 'ern',   16, 22, _drawErn);
+  if (!scene.textures.exists('saria')) _sprite(scene, 'saria', 16, 22, _drawSaria);
+
   _sprite(scene, 'npc',      14, 22, _drawNpc);
 
-  // モンスター
-  _sprite(scene, 'slime',    14, 12, _drawSlime);
-  _sprite(scene, 'goblin',   10, 16, _drawGoblin);
-  _sprite(scene, 'skeleton', 12, 22, _drawSkeleton);
-  _sprite(scene, 'orc',      17, 24, _drawOrc);
-  _sprite(scene, 'bat',      20, 12, _drawBat);
-  _sprite(scene, 'spider',   18, 12, _drawSpider);
-  _sprite(scene, 'dragon',      24, 18, _drawDragon);
-  _sprite(scene, 'gold_slime',  20, 16, _drawGoldSlime);
-  _sprite(scene, 'silver_slime',20, 16, _drawSilverSlime);
+  // モンスター — PNG優先、なければCanvas描画
+  if (!scene.textures.exists('slime'))    _sprite(scene, 'slime',    14, 12, _drawSlime);
+  if (!scene.textures.exists('goblin'))   _sprite(scene, 'goblin',   10, 16, _drawGoblin);
+  if (!scene.textures.exists('skeleton')) _sprite(scene, 'skeleton', 12, 22, _drawSkeleton);
+  if (!scene.textures.exists('bat'))      _sprite(scene, 'bat',      20, 12, _drawBat);
+  if (!scene.textures.exists('spider'))   _sprite(scene, 'spider',   18, 12, _drawSpider);
+  _sprite(scene, 'orc',          17, 24, _drawOrc);
+  _sprite(scene, 'dragon',       24, 18, _drawDragon);
+  _sprite(scene, 'gold_slime',   20, 16, _drawGoldSlime);
+  _sprite(scene, 'silver_slime', 20, 16, _drawSilverSlime);
+
+  // PNG白背景を透明化（キャラ＋コモンモンスター全部）
+  const pngKeys = [
+    'hero', 'ern', 'saria',
+    'slime', 'goblin', 'bat', 'wolf', 'skeleton',
+    'treant', 'spider', 'sand_worm', 'ice_wolf', 'lava_lizard'
+  ];
+  pngKeys.forEach(key => {
+    const tex = scene.textures.get(key);
+    if (tex && tex.source[0] && tex.source[0].image instanceof HTMLImageElement) {
+      _removeWhiteBg(scene, key);
+    }
+  });
 }

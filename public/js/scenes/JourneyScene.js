@@ -4,6 +4,7 @@ const CANVAS_W = 750;
 const CANVAS_H = 480;
 const GROUND_Y = 360;
 const PLAYER_X = 180;
+const CHAR_GAP  = 65;
 
 const SHAPE_SPRITE = {
   blob:'slime', small:'goblin', human:'skeleton',
@@ -31,12 +32,13 @@ class JourneyScene extends Phaser.Scene {
       .setVisible(false);
 
     // ---- Character sprites ----
-    this.comp1Img   = this.add.image(PLAYER_X - 84,  GROUND_Y, 'saria').setOrigin(0.5, 1);
-    this.comp0Img   = this.add.image(PLAYER_X - 42,  GROUND_Y, 'ern').setOrigin(0.5, 1);
-    this.partnerImg = this.add.image(PLAYER_X - 130, GROUND_Y, 'hero').setOrigin(0.5, 1).setVisible(false);
-    this.playerImg  = this.add.image(PLAYER_X,       GROUND_Y, 'hero').setOrigin(0.5, 1);
+    const CHAR_SCALE = 0.15;
+    this.comp1Img   = this.add.image(PLAYER_X - CHAR_GAP * 2, GROUND_Y, 'saria').setOrigin(0.5, 1).setScale(CHAR_SCALE);
+    this.comp0Img   = this.add.image(PLAYER_X - CHAR_GAP,     GROUND_Y, 'ern').setOrigin(0.5, 1).setScale(CHAR_SCALE);
+    this.partnerImg = this.add.image(PLAYER_X - CHAR_GAP * 3, GROUND_Y, 'hero').setOrigin(0.5, 1).setScale(CHAR_SCALE).setVisible(false);
+    this.playerImg  = this.add.image(PLAYER_X,                GROUND_Y, 'hero').setOrigin(0.5, 1).setScale(CHAR_SCALE);
     this.npcImg     = this.add.image(350,             GROUND_Y, 'npc').setOrigin(0.5, 1).setVisible(false);
-    this.monsterImg = this.add.image(CANVAS_W + 80,  GROUND_Y, 'slime').setOrigin(0.5, 1).setVisible(false);
+    this.monsterImg = this.add.image(CANVAS_W + 80,  GROUND_Y, 'slime').setOrigin(0.5, 1).setScale(0.15).setVisible(false);
     this.dungeonGfx = this.add.graphics().setVisible(false);
 
     // ---- HP bars ----
@@ -46,9 +48,9 @@ class JourneyScene extends Phaser.Scene {
     // ---- Name labels ----
     const nameSty = { fontSize: '11px', color: '#ffffff', stroke: '#000000', strokeThickness: 3 };
     const gs0 = window.gameState;
-    this.playerNameTxt  = this.add.text(PLAYER_X,      GROUND_Y - 82, gs0.player.name, nameSty).setOrigin(0.5, 1);
-    this.comp0NameTxt   = this.add.text(PLAYER_X - 42, GROUND_Y - 78, D.COMPANIONS[0].name, nameSty).setOrigin(0.5, 1);
-    this.comp1NameTxt   = this.add.text(PLAYER_X - 84, GROUND_Y - 78, D.COMPANIONS[1].name, nameSty).setOrigin(0.5, 1);
+    this.playerNameTxt  = this.add.text(PLAYER_X,                GROUND_Y - 140, gs0.player.name,        nameSty).setOrigin(0.5, 1);
+    this.comp0NameTxt   = this.add.text(PLAYER_X - CHAR_GAP,     GROUND_Y - 140, D.COMPANIONS[0].name,   nameSty).setOrigin(0.5, 1);
+    this.comp1NameTxt   = this.add.text(PLAYER_X - CHAR_GAP * 2, GROUND_Y - 140, D.COMPANIONS[1].name,   nameSty).setOrigin(0.5, 1);
     this.monsterNameTxt = this.add.text(0, 0, '', nameSty).setOrigin(0.5, 1).setVisible(false);
 
     // ---- Floating texts ----
@@ -205,11 +207,13 @@ class JourneyScene extends Phaser.Scene {
     this.monsterHp = this.currentMonster.hp;
     this.monsterX = CANVAS_W + 80;
     this.state = 'pre_battle';
-    const key = SHAPE_SPRITE[this.currentMonster.shape] || 'slime';
+    const key = this.textures.exists(this.currentMonster.id)
+      ? this.currentMonster.id
+      : (SHAPE_SPRITE[this.currentMonster.shape] || 'slime');
     const groundY = this.currentMonster.shape === 'fly' ? GROUND_Y - 30 : GROUND_Y;
-    this.monsterImg.setTexture(key).setPosition(this.monsterX, groundY).clearTint().setVisible(true);
+    this.monsterImg.setTexture(key).setScale(0.15).setPosition(this.monsterX, groundY).clearTint().setVisible(true);
     this.hpBarsGfx.setVisible(true);
-    this.monsterNameTxt.setText(this.currentMonster.name).setPosition(this.monsterX, GROUND_Y - 88).setVisible(true);
+    this.monsterNameTxt.setText(this.currentMonster.name).setPosition(this.monsterX, GROUND_Y - 165).setVisible(true);
 
     // レアスライム出現時の特別演出
     if (this.currentMonster.id === 'gold_slime') {
@@ -481,7 +485,7 @@ class JourneyScene extends Phaser.Scene {
 
     // Monster name follows sprite position
     if (this.monsterNameTxt.visible) {
-      this.monsterNameTxt.setPosition(this.monsterX, GROUND_Y - 88);
+      this.monsterNameTxt.setPosition(this.monsterX, GROUND_Y - 165);
     }
   }
 
@@ -507,13 +511,13 @@ class JourneyScene extends Phaser.Scene {
     for (let i = 0; i < gs.companions.length; i++) {
       const c = gs.companions[i];
       if (c.downTimer > 0) continue;
-      const cx = PLAYER_X - 42 * (i + 1);
+      const cx = PLAYER_X - CHAR_GAP * (i + 1);
       const maxHp = gs.getCompanionMaxHp(i);
       const pct = Math.max(0, c.hp / maxHp);
       g.fillStyle(0x111111, 1);
-      g.fillRect(cx - 18, GROUND_Y - 72, 36, 5);
+      g.fillRect(cx - 18, GROUND_Y - 128, 36, 5);
       g.fillStyle(i === 0 ? 0x5588aa : 0x8866cc, 1);
-      g.fillRect(cx - 18, GROUND_Y - 72, Math.floor(36 * pct), 5);
+      g.fillRect(cx - 18, GROUND_Y - 128, Math.floor(36 * pct), 5);
     }
   }
 
@@ -646,18 +650,18 @@ class JourneyScene extends Phaser.Scene {
 
     const pPct = gs.player.hp / stats.maxHp;
     g.fillStyle(0x220000, 1);
-    g.fillRect(PLAYER_X - 30, GROUND_Y - 75, 60, 8);
+    g.fillRect(PLAYER_X - 30, GROUND_Y - 128, 60, 8);
     g.fillStyle(0xcc2222, 1);
-    g.fillRect(PLAYER_X - 30, GROUND_Y - 75, Math.floor(60 * pPct), 8);
+    g.fillRect(PLAYER_X - 30, GROUND_Y - 128, Math.floor(60 * pPct), 8);
 
     if (this.currentMonster) {
       const mPct = Math.max(0, this.monsterHp / this.currentMonster.hp);
       const mx = this.monsterX;
       g.fillStyle(0x220000, 1);
-      g.fillRect(mx - 35, GROUND_Y - 80, 70, 8);
+      g.fillRect(mx - 35, GROUND_Y - 155, 70, 8);
       const hpCol = mPct > 0.5 ? 0x22cc22 : mPct > 0.25 ? 0xcccc22 : 0xcc2222;
       g.fillStyle(hpCol, 1);
-      g.fillRect(mx - 35, GROUND_Y - 80, Math.floor(70 * mPct), 8);
+      g.fillRect(mx - 35, GROUND_Y - 155, Math.floor(70 * mPct), 8);
 
       if (this.currentMonster.rarity === 'rare' || this.currentMonster.rarity === 'legendary') {
         let glowCol = this.currentMonster.rarity === 'legendary' ? 0xffaa00 : 0x4488ff;

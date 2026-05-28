@@ -4,6 +4,20 @@ class BootScene extends Phaser.Scene {
   constructor() { super({ key: 'BootScene' }); }
 
   preload() {
+    this.load.image('hero',        'images/characters/hero.png');
+    this.load.image('ern',         'images/characters/ern.png');
+    this.load.image('saria',       'images/characters/saria.png');
+    this.load.image('slime',       'images/characters/slime.png');
+    this.load.image('goblin',      'images/characters/goblin.png');
+    this.load.image('bat',         'images/characters/bat.png');
+    this.load.image('wolf',        'images/characters/wolf.png');
+    this.load.image('skeleton',    'images/characters/skeleton.png');
+    this.load.image('treant',      'images/characters/treant.png');
+    this.load.image('spider',      'images/characters/spider.png');
+    this.load.image('sand_worm',   'images/characters/sand_worm.png');
+    this.load.image('ice_wolf',    'images/characters/ice_wolf.png');
+    this.load.image('lava_lizard', 'images/characters/lava_lizard.png');
+
     this.load.image('bg_grassland', 'images/bg/grassland.jpg');
     this.load.image('bg_forest',    'images/bg/forest.jpg');
     this.load.image('bg_storm',     'images/bg/storm.jpg');
