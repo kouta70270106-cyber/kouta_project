@@ -40,6 +40,11 @@ class JourneyScene extends Phaser.Scene {
     this.npcImg     = this.add.image(350,             GROUND_Y, 'npc').setOrigin(0.5, 1).setVisible(false);
     this.monsterImg = this.add.image(CANVAS_W + 80,  GROUND_Y, 'slime').setOrigin(0.5, 1).setScale(0.15).setVisible(false);
     this.dungeonGfx = this.add.graphics().setVisible(false);
+    this.slashGfx   = this.add.graphics().setDepth(10);
+    this.magicGfx   = this.add.graphics().setDepth(10);
+    this.playerSword = this._makeSword();
+    this.comp0Sword  = this._makeSword();
+    this.comp1Sword  = this._makeSword();
 
     // ---- HP bars ----
     this.compBarGfx = this.add.graphics();
@@ -68,6 +73,13 @@ class JourneyScene extends Phaser.Scene {
     this.monsterHp = 0;
     this.battleFlashT = 0;
     this.battleDmgTimer = 0;
+    this.atkOffPlayerX  = 0;
+    this.atkOffComp0X   = 0;
+    this.atkOffComp1X   = 0;
+    this.atkOffMonsterX = 0;
+    this.animGen          = 0;
+    this.animRunning      = false;
+    this.displayMonsterHp = 0;
     this.npcData = null;
     this.dungeonX = CANVAS_W + 100;
     this.dungeonVisible = false;
@@ -116,7 +128,7 @@ class JourneyScene extends Phaser.Scene {
     if (this.state === 'battle') {
       this.battleFlashT += dt * 4;
       this.battleDmgTimer -= dt;
-      if (this.battleDmgTimer <= 0) {
+      if (this.battleDmgTimer <= 0 && !this.animRunning) {
         this._doBattleTick();
         this.battleDmgTimer = 1.0;
       }
@@ -204,7 +216,8 @@ class JourneyScene extends Phaser.Scene {
     const gs = window.gameState;
     const base = D.pickMonster(gs.journey.area, gs.guild?.id);
     this.currentMonster = gs.scaleMonster(base);
-    this.monsterHp = this.currentMonster.hp;
+    this.monsterHp        = this.currentMonster.hp;
+    this.displayMonsterHp = this.currentMonster.hp;
     this.monsterX = CANVAS_W + 80;
     this.state = 'pre_battle';
     const key = this.textures.exists(this.currentMonster.id)
@@ -231,10 +244,9 @@ class JourneyScene extends Phaser.Scene {
 
     const pStats = gs.getStats();
 
-    // Player → Monster
+    // Player → Monster（ダメージ量だけ計算、まだ適用しない）
     let pDmg = Math.max(1, pStats.atk - this.currentMonster.def);
     const spell = gs.player.equipment?.spellbook;
-    // 魔法書スキル: 攻撃時
     if (spell?.element === 'fire' && Math.random() < 0.15) {
       const bonus = Math.floor(pStats.atk * 0.5);
       pDmg += bonus;
@@ -243,22 +255,25 @@ class JourneyScene extends Phaser.Scene {
       pDmg *= 2;
       gs.addLog(`⚡ 雷撃発動！ ダメージ2倍！`, 'highlight');
     }
-    this.monsterHp -= pDmg;
-    this._addFloat(this.monsterX, GROUND_Y - 60, `-${pDmg}`, '#ff4444');
 
-    // Companions → Monster
+    // Companions → Monster（ダメージ量だけ計算）
+    const activeComps = [];
     for (let i = 0; i < gs.companions.length; i++) {
       const c = gs.companions[i];
       if (c.hp > 0 && c.downTimer === 0) {
         const cDmg = Math.max(1, gs.getCompanionAtk(i) - Math.floor(this.currentMonster.def * 0.5));
-        this.monsterHp -= cDmg;
-        const cx = PLAYER_X - 42 * (i + 1);
-        this._addFloat(cx, GROUND_Y - 60, `-${cDmg}`, '#ffaa44');
+        activeComps.push({ idx: i, dmg: cDmg });
       }
     }
 
-    // Monster → random living party member
-    if (this.monsterHp > 0) {
+    // 全ダメージをゲームロジックに一括適用
+    this.monsterHp -= pDmg;
+    activeComps.forEach(({ dmg }) => { this.monsterHp -= dmg; });
+
+    // Monster → random living party member（ゲームロジック）
+    const monsterAlive = this.monsterHp > 0;
+    let monsterFloatX = PLAYER_X, monsterFloatDmg = '';
+    if (monsterAlive) {
       const targets = [{ type: 'player' }];
       for (let i = 0; i < gs.companions.length; i++) {
         if (gs.companions[i].hp > 0 && gs.companions[i].downTimer === 0) {
@@ -266,24 +281,21 @@ class JourneyScene extends Phaser.Scene {
         }
       }
       const target = targets[Math.floor(Math.random() * targets.length)];
-
       if (target.type === 'player') {
         let mDmg = Math.max(1, this.currentMonster.atk - pStats.def);
-        // 氷魔法スキル: 被ダメ軽減
         if (spell?.element === 'ice' && Math.random() < 0.20) {
           mDmg = Math.floor(mDmg * 0.5);
           gs.addLog(`❄️ 氷の盾！ ダメージ半減！`, 'success');
         }
         gs.player.hp = Math.max(0, gs.player.hp - mDmg);
-        this._addFloat(PLAYER_X, GROUND_Y - 60, `-${mDmg}`, '#ff8844');
+        monsterFloatX = PLAYER_X; monsterFloatDmg = `-${mDmg}`;
       } else {
         const ci = target.idx;
         const c = gs.companions[ci];
         const cDef = Math.floor(pStats.def * D.COMPANIONS[ci].defRatio);
         const mDmg = Math.max(1, this.currentMonster.atk - cDef);
         c.hp = Math.max(0, c.hp - mDmg);
-        const cx = PLAYER_X - 42 * (ci + 1);
-        this._addFloat(cx, GROUND_Y - 60, `-${mDmg}`, '#ff8844');
+        monsterFloatX = PLAYER_X - 42 * (ci + 1); monsterFloatDmg = `-${mDmg}`;
         if (c.hp <= 0) {
           c.downTimer = 12;
           gs.addLog(`💀 ${D.COMPANIONS[ci].name}がやられた！ しばらく戦線離脱...`, 'danger');
@@ -291,11 +303,55 @@ class JourneyScene extends Phaser.Scene {
       }
     }
 
-    if (this.monsterHp <= 0) {
-      this._onVictory();
-    } else if (gs.player.hp <= 0) {
-      this._onDefeat();
+    if (this.monsterHp <= 0) { this._onVictory(); return; }
+    if (gs.player.hp <= 0)  { this._onDefeat();  return; }
+
+    // ---- ターン制アニメーション（HPバーは impact 時点で段階的に減少） ----
+    this.animRunning = true;
+    const TURN_MS = 900;
+    let t = 0;
+
+    // 表示用HPの段階値を計算
+    let dispHp = this.displayMonsterHp;
+    const mxPos = this.monsterX;
+
+    const playerImpact = () => {
+      dispHp = Math.max(0, dispHp - pDmg);
+      this.displayMonsterHp = dispHp;
+      this._addFloat(mxPos, GROUND_Y - 60, `-${pDmg}`, '#ff4444');
+    };
+
+    this._runAttackTurn(this.playerImg, 'hero', this.playerSword, 'atkOffPlayerX', PLAYER_X, t, playerImpact);
+    t += TURN_MS;
+
+    activeComps.forEach(({ idx, dmg }) => {
+      const compImg = idx === 0 ? this.comp0Img : this.comp1Img;
+      const compKey = idx === 0 ? 'ern' : 'saria';
+      const offKey  = idx === 0 ? 'atkOffComp0X' : 'atkOffComp1X';
+      const origX   = idx === 0 ? (PLAYER_X - CHAR_GAP) : (PLAYER_X - CHAR_GAP * 2);
+      const cx      = PLAYER_X - 42 * (idx + 1);
+      const d = dmg;
+      const compImpact = () => {
+        dispHp = Math.max(0, dispHp - d);
+        this.displayMonsterHp = dispHp;
+        this._addFloat(mxPos, GROUND_Y - 60, `-${d}`, '#ffaa44');
+      };
+      if (idx === 1) {
+        this._runMagicTurn(compImg, compKey, origX, t, compImpact);
+      } else {
+        this._runAttackTurn(compImg, compKey, null, offKey, origX, t, compImpact);
+      }
+      t += TURN_MS;
+    });
+
+    const mfx = monsterFloatX, mfd = monsterFloatDmg;
+    if (monsterAlive) {
+      this._runMonsterTurn(t, () => { this._addFloat(mfx, GROUND_Y - 60, mfd, '#ff8844'); });
+      t += TURN_MS;
     }
+
+    const gen = this.animGen;
+    this.time.delayedCall(t, () => { if (this.animGen === gen) this.animRunning = false; });
   }
 
   _onVictory() {
@@ -361,6 +417,28 @@ class JourneyScene extends Phaser.Scene {
   }
 
   _endBattle() {
+    this.animGen++;
+    this.animRunning = false;
+    this.tweens.killTweensOf(this);
+    this.atkOffPlayerX  = 0;
+    this.atkOffComp0X   = 0;
+    this.atkOffComp1X   = 0;
+    this.atkOffMonsterX = 0;
+    this.tweens.killTweensOf(this.playerImg);
+    this.tweens.killTweensOf(this.comp0Img);
+    this.tweens.killTweensOf(this.comp1Img);
+    this.tweens.killTweensOf(this.playerSword);
+    this.tweens.killTweensOf(this.comp0Sword);
+    this.tweens.killTweensOf(this.comp1Sword);
+    this.playerImg.rotation = 0;
+    this.comp0Img.rotation  = 0;
+    this.comp1Img.rotation  = 0;
+    this.playerImg.setTexture('hero');
+    this.comp0Img.setTexture('ern');
+    this.comp1Img.setTexture('saria');
+    this.playerSword.setVisible(false);
+    this.comp0Sword.setVisible(false);
+    this.comp1Sword.setVisible(false);
     this.currentMonster = null;
     this.monsterHp = 0;
     this.monsterImg.setVisible(false);
@@ -457,12 +535,20 @@ class JourneyScene extends Phaser.Scene {
     const compBob = this.state === 'walking' ? Math.sin(this.playerBobT * 0.9) * 3 : 0;
 
     // Player sprite
+    this.playerImg.x = PLAYER_X + this.atkOffPlayerX;
     this.playerImg.y = GROUND_Y - bob;
     const playerFlash = this.state === 'battle' && Math.sin(this.battleFlashT) > 0.5;
     playerFlash ? this.playerImg.setTint(0xaaaaff) : this.playerImg.clearTint();
 
-    // Companion sprites
+    // Companion sprites (apply attack offsets before Y update)
+    this.comp0Img.x = (PLAYER_X - CHAR_GAP)     + this.atkOffComp0X;
+    this.comp1Img.x = (PLAYER_X - CHAR_GAP * 2) + this.atkOffComp1X;
     this._updateCompanionSprites(compBob);
+
+    // Sync sword positions to character hand locations
+    if (this.playerSword.visible) this.playerSword.setPosition(this.playerImg.x + 20, GROUND_Y - 42);
+    if (this.comp0Sword.visible)  this.comp0Sword.setPosition(this.comp0Img.x  + 18, GROUND_Y - 38);
+    if (this.comp1Sword.visible)  this.comp1Sword.setPosition(this.comp1Img.x  + 16, GROUND_Y - 34);
 
     // Partner sprite
     if (window.multiManager.partnerState) {
@@ -524,9 +610,210 @@ class JourneyScene extends Phaser.Scene {
   _updateMonsterSprite() {
     if (!this.monsterImg.visible || !this.currentMonster) return;
     const groundY = this.currentMonster.shape === 'fly' ? GROUND_Y - 30 : GROUND_Y;
-    this.monsterImg.setPosition(this.monsterX, groundY);
+    this.monsterImg.setPosition(this.monsterX + this.atkOffMonsterX, groundY);
     const flash = this.state === 'battle' && Math.sin(this.battleFlashT) < -0.5;
     flash ? this.monsterImg.setTint(0xffffff) : this.monsterImg.clearTint();
+  }
+
+  _runAttackTurn(img, key, sword, offKey, origX, delay, onImpact) {
+    const gen = this.animGen;
+    const ok = () => this.animGen === gen;
+    const approachOff = this.monsterX - 90 - origX;
+    const AP = 200; // approach / return duration
+
+    this.time.delayedCall(delay, () => {
+      if (!ok()) return;
+      this.tweens.killTweensOf(img);
+      img.rotation = 0;
+      this.tweens.add({ targets: this, [offKey]: approachOff, duration: AP, ease: 'Quad.Out' });
+      this.tweens.add({ targets: img, rotation: 0.35, duration: AP, ease: 'Quad.Out' });
+      img.setTexture(key + '_atk1');
+    });
+    this.time.delayedCall(delay + AP + 220, () => {
+      if (!ok()) return;
+      img.setTexture(key + '_atk2');
+      this._showSlash(this.monsterX, GROUND_Y - 80);
+      if (sword) this._swingSword(sword, 0);
+      if (onImpact) onImpact();
+    });
+    this.time.delayedCall(delay + AP + 440, () => {
+      if (!ok()) return;
+      img.setTexture(key + '_atk3');
+      this.tweens.add({ targets: this, [offKey]: 0, duration: AP, ease: 'Quad.In' });
+      this.tweens.add({ targets: img, rotation: 0, duration: AP, ease: 'Quad.In' });
+    });
+    this.time.delayedCall(delay + AP + 440 + AP, () => {
+      if (!ok()) return;
+      img.setTexture(key);
+    });
+  }
+
+  _runMonsterTurn(delay, onImpact) {
+    const gen = this.animGen;
+    const ok = () => this.animGen === gen;
+    const AP = 200;
+    const travel = this.monsterX - (PLAYER_X + 80);
+
+    this.time.delayedCall(delay, () => {
+      if (!ok()) return;
+      this.tweens.add({ targets: this, atkOffMonsterX: -travel, duration: AP, ease: 'Quad.Out' });
+    });
+    this.time.delayedCall(delay + AP, () => {
+      if (!ok()) return;
+      if (onImpact) onImpact();
+    });
+    this.time.delayedCall(delay + AP + 300, () => {
+      if (!ok()) return;
+      this.tweens.add({ targets: this, atkOffMonsterX: 0, duration: AP, ease: 'Quad.In' });
+    });
+  }
+
+  _runMagicTurn(img, key, origX, delay, onImpact) {
+    const gen = this.animGen;
+    const ok = () => this.animGen === gen;
+
+    this.time.delayedCall(delay, () => {
+      if (!ok()) return;
+      this.tweens.killTweensOf(img);
+      img.rotation = 0;
+      img.setTexture(key + '_atk1');
+      this.tweens.add({ targets: img, rotation: 0.2, duration: 280, ease: 'Quad.Out' });
+    });
+    this.time.delayedCall(delay + 280, () => {
+      if (!ok()) return;
+      img.setTexture(key + '_atk2');
+      this._launchMagicBolt(origX + 30, GROUND_Y - 55, this.monsterX - 20, GROUND_Y - 80, onImpact);
+    });
+    this.time.delayedCall(delay + 580, () => {
+      if (!ok()) return;
+      img.setTexture(key + '_atk3');
+      this.tweens.add({ targets: img, rotation: 0, duration: 200, ease: 'Quad.Out' });
+    });
+    this.time.delayedCall(delay + 800, () => {
+      if (!ok()) return;
+      this.tweens.killTweensOf(img);
+      img.rotation = 0;
+      img.setTexture(key);
+    });
+  }
+
+  _launchMagicBolt(fromX, fromY, toX, toY, onImpact) {
+    const bolt = this.add.graphics().setDepth(9);
+    bolt.fillStyle(0x99aaff, 1);
+    bolt.fillCircle(0, 0, 7);
+    bolt.fillStyle(0xffffff, 0.9);
+    bolt.fillCircle(0, 0, 3);
+    bolt.lineStyle(2, 0xccddff, 0.7);
+    bolt.strokeCircle(0, 0, 12);
+    bolt.setPosition(fromX, fromY);
+    this.tweens.add({
+      targets: bolt,
+      x: toX,
+      y: toY,
+      duration: 280,
+      ease: 'Quad.In',
+      onComplete: () => {
+        this._showMagicBurst(toX, toY);
+        if (onImpact) onImpact();
+        bolt.destroy();
+      }
+    });
+  }
+
+  _playAttackAnim(img, baseKey, delay) {
+    const gen = this.animGen;
+    const ok = () => this.animGen === gen;
+    this.time.delayedCall(delay,       () => { if (ok()) img.setTexture(baseKey + '_atk1'); });
+    this.time.delayedCall(delay + 220, () => { if (ok()) img.setTexture(baseKey + '_atk2'); });
+    this.time.delayedCall(delay + 440, () => { if (ok()) img.setTexture(baseKey + '_atk3'); });
+    this.time.delayedCall(delay + 680, () => { if (ok()) img.setTexture(baseKey); });
+  }
+
+  _makeSword() {
+    const g = this.add.graphics().setDepth(5).setVisible(false);
+    // Blade
+    g.fillStyle(0xe0eeff, 1);
+    g.fillRect(-2, -50, 4, 40);
+    // Blade tip
+    g.fillStyle(0xffffff, 1);
+    g.fillRect(-1, -60, 2, 12);
+    // Blade shine
+    g.fillStyle(0xffffff, 0.5);
+    g.fillRect(-1, -50, 1, 36);
+    // Crossguard
+    g.fillStyle(0xc8a020, 1);
+    g.fillRect(-11, -11, 22, 5);
+    // Handle
+    g.fillStyle(0x7a3b10, 1);
+    g.fillRect(-3, -6, 6, 15);
+    // Pommel
+    g.fillStyle(0xc8a020, 1);
+    g.fillRect(-4, 9, 8, 6);
+    return g;
+  }
+
+  _swingSword(sword, delay) {
+    this.tweens.killTweensOf(sword);
+    sword.setRotation(-0.9);
+    sword.setVisible(false);
+    this.tweens.add({
+      targets: sword,
+      rotation: 1.2,
+      duration: 300,
+      delay,
+      ease: 'Quad.In',
+      onStart: () => sword.setVisible(true),
+      onComplete: () => {
+        this.tweens.add({
+          targets: sword,
+          rotation: -0.9,
+          duration: 200,
+          ease: 'Quad.Out',
+          onComplete: () => sword.setVisible(false)
+        });
+      }
+    });
+  }
+
+  _showSlash(x, y) {
+    const g = this.slashGfx;
+    this.tweens.killTweensOf(g);
+    g.clear();
+    g.setAlpha(1);
+    g.lineStyle(5, 0xffffff, 1.0);
+    g.beginPath();
+    g.arc(x, y, 38, -Math.PI * 0.65, Math.PI * 0.1, false);
+    g.strokePath();
+    g.lineStyle(3, 0xffee88, 0.8);
+    g.beginPath();
+    g.arc(x + 10, y - 10, 26, -Math.PI * 0.55, Math.PI * 0.05, false);
+    g.strokePath();
+    this.tweens.add({ targets: g, alpha: 0, duration: 220, ease: 'Quad.In', onComplete: () => g.clear() });
+  }
+
+  _showMagicBurst(x, y) {
+    const g = this.magicGfx;
+    this.tweens.killTweensOf(g);
+    g.clear();
+    g.setAlpha(1);
+    // 外リング
+    g.lineStyle(4, 0x99aaff, 1.0);
+    g.strokeCircle(x, y, 32);
+    // 内リング
+    g.lineStyle(3, 0xddeeff, 0.9);
+    g.strokeCircle(x, y, 18);
+    // 中心光
+    g.fillStyle(0xffffff, 0.9);
+    g.fillCircle(x, y, 7);
+    // 放射線（8方向）
+    g.lineStyle(2, 0xffffff, 0.85);
+    const R = 24;
+    for (let a = 0; a < 8; a++) {
+      const rad = (a / 8) * Math.PI * 2;
+      g.lineBetween(x + Math.cos(rad) * 10, y + Math.sin(rad) * 10,
+                    x + Math.cos(rad) * R,  y + Math.sin(rad) * R);
+    }
+    this.tweens.add({ targets: g, alpha: 0, duration: 350, ease: 'Quad.In', onComplete: () => g.clear() });
   }
 
   _drawClouds(area) {
@@ -655,7 +942,7 @@ class JourneyScene extends Phaser.Scene {
     g.fillRect(PLAYER_X - 30, GROUND_Y - 128, Math.floor(60 * pPct), 8);
 
     if (this.currentMonster) {
-      const mPct = Math.max(0, this.monsterHp / this.currentMonster.hp);
+      const mPct = Math.max(0, this.displayMonsterHp / this.currentMonster.hp);
       const mx = this.monsterX;
       g.fillStyle(0x220000, 1);
       g.fillRect(mx - 35, GROUND_Y - 155, 70, 8);

@@ -7,6 +7,15 @@ class BootScene extends Phaser.Scene {
     this.load.image('hero',        'images/characters/hero.png');
     this.load.image('ern',         'images/characters/ern.png');
     this.load.image('saria',       'images/characters/saria.png');
+    this.load.image('hero_atk1',   'images/characters/hero_atk1.png');
+    this.load.image('hero_atk2',   'images/characters/hero_atk2.png');
+    this.load.image('hero_atk3',   'images/characters/hero_atk3.png');
+    this.load.image('ern_atk1',    'images/characters/ern_atk1.png');
+    this.load.image('ern_atk2',    'images/characters/ern_atk2.png');
+    this.load.image('ern_atk3',    'images/characters/ern_atk3.png');
+    this.load.image('saria_atk1',  'images/characters/saria_atk1.png');
+    this.load.image('saria_atk2',  'images/characters/saria_atk2.png');
+    this.load.image('saria_atk3',  'images/characters/saria_atk3.png');
     this.load.image('slime',       'images/characters/slime.png');
     this.load.image('goblin',      'images/characters/goblin.png');
     this.load.image('bat',         'images/characters/bat.png');

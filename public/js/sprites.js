@@ -629,6 +629,9 @@ function createGameSprites(scene) {
   // PNG白背景を透明化（キャラ＋コモンモンスター全部）
   const pngKeys = [
     'hero', 'ern', 'saria',
+    'hero_atk1', 'hero_atk2', 'hero_atk3',
+    'ern_atk1',  'ern_atk2',  'ern_atk3',
+    'saria_atk1','saria_atk2','saria_atk3',
     'slime', 'goblin', 'bat', 'wolf', 'skeleton',
     'treant', 'spider', 'sand_worm', 'ice_wolf', 'lava_lizard',
     'orc', 'harpy', 'lizardman', 'skeleton_mage', 'troll',
