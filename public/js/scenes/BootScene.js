@@ -56,6 +56,8 @@ class BootScene extends Phaser.Scene {
     // --- BGM ---
     this.load.audio('bgm_journey', 'audio/bgm_journey.mp3');
     this.load.audio('bgm_boss',    'audio/bgm_boss.mp3');
+    this.load.audio('se_sword',    'audio/se_sword.mp3');
+    this.load.audio('se_magic',    'audio/se_magic.mp3');
     // bgm_dungeon は後で追加: this.load.audio('bgm_dungeon', 'audio/bgm_dungeon.mp3');
   }
 
@@ -117,6 +119,19 @@ class BootScene extends Phaser.Scene {
         gain.gain.exponentialRampToValueAtTime(0.001, t + 0.08);
         osc.start(t);
         osc.stop(t + 0.08);
+      } catch (e) { /* 非対応ブラウザは無視 */ }
+    };
+
+    // ---- 攻撃SE（実音ファイル使用）----
+    window._seScene = this;
+    window.playAttackSE = function(type) {
+      try {
+        const scene = window._seScene;
+        if (!scene) return;
+        const key = type === 'sword' ? 'se_sword' : type === 'magic' ? 'se_magic' : null;
+        if (key && scene.cache.audio.has(key)) {
+          scene.sound.play(key, { volume: 0.8 });
+        }
       } catch (e) { /* 非対応ブラウザは無視 */ }
     };
 

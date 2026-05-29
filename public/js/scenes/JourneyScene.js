@@ -638,6 +638,7 @@ class JourneyScene extends Phaser.Scene {
       img.setTexture(key + '_atk2');
       this._showSlash(this.monsterX, GROUND_Y - 80);
       if (sword) this._swingSword(sword, 0);
+      window.playAttackSE('sword');
       if (onImpact) onImpact();
     });
     this.time.delayedCall(delay + AP + 440, () => {
@@ -718,6 +719,7 @@ class JourneyScene extends Phaser.Scene {
       ease: 'Quad.In',
       onComplete: () => {
         this._showMagicBurst(toX, toY);
+        window.playAttackSE('magic');
         if (onImpact) onImpact();
         bolt.destroy();
       }
