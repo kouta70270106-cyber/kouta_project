@@ -621,16 +621,20 @@ function createGameSprites(scene) {
   if (!scene.textures.exists('skeleton')) _sprite(scene, 'skeleton', 12, 22, _drawSkeleton);
   if (!scene.textures.exists('bat'))      _sprite(scene, 'bat',      20, 12, _drawBat);
   if (!scene.textures.exists('spider'))   _sprite(scene, 'spider',   18, 12, _drawSpider);
-  _sprite(scene, 'orc',          17, 24, _drawOrc);
-  _sprite(scene, 'dragon',       24, 18, _drawDragon);
-  _sprite(scene, 'gold_slime',   20, 16, _drawGoldSlime);
-  _sprite(scene, 'silver_slime', 20, 16, _drawSilverSlime);
+  if (!scene.textures.exists('orc'))          _sprite(scene, 'orc',          17, 24, _drawOrc);
+  if (!scene.textures.exists('dragon'))       _sprite(scene, 'dragon',       24, 18, _drawDragon);
+  if (!scene.textures.exists('gold_slime'))   _sprite(scene, 'gold_slime',   20, 16, _drawGoldSlime);
+  if (!scene.textures.exists('silver_slime')) _sprite(scene, 'silver_slime', 20, 16, _drawSilverSlime);
 
   // PNG白背景を透明化（キャラ＋コモンモンスター全部）
   const pngKeys = [
     'hero', 'ern', 'saria',
     'slime', 'goblin', 'bat', 'wolf', 'skeleton',
-    'treant', 'spider', 'sand_worm', 'ice_wolf', 'lava_lizard'
+    'treant', 'spider', 'sand_worm', 'ice_wolf', 'lava_lizard',
+    'orc', 'harpy', 'lizardman', 'skeleton_mage', 'troll',
+    'cave_guard', 'dark_elf', 'frost_knight', 'fire_imp',
+    'minotaur', 'wyvern', 'vampire', 'golem', 'frost_dragon', 'demon_knight',
+    'gold_slime', 'silver_slime', 'dragon', 'lich', 'chimera'
   ];
   pngKeys.forEach(key => {
     const tex = scene.textures.get(key);

@@ -663,15 +663,6 @@ class JourneyScene extends Phaser.Scene {
       g.fillStyle(hpCol, 1);
       g.fillRect(mx - 35, GROUND_Y - 155, Math.floor(70 * mPct), 8);
 
-      if (this.currentMonster.rarity === 'rare' || this.currentMonster.rarity === 'legendary') {
-        let glowCol = this.currentMonster.rarity === 'legendary' ? 0xffaa00 : 0x4488ff;
-        if (this.currentMonster.id === 'gold_slime')   glowCol = 0xFFD700;
-        if (this.currentMonster.id === 'silver_slime') glowCol = 0xC0C0FF;
-        g.lineStyle(3, glowCol, 0.8);
-        g.strokeCircle(mx, GROUND_Y - 30, 50);
-        g.lineStyle(1, glowCol, 0.3);
-        g.strokeCircle(mx, GROUND_Y - 30, 58);
-      }
     }
   }
 

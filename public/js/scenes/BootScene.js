@@ -17,6 +17,26 @@ class BootScene extends Phaser.Scene {
     this.load.image('sand_worm',   'images/characters/sand_worm.png');
     this.load.image('ice_wolf',    'images/characters/ice_wolf.png');
     this.load.image('lava_lizard', 'images/characters/lava_lizard.png');
+    this.load.image('orc',          'images/characters/orc.png');
+    this.load.image('harpy',        'images/characters/harpy.png');
+    this.load.image('lizardman',    'images/characters/lizardman.png');
+    this.load.image('skeleton_mage','images/characters/skeleton_mage.png');
+    this.load.image('troll',        'images/characters/troll.png');
+    this.load.image('cave_guard',   'images/characters/cave_guard.png');
+    this.load.image('dark_elf',     'images/characters/dark_elf.png');
+    this.load.image('frost_knight', 'images/characters/frost_knight.png');
+    this.load.image('fire_imp',     'images/characters/fire_imp.png');
+    this.load.image('minotaur',     'images/characters/minotaur.png');
+    this.load.image('wyvern',       'images/characters/wyvern.png');
+    this.load.image('vampire',      'images/characters/vampire.png');
+    this.load.image('golem',        'images/characters/golem.png');
+    this.load.image('frost_dragon', 'images/characters/frost_dragon.png');
+    this.load.image('demon_knight', 'images/characters/demon_knight.png');
+    this.load.image('gold_slime',   'images/characters/gold_slime.png');
+    this.load.image('silver_slime', 'images/characters/silver_slime.png');
+    this.load.image('dragon',       'images/characters/dragon.png');
+    this.load.image('lich',         'images/characters/lich.png');
+    this.load.image('chimera',      'images/characters/chimera.png');
 
     this.load.image('bg_grassland', 'images/bg/grassland.jpg');
     this.load.image('bg_forest',    'images/bg/forest.jpg');
