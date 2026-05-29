@@ -303,7 +303,7 @@ class JourneyScene extends Phaser.Scene {
       }
     }
 
-    if (this.monsterHp <= 0) { this._onVictory(); return; }
+    const monsterDied = this.monsterHp <= 0;
     if (gs.player.hp <= 0)  { this._onDefeat();  return; }
 
     // ---- ターン制アニメーション（HPバーは impact 時点で段階的に減少） ----
@@ -351,7 +351,11 @@ class JourneyScene extends Phaser.Scene {
     }
 
     const gen = this.animGen;
-    this.time.delayedCall(t, () => { if (this.animGen === gen) this.animRunning = false; });
+    this.time.delayedCall(t, () => {
+      if (this.animGen !== gen) return;
+      this.animRunning = false;
+      if (monsterDied) this._onVictory();
+    });
   }
 
   _onVictory() {
