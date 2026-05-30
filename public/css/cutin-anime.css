@@ -1,0 +1,133 @@
+/* =====================================================================
+   必殺技カットイン — 案① 王道アニメ（紋章入り） / ゲーム導入用 独立スタイル
+   依存なし・cit- 名前空間。cutin-engine.js とセットで使用。
+   --cit-spd  : 速度倍率(大きいほど速い, 既定1)
+   --cit-shake: 揺れ倍率(既定1)
+   --cit-sl   : スピード線の濃さ倍率(既定1)
+   --cit-accent / --cit-accent-d : キャラのアクセント色（JSが注入）
+   ===================================================================== */
+.cit-overlay {
+  --cit-gold-hi:#fbe9a8; --cit-gold:#d9b24a; --cit-gold-lo:#7c5e1c;
+  --cit-spd:1; --cit-shake:1; --cit-sl:1;
+  --cit-accent:#6db0ec; --cit-accent-d:#2b6aa6;
+  --cit-foil: linear-gradient(180deg,#fff7da 0%,#fbe9a8 22%,#d9b24a 50%,#a87c22 74%,#f3dd97 100%);
+
+  position: absolute; inset: 0; z-index: 9999;
+  pointer-events: none; opacity: 0; visibility: hidden;
+  font-family: "Shippori Mincho", serif;
+  overflow: hidden;
+}
+.cit-overlay.cit-playing { opacity: 1; visibility: visible; }
+.cit-overlay * { box-sizing: border-box; }
+
+.cit-layer { position: absolute; inset: 0; }
+.cit-shake { position: absolute; inset: 0; }
+.cit-overlay.cit-playing .cit-shake { animation: citShake calc(2.7s / var(--cit-spd)) ease-out; }
+@keyframes citShake {
+  0%,100%{transform:translate(0,0);}
+  6%{transform:translate(calc(-3px*var(--cit-shake)),calc(2px*var(--cit-shake)));}
+  12%{transform:translate(calc(3px*var(--cit-shake)),calc(-2px*var(--cit-shake)));}
+  20%{transform:translate(calc(-5px*var(--cit-shake)),calc(3px*var(--cit-shake)));}
+  28%{transform:translate(calc(4px*var(--cit-shake)),calc(2px*var(--cit-shake)));}
+  34%{transform:translate(calc(-7px*var(--cit-shake)),calc(-3px*var(--cit-shake)));}
+  37%{transform:translate(calc(8px*var(--cit-shake)),calc(4px*var(--cit-shake)));}
+  42%{transform:translate(calc(-2px*var(--cit-shake)),calc(1px*var(--cit-shake)));}
+}
+
+/* veil */
+.cit-veil{background:radial-gradient(120% 120% at 50% 50%,transparent 30%,rgba(2,2,4,.55) 62%,rgba(0,0,0,.95) 100%);opacity:0;}
+.cit-overlay.cit-playing .cit-veil{animation:citVeil calc(3.3s / var(--cit-spd)) ease-out forwards;}
+@keyframes citVeil{0%{opacity:0;}33%{opacity:1;}88%{opacity:1;}100%{opacity:0;}}
+
+/* flash */
+.cit-flash{background:radial-gradient(circle at 50% 50%,#fff 0%,var(--cit-gold-hi) 40%,var(--cit-gold) 70%,transparent 100%);opacity:0;mix-blend-mode:screen;}
+.cit-overlay.cit-playing .cit-flash{animation:citFlash calc(3.3s / var(--cit-spd)) ease-out forwards;}
+@keyframes citFlash{0%,30%{opacity:0;}34%{opacity:1;}40%{opacity:0;}78%{opacity:0;}82%{opacity:.85;}88%{opacity:0;}100%{opacity:0;}}
+
+/* converging sparks */
+.cit-spark{position:absolute;left:50%;top:50%;border-radius:50%;
+  background:radial-gradient(circle,var(--cit-gold-hi),var(--cit-accent) 60%,transparent 70%);
+  box-shadow:0 0 8px 2px var(--cit-accent);opacity:0;transform:translate(-50%,-50%);}
+.cit-overlay.cit-playing .cit-spark{animation:citSpark calc(1.25s / var(--cit-spd)) cubic-bezier(.5,0,.9,.6) forwards;}
+@keyframes citSpark{0%{opacity:0;transform:translate(var(--sx),var(--sy)) scale(.4);}20%{opacity:1;}100%{opacity:0;transform:translate(-50%,-50%) scale(.2);}}
+
+/* speed lines */
+.cit-speed-radial{background:repeating-conic-gradient(from 0deg at 50% 50%,transparent 0 1.4deg,rgba(8,7,10,.85) 1.4deg 3.1deg);opacity:0;transform:scale(.2);mix-blend-mode:multiply;}
+.cit-overlay.cit-playing .cit-speed-radial{animation:citRad calc(2.4s / var(--cit-spd)) ease-out forwards;animation-delay:calc(1.15s / var(--cit-spd));}
+@keyframes citRad{0%{opacity:0;transform:scale(.15) rotate(0);}12%{opacity:calc(.9*var(--cit-sl));}100%{opacity:0;transform:scale(1.7) rotate(14deg);}}
+.cit-speed-stream{background:repeating-linear-gradient(0deg,transparent 0 9px,rgba(255,255,255,.05) 9px 10px),repeating-linear-gradient(0deg,transparent 0 26px,rgba(255,255,255,.10) 26px 28px);opacity:0;}
+.cit-overlay.cit-playing .cit-speed-stream{animation:citStream calc(2.2s / var(--cit-spd)) linear forwards;animation-delay:calc(1.25s / var(--cit-spd));}
+@keyframes citStream{0%{opacity:0;background-position:0 0,0 0;}15%{opacity:calc(.5*var(--cit-sl));}100%{opacity:0;background-position:-240px 0,200px 0;}}
+
+/* slash */
+.cit-slash{position:absolute;top:50%;left:-30%;width:160%;height:clamp(6px,1.6vmin,16px);
+  background:linear-gradient(90deg,transparent,#fff 45%,var(--cit-gold-hi) 55%,transparent);
+  filter:drop-shadow(0 0 14px var(--cit-gold-hi));transform:translateY(-50%) rotate(-18deg) scaleX(0);transform-origin:left center;opacity:0;}
+.cit-overlay.cit-playing .cit-slash{animation:citSlash calc(3.3s / var(--cit-spd)) ease-out forwards;}
+@keyframes citSlash{0%,76%{opacity:0;transform:translateY(-50%) rotate(-18deg) scaleX(0);}80%{opacity:1;transform:translateY(-50%) rotate(-18deg) scaleX(1);}92%{opacity:1;}100%{opacity:0;transform:translateY(-50%) rotate(-18deg) scaleX(1.05) translateX(40%);}}
+
+/* diagonal gold bands */
+.cit-band{position:absolute;left:-20%;right:-20%;top:30%;height:48%;
+  background:linear-gradient(180deg,#0a0a11,#16131f 50%,#0a0a11);
+  border-top:3px solid var(--cit-gold);border-bottom:3px solid var(--cit-gold);
+  box-shadow:inset 0 0 40px rgba(0,0,0,.7),0 30px 70px rgba(0,0,0,.55);
+  transform:rotate(-9deg) scaleX(0);transform-origin:left center;}
+.cit-band.cit-thin{top:26%;height:4%;background:var(--cit-foil);border:none;transform:rotate(-9deg) scaleX(0);transform-origin:right center;}
+.cit-overlay.cit-playing .cit-band{animation:citBand calc(.55s / var(--cit-spd)) cubic-bezier(.1,.8,.2,1) forwards;animation-delay:calc(1.18s / var(--cit-spd));}
+.cit-overlay.cit-playing .cit-band.cit-thin{animation:citBand calc(.5s / var(--cit-spd)) cubic-bezier(.1,.8,.2,1) forwards;animation-delay:calc(1.32s / var(--cit-spd));}
+@keyframes citBand{0%{transform:rotate(-9deg) scaleX(0);}100%{transform:rotate(-9deg) scaleX(1);}}
+
+/* heraldic seal */
+.cit-crest{position:absolute;left:27%;top:44%;transform:translate(-50%,-50%) scale(1.9) rotate(-11deg);
+  font-size:clamp(150px,40vmin,520px);color:color-mix(in srgb,var(--cit-gold) 16%,transparent);
+  -webkit-text-stroke:2px rgba(217,178,74,.42);filter:drop-shadow(0 0 36px rgba(217,178,74,.28));opacity:0;z-index:1;}
+.cit-overlay.cit-playing .cit-crest{animation:citSeal calc(.5s / var(--cit-spd)) cubic-bezier(.2,1.4,.4,1) forwards;animation-delay:calc(1.28s / var(--cit-spd));}
+@keyframes citSeal{0%{opacity:0;transform:translate(-50%,-50%) scale(2.4) rotate(-11deg);}55%{opacity:1;transform:translate(-50%,-50%) scale(.92) rotate(-11deg);}100%{opacity:.92;transform:translate(-50%,-50%) scale(1) rotate(-11deg);}}
+
+/* portrait */
+.cit-portrait-wrap{position:absolute;right:0;bottom:0;z-index:3;
+  width:clamp(350px,85%,880px);height:100%;
+  transform:translateX(125%) skewX(-5deg);filter:drop-shadow(0 18px 30px rgba(0,0,0,.6));}
+.cit-overlay.cit-playing .cit-portrait-wrap{animation:citSlam calc(.55s / var(--cit-spd)) cubic-bezier(.15,.9,.25,1) forwards;animation-delay:calc(1.22s / var(--cit-spd));}
+@keyframes citSlam{0%{transform:translateX(125%) skewX(-5deg);}70%{transform:translateX(-4%) skewX(-5deg);}100%{transform:translateX(0) skewX(0);}}
+.cit-portrait{position:relative;width:100%;height:100%;clip-path:polygon(8% 0,100% 0,92% 100%,0 100%);
+  background-color:transparent;background-size:auto 100%;background-position:center bottom;background-repeat:no-repeat;
+  image-rendering:pixelated;border:2px solid rgba(217,178,74,.55);}
+/* striped placeholder when no portrait image is set */
+.cit-portrait.cit-empty{background-image:repeating-linear-gradient(45deg,#14141d 0 14px,#0e0e16 14px 28px);}
+.cit-portrait.cit-empty::before{content:attr(data-ph);position:absolute;inset:0;display:flex;align-items:flex-end;justify-content:center;
+  padding-bottom:14%;font-family:ui-monospace,monospace;font-size:13px;letter-spacing:.1em;color:rgba(217,178,74,.6);text-align:center;}
+.cit-portrait::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 55%,color-mix(in srgb,var(--cit-accent) 40%,transparent));pointer-events:none;}
+.cit-portrait-rim{position:absolute;inset:-2px;border:2px solid color-mix(in srgb,var(--cit-accent) 80%,white 10%);
+  box-shadow:0 0 24px color-mix(in srgb,var(--cit-accent) 70%,transparent),inset 0 0 30px rgba(0,0,0,.6);
+  clip-path:polygon(8% 0,100% 0,92% 100%,0 100%);pointer-events:none;}
+
+/* move name */
+.cit-namebox{position:absolute;left:5%;bottom:12%;z-index:5;display:flex;flex-direction:column;align-items:flex-start;gap:1.4vmin;}
+.cit-tag{font-family:"Shippori Mincho",serif;font-weight:700;font-size:clamp(18px,3.4vmin,40px);
+  color:var(--cit-accent);opacity:0;text-shadow:0 2px 6px #000,0 0 14px color-mix(in srgb,var(--cit-accent) 60%,transparent);}
+.cit-sub{font-family:"Cinzel",serif;font-size:clamp(12px,2vmin,26px);letter-spacing:.42em;color:var(--cit-gold-hi);
+  text-transform:uppercase;opacity:0;text-shadow:0 0 10px rgba(217,178,74,.6);}
+.cit-jp{display:flex;font-family:"Shippori Mincho",serif;font-weight:800;line-height:.92;letter-spacing:.02em;font-size:clamp(54px,15vmin,190px);}
+.cit-jp span{display:inline-block;background:var(--cit-foil);-webkit-background-clip:text;background-clip:text;color:transparent;
+  -webkit-text-stroke:1px rgba(0,0,0,.55);filter:drop-shadow(0 3px 0 rgba(0,0,0,.65)) drop-shadow(0 0 16px rgba(217,178,74,.45));opacity:0;}
+.cit-romaji{font-family:"Cinzel",serif;font-weight:700;font-size:clamp(15px,2.6vmin,32px);color:#fff;opacity:0;letter-spacing:.16em;text-shadow:0 2px 6px #000;}
+
+.cit-overlay.cit-playing .cit-jp span{animation:citCh calc(.5s / var(--cit-spd)) cubic-bezier(.2,1.5,.4,1) forwards;}
+@keyframes citCh{0%{opacity:0;transform:translateY(.35em) scale(2.4) skewX(-8deg);filter:blur(6px) drop-shadow(0 3px 0 rgba(0,0,0,.65));}60%{opacity:1;}100%{opacity:1;transform:translateY(0) scale(1) skewX(0);filter:blur(0) drop-shadow(0 3px 0 rgba(0,0,0,.65)) drop-shadow(0 0 16px rgba(217,178,74,.45));}}
+.cit-overlay.cit-playing .cit-tag{animation:citFade calc(.7s / var(--cit-spd)) ease-out forwards;animation-delay:calc(1.5s / var(--cit-spd));}
+.cit-overlay.cit-playing .cit-sub{animation:citFade calc(.9s / var(--cit-spd)) ease-out forwards;animation-delay:calc(1.75s / var(--cit-spd));}
+.cit-overlay.cit-playing .cit-romaji{animation:citFade calc(.8s / var(--cit-spd)) ease-out forwards;animation-delay:calc(1.6s / var(--cit-spd));}
+@keyframes citFade{0%{opacity:0;letter-spacing:.7em;}100%{opacity:.97;}}
+
+/* optional scene charge hook: add .cit-charging to your scene element */
+.cit-charging{animation:citDrain calc(1.15s / var(--cit-spd,1)) ease-in forwards;}
+@keyframes citDrain{0%{filter:none;transform:scale(1);}100%{filter:saturate(.25) brightness(.45) contrast(1.1);transform:scale(1.04);}}
+
+@media (max-aspect-ratio: 4/5){
+  .cit-portrait-wrap{right:50%;width:clamp(290px,92%,720px);height:100%;transform:translate(50%,0) translateX(125%) skewX(-5deg);}
+  .cit-overlay.cit-playing .cit-portrait-wrap{animation-name:citSlamP;}
+  @keyframes citSlamP{0%{transform:translate(50%,0) translateX(125%) skewX(-5deg);}70%{transform:translate(50%,0) translateX(-4%) skewX(-5deg);}100%{transform:translate(50%,0) translateX(0) skewX(0);}}
+  .cit-namebox{left:6%;bottom:9%;}
+  .cit-crest{left:50%;}
+}

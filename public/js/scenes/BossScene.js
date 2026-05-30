@@ -73,6 +73,12 @@ class BossScene extends Phaser.Scene {
     const pStats = gs.getStats();
     const boss = this.bossData;
 
+    // 必殺技チェック（ボス戦はプレイヤーのみ）
+    if ((window.heroTP || 0) >= 100) {
+      this._doBossSpecialAttack();
+      return;
+    }
+
     // Phase check
     if (this.bossHp <= this.bossMaxHp / 2 && this.phase === 1) {
       this.phase = 2;
@@ -95,12 +101,70 @@ class BossScene extends Phaser.Scene {
       this._addFloat(CANVAS_W / 2 - 120, CANVAS_H / 2 - 40, `-${bDmg}`, '#ff0000');
     }
 
+    // TP蓄積
+    window.heroTP = Math.min(100, (window.heroTP || 0) + 34);
+
     if (this.bossHp <= 0) {
       this._onVictory();
     } else if (gs.player.hp <= 0) {
       this._onDefeat();
     }
     updateUI();
+  }
+
+  _doBossSpecialAttack() {
+    const gs = window.gameState;
+    const pStats = gs.getStats();
+
+    window.heroTP = 0;
+    const sp = { name: '⚡ 天空斬！', color: '#ffd700', mult: 5.0 };
+    const dmg = Math.max(1, Math.floor(pStats.atk * sp.mult));
+
+    // カットイン表示してから攻撃演出
+    this._showBossCutIn('hero');
+
+    this.time.delayedCall(1100, () => {
+      this.bossHp = Math.max(0, this.bossHp - dmg);
+
+      // 白フラッシュ
+      const flash = this.add.graphics().setDepth(22);
+      flash.fillStyle(0xffffff, 0.8);
+      flash.fillRect(0, 0, CANVAS_W, CANVAS_H);
+      this.tweens.add({
+        targets: flash, alpha: 0, duration: 350, ease: 'Quad.In',
+        onComplete: () => flash.destroy()
+      });
+
+      // 技名テキスト
+      const txt = this.add.text(CANVAS_W / 2, CANVAS_H / 2 - 20, sp.name, {
+        fontSize: '34px', fontStyle: 'bold', color: sp.color,
+        stroke: '#000000', strokeThickness: 5
+      }).setOrigin(0.5).setDepth(23).setAlpha(0).setScale(0.6);
+      this.tweens.add({
+        targets: txt, alpha: 1, scaleX: 1, scaleY: 1, duration: 220, ease: 'Back.Out',
+        onComplete: () => {
+          this.tweens.add({
+            targets: txt, alpha: 0, y: txt.y - 50,
+            duration: 550, delay: 500, ease: 'Quad.In',
+            onComplete: () => txt.destroy()
+          });
+        }
+      });
+
+      this._addFloat(CANVAS_W / 2 + 120, CANVAS_H / 2 - 40, `-${dmg}`, sp.color);
+      this.cameras.main.shake(300, 0.007);
+      gs.addLog(`${sp.name} ${dmg}ダメージ！！`, 'legendary');
+
+      if (this.bossHp <= 0) this._onVictory();
+      updateUI();
+    });
+  }
+
+  _showBossCutIn(charKey) {
+    if (!window.Cutin) return;
+    const ID_MAP = { hero: 'yusha', ern: 'eln', saria: 'saria' };
+    const canvas = document.querySelector('canvas');
+    Cutin.play(ID_MAP[charKey] || charKey, { speed: 4.5, sceneEl: canvas, charge: true });
   }
 
   _onVictory() {
@@ -136,6 +200,9 @@ class BossScene extends Phaser.Scene {
   }
 
   _onDefeat() {
+    window.heroTP  = 0;
+    window.ernTP   = 0;
+    window.sariaTP = 0;
     const gs = window.gameState;
     this.state = 'defeat';
     gs.player.hp = Math.floor(gs.getStats().maxHp * 0.2);

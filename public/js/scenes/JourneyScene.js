@@ -58,6 +58,33 @@ class JourneyScene extends Phaser.Scene {
     this.comp1NameTxt   = this.add.text(PLAYER_X - CHAR_GAP * 2, GROUND_Y - 140, D.COMPANIONS[1].name,   nameSty).setOrigin(0.5, 1);
     this.monsterNameTxt = this.add.text(0, 0, '', nameSty).setOrigin(0.5, 1).setVisible(false);
 
+    // ---- TP (テンションポイント) ----
+    if (window.heroTP  === undefined) window.heroTP  = 0;
+    if (window.ernTP   === undefined) window.ernTP   = 0;
+    if (window.sariaTP === undefined) window.sariaTP = 0;
+
+    // カットインエンジンの設定（canvas親要素に収める）
+    if (window.Cutin) {
+      const canvas = document.querySelector('canvas');
+      const container = canvas ? canvas.parentElement : null;
+      if (container) {
+        container.style.position = 'relative';
+        container.style.overflow = 'hidden';
+        Cutin.configure({ container });
+      }
+      Cutin.setPortrait('yusha', 'images/characters/hero.png');
+      Cutin.setPortrait('eln',   'images/characters/ern.png');
+      Cutin.setPortrait('saria', 'images/characters/saria.png');
+    }
+    this.tpGfx = this.add.graphics().setDepth(6);
+    this.tpLabelTxt = this.add.text(12, CANVAS_H - 38, 'TP', {
+      fontSize: '10px', color: '#aaddff', stroke: '#000', strokeThickness: 2
+    }).setDepth(7);
+    this.tpReadyTxt = this.add.text(PLAYER_X + 30, GROUND_Y - 121, '必殺！', {
+      fontSize: '11px', fontStyle: 'bold', color: '#ffd700',
+      stroke: '#000000', strokeThickness: 2
+    }).setDepth(7).setVisible(false);
+
     // ---- Floating texts ----
     this.floatTexts = [];
 
@@ -243,34 +270,55 @@ class JourneyScene extends Phaser.Scene {
     if (!this.currentMonster) return;
 
     const pStats = gs.getStats();
-
-    // Player → Monster（ダメージ量だけ計算、まだ適用しない）
-    let pDmg = Math.max(1, pStats.atk - this.currentMonster.def);
     const spell = gs.player.equipment?.spellbook;
-    if (spell?.element === 'fire' && Math.random() < 0.15) {
-      const bonus = Math.floor(pStats.atk * 0.5);
-      pDmg += bonus;
-      gs.addLog(`🔥 炎バースト！ +${bonus}ダメージ！`, 'highlight');
-    } else if (spell?.element === 'thunder' && Math.random() < 0.20) {
-      pDmg *= 2;
-      gs.addLog(`⚡ 雷撃発動！ ダメージ2倍！`, 'highlight');
+
+    // 各キャラの必殺技フラグ（攻撃前にチェック）
+    const heroSpec  = (window.heroTP  || 0) >= 100;
+    const ernSpec   = (window.ernTP   || 0) >= 100;
+    const sariaSpec = (window.sariaTP || 0) >= 100;
+    if (heroSpec)  window.heroTP  = 0;
+    if (ernSpec)   window.ernTP   = 0;
+    if (sariaSpec) window.sariaTP = 0;
+
+    // Player → Monster ダメージ計算
+    let pDmg;
+    if (heroSpec) {
+      pDmg = Math.floor(pStats.atk * 5.0); // 天空斬: ATK×5 防御無視
+    } else {
+      pDmg = Math.max(1, pStats.atk - this.currentMonster.def);
+      if (spell?.element === 'fire' && Math.random() < 0.15) {
+        const bonus = Math.floor(pStats.atk * 0.5);
+        pDmg += bonus;
+        gs.addLog(`🔥 炎バースト！ +${bonus}ダメージ！`, 'highlight');
+      } else if (spell?.element === 'thunder' && Math.random() < 0.20) {
+        pDmg *= 2;
+        gs.addLog(`⚡ 雷撃発動！ ダメージ2倍！`, 'highlight');
+      }
     }
 
-    // Companions → Monster（ダメージ量だけ計算）
+    // Companions → Monster ダメージ計算
     const activeComps = [];
     for (let i = 0; i < gs.companions.length; i++) {
       const c = gs.companions[i];
       if (c.hp > 0 && c.downTimer === 0) {
-        const cDmg = Math.max(1, gs.getCompanionAtk(i) - Math.floor(this.currentMonster.def * 0.5));
-        activeComps.push({ idx: i, dmg: cDmg });
+        const isSpec = i === 0 ? ernSpec : sariaSpec;
+        let cDmg;
+        if (isSpec) {
+          cDmg = i === 0
+            ? Math.floor(pStats.atk * 4.8)  // 双剣乱舞
+            : Math.floor(pStats.atk * 5.5); // 星霊爆裂陣
+        } else {
+          cDmg = Math.max(1, gs.getCompanionAtk(i) - Math.floor(this.currentMonster.def * 0.5));
+        }
+        activeComps.push({ idx: i, dmg: cDmg, isSpec });
       }
     }
 
-    // 全ダメージをゲームロジックに一括適用
+    // 全ダメージ適用
     this.monsterHp -= pDmg;
     activeComps.forEach(({ dmg }) => { this.monsterHp -= dmg; });
 
-    // Monster → random living party member（ゲームロジック）
+    // Monster → random living party member
     const monsterAlive = this.monsterHp > 0;
     let monsterFloatX = PLAYER_X, monsterFloatDmg = '';
     if (monsterAlive) {
@@ -304,37 +352,82 @@ class JourneyScene extends Phaser.Scene {
     }
 
     const monsterDied = this.monsterHp <= 0;
-    if (gs.player.hp <= 0)  { this._onDefeat();  return; }
+    if (gs.player.hp <= 0) { this._onDefeat(); return; }
 
-    // ---- ターン制アニメーション（HPバーは impact 時点で段階的に減少） ----
+    // TP蓄積（攻撃した・生きているキャラのみ）
+    window.heroTP = Math.min(100, (window.heroTP || 0) + 34);
+    for (let i = 0; i < gs.companions.length; i++) {
+      if (gs.companions[i].hp > 0 && gs.companions[i].downTimer === 0) {
+        if (i === 0) window.ernTP   = Math.min(100, (window.ernTP   || 0) + 34);
+        else         window.sariaTP = Math.min(100, (window.sariaTP || 0) + 34);
+      }
+    }
+
+    // ---- ターン制アニメーション ----
     this.animRunning = true;
     const TURN_MS = 900;
     let t = 0;
-
-    // 表示用HPの段階値を計算
     let dispHp = this.displayMonsterHp;
     const mxPos = this.monsterX;
 
+    // 必殺技ログ（必殺技を使ったキャラ分）
+    if (heroSpec) gs.addLog(`⚡ 天空斬！ 防御無視 ${pDmg}ダメージ！！`, 'legendary');
+    activeComps.forEach(({ idx, dmg, isSpec }) => {
+      if (isSpec) {
+        const msg = idx === 0 ? `🗡️ 双剣乱舞！ ${dmg}ダメージ！！` : `✨ 星霊爆裂陣！ ${dmg}ダメージ！！`;
+        gs.addLog(msg, 'legendary');
+      }
+    });
+
+    // プレイヤーターン
+    const CUTIN_MS = 1100; // speed 4.5 での cutin-engine 所要時間
+    if (heroSpec) {
+      this.time.delayedCall(t, () => { this._showCutIn('hero', '⚡ 天空斬！', '#ffd700'); });
+      t += CUTIN_MS;
+    }
     const playerImpact = () => {
       dispHp = Math.max(0, dispHp - pDmg);
       this.displayMonsterHp = dispHp;
-      this._addFloat(mxPos, GROUND_Y - 60, `-${pDmg}`, '#ff4444');
+      if (heroSpec) {
+        const dmgTxt = this.add.text(mxPos, GROUND_Y - 80, `-${pDmg}`, {
+          fontSize: '26px', fontStyle: 'bold', color: '#ffd700',
+          stroke: '#000000', strokeThickness: 4
+        }).setOrigin(0.5).setDepth(20);
+        this.floatTexts.push({ obj: dmgTxt, vy: -80, life: 1.5 });
+        this.cameras.main.shake(220, 0.006);
+      } else {
+        this._addFloat(mxPos, GROUND_Y - 60, `-${pDmg}`, '#ff4444');
+      }
     };
-
     this._runAttackTurn(this.playerImg, 'hero', this.playerSword, 'atkOffPlayerX', PLAYER_X, t, playerImpact);
     t += TURN_MS;
 
-    activeComps.forEach(({ idx, dmg }) => {
+    // 仲間ターン
+    activeComps.forEach(({ idx, dmg, isSpec }) => {
       const compImg = idx === 0 ? this.comp0Img : this.comp1Img;
       const compKey = idx === 0 ? 'ern' : 'saria';
       const offKey  = idx === 0 ? 'atkOffComp0X' : 'atkOffComp1X';
       const origX   = idx === 0 ? (PLAYER_X - CHAR_GAP) : (PLAYER_X - CHAR_GAP * 2);
-      const cx      = PLAYER_X - 42 * (idx + 1);
       const d = dmg;
+      const specName  = idx === 0 ? '🗡️ 双剣乱舞！' : '✨ 星霊爆裂陣！';
+      const specColor = idx === 0 ? '#44ff88' : '#99aaff';
+      if (isSpec) {
+        this.time.delayedCall(t, () => { this._showCutIn(compKey, specName, specColor); });
+        t += CUTIN_MS;
+      }
       const compImpact = () => {
         dispHp = Math.max(0, dispHp - d);
         this.displayMonsterHp = dispHp;
-        this._addFloat(mxPos, GROUND_Y - 60, `-${d}`, '#ffaa44');
+        if (isSpec) {
+          const dmgTxt = this.add.text(mxPos, GROUND_Y - 80, `-${d}`, {
+            fontSize: '26px', fontStyle: 'bold', color: specColor,
+            stroke: '#000000', strokeThickness: 4
+          }).setOrigin(0.5).setDepth(20);
+          this.floatTexts.push({ obj: dmgTxt, vy: -80, life: 1.5 });
+          this.cameras.main.shake(220, 0.006);
+        } else {
+          this._addFloat(mxPos, GROUND_Y - 60, `-${d}`, '#ffaa44');
+        }
       };
       if (idx === 1) {
         this._runMagicTurn(compImg, compKey, origX, t, compImpact);
@@ -344,6 +437,7 @@ class JourneyScene extends Phaser.Scene {
       t += TURN_MS;
     });
 
+    // モンスターターン
     const mfx = monsterFloatX, mfd = monsterFloatDmg;
     if (monsterAlive) {
       this._runMonsterTurn(t, () => { this._addFloat(mfx, GROUND_Y - 60, mfd, '#ff8844'); });
@@ -413,6 +507,9 @@ class JourneyScene extends Phaser.Scene {
   }
 
   _onDefeat() {
+    window.heroTP  = 0;
+    window.ernTP   = 0;
+    window.sariaTP = 0;
     const gs = window.gameState;
     gs.player.hp = Math.floor(gs.getStats().maxHp * 0.3); // survive at 30%
     gs.addLog(`💀 ${this.currentMonster.name}にやられた！ 何とか生き延びた...`, 'danger');
@@ -564,6 +661,7 @@ class JourneyScene extends Phaser.Scene {
 
     // Companion HP bars
     this._drawCompanionBars();
+    this._drawTpBar();
 
     // Sync player name (may change after load)
     const gs = window.gameState;
@@ -933,6 +1031,88 @@ class JourneyScene extends Phaser.Scene {
     for (let x = -ox; x < CANVAS_W; x += 80) {
       g.fillRect(x, GROUND_Y, 40, 3);
     }
+  }
+
+  // =========================================================
+  //  TP バー描画
+  // =========================================================
+  _drawTpBar() {
+    const g = this.tpGfx;
+    g.clear();
+    const pulse = 0.5 + 0.5 * Math.sin(this.battleFlashT * 2);
+
+    const bars = [
+      { tp: window.heroTP  || 0, cx: PLAYER_X,               col: 0xffd700 },
+      { tp: window.ernTP   || 0, cx: PLAYER_X - CHAR_GAP,     col: 0x44ff88 },
+      { tp: window.sariaTP || 0, cx: PLAYER_X - CHAR_GAP * 2, col: 0x9988ff },
+    ];
+
+    const BW = 36, BH = 4, BY = GROUND_Y - 119;
+    let anyReady = false;
+
+    for (const b of bars) {
+      const pct = Math.min(1, b.tp / 100);
+      const bx = b.cx - BW / 2;
+
+      g.fillStyle(0x111122, 1);
+      g.fillRect(bx, BY, BW, BH);
+
+      g.fillStyle(pct >= 1 ? b.col : 0x2244aa, 1);
+      g.fillRect(bx, BY, Math.floor(BW * pct), BH);
+
+      g.lineStyle(1, 0x334466, 1);
+      g.strokeRect(bx, BY, BW, BH);
+
+      if (pct >= 1) {
+        g.lineStyle(1, b.col, pulse);
+        g.strokeRect(bx - 1, BY - 1, BW + 2, BH + 2);
+        anyReady = true;
+      }
+    }
+
+    this.tpReadyTxt.setVisible(anyReady).setAlpha(0.6 + 0.4 * pulse);
+  }
+
+  // =========================================================
+  //  必殺技カットイン・フラッシュ演出
+  // =========================================================
+  _showCutIn(charKey, _techName, _techColor) {
+    if (!window.Cutin) return;
+    // charKey('hero'/'ern'/'saria') → Cutin ID('yusha'/'eln'/'saria') に変換
+    const ID_MAP = { hero: 'yusha', ern: 'eln', saria: 'saria' };
+    const id = ID_MAP[charKey] || charKey;
+    // ゲームcanvasをsceneElに渡すと必殺技中にゲーム画面が暗転する
+    const canvas = document.querySelector('canvas');
+    Cutin.play(id, { speed: 4.5, sceneEl: canvas, charge: true });
+  }
+
+  _showSpecialFlash(name, color) {
+    // 白フラッシュ
+    const flash = this.add.graphics().setDepth(22);
+    flash.fillStyle(0xffffff, 0.8);
+    flash.fillRect(0, 0, CANVAS_W, CANVAS_H);
+    this.tweens.add({
+      targets: flash, alpha: 0, duration: 350, ease: 'Quad.In',
+      onComplete: () => flash.destroy()
+    });
+
+    // 技名テキスト（ポップイン）
+    const txt = this.add.text(CANVAS_W / 2, CANVAS_H / 2 - 20, name, {
+      fontSize: '34px', fontStyle: 'bold', color,
+      stroke: '#000000', strokeThickness: 5
+    }).setOrigin(0.5).setDepth(23).setAlpha(0).setScale(0.6);
+
+    this.tweens.add({
+      targets: txt, alpha: 1, scaleX: 1, scaleY: 1,
+      duration: 220, ease: 'Back.Out',
+      onComplete: () => {
+        this.tweens.add({
+          targets: txt, alpha: 0, y: txt.y - 50,
+          duration: 550, delay: 600, ease: 'Quad.In',
+          onComplete: () => txt.destroy()
+        });
+      }
+    });
   }
 
   _drawHpBars() {
