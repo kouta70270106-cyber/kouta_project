@@ -1,10 +1,22 @@
 'use strict';
 
-const DCELL = 80;
-const DCOLS = 5;
-const DROWS = 4;
-const DOFF_X = (750 - DCOLS * DCELL) / 2;
-const DOFF_Y = 60;
+// Room nodes matching dungeon-map.html (SVG viewBox 0 0 820 500 → canvas 750×480)
+const DMAP_ROOMS = (() => {
+  const sx = 750 / 820, sy = 480 / 500;
+  const p = (x, y) => ({ x: Math.round(x * sx), y: Math.round(y * sy) });
+  return [
+    { id: 0, name: '入口',     ...p(110, 400), isBoss: false, neighbors: [1, 3] },
+    { id: 1, name: '広間',     ...p(110, 250), isBoss: false, neighbors: [0, 2, 4] },
+    { id: 2, name: '宝物庫',   ...p(110, 100), isBoss: false, neighbors: [1] },
+    { id: 3, name: '貯蔵庫',   ...p(300, 400), isBoss: false, neighbors: [0] },
+    { id: 4, name: '衛兵所',   ...p(300, 250), isBoss: false, neighbors: [1, 5] },
+    { id: 5, name: '中央広場', ...p(490, 250), isBoss: false, neighbors: [4, 6, 7] },
+    { id: 6, name: '祭壇',     ...p(490, 100), isBoss: false, neighbors: [5] },
+    { id: 7, name: '控えの間', ...p(690, 250), isBoss: false, neighbors: [5, 8] },
+    { id: 8, name: 'ボスの間', ...p(698,  99), isBoss: true,  neighbors: [7] },
+  ];
+})();
+const DNODE_R = 22;
 
 class DungeonScene extends Phaser.Scene {
   constructor() { super({ key: 'DungeonScene' }); }
@@ -12,19 +24,19 @@ class DungeonScene extends Phaser.Scene {
   create() {
     const gs = window.gameState;
 
-    // Floor count increases with journey
     this.floorNum = 1 + Math.floor(gs.journey.distance / 300);
     this.rooms = this._generateRooms();
-    this.playerCell = { col: 0, row: DROWS - 1 };
-    this.state = 'explore'; // explore | battle | cleared
+    this.playerRoomId = 0;
+    this.state = 'explore';
     this.battleMonster = null;
     this.battleMonsterHp = 0;
     this.battleFlashT = 0;
     this.battleDmgTimer = 1.5;
     this.autoMoveTimer = 0;
-
-    // Auto mode: default true, persisted in localStorage
     this.autoMode = localStorage.getItem('dungeon_auto') !== 'false';
+
+    // Background image
+    this.add.image(CANVAS_W / 2, CANVAS_H / 2, 'dungeon_bg').setDisplaySize(CANVAS_W, CANVAS_H);
 
     // Graphics layers
     this.mapGfx  = this.add.graphics();
@@ -37,13 +49,13 @@ class DungeonScene extends Phaser.Scene {
       fontSize: '16px', color: '#ffd700', stroke: '#000', strokeThickness: 2
     }).setOrigin(0.5);
 
-    // Exit button (bottom-left)
+    // Exit button
     const exitBtn = this.add.text(60, CANVAS_H - 20, '[ 退出 ]', {
       fontSize: '13px', color: '#ff8888', stroke: '#000', strokeThickness: 2
     }).setOrigin(0.5).setInteractive({ useHandCursor: true });
     exitBtn.on('pointerdown', () => { window.playSE?.(); this._exitDungeon(false); });
 
-    // Auto/Manual toggle button (bottom-right)
+    // Auto/Manual toggle
     this.toggleBtn = this.add.text(CANVAS_W - 60, CANVAS_H - 20, '', {
       fontSize: '12px', stroke: '#000', strokeThickness: 2,
       backgroundColor: '#1a2a1a', padding: { x: 8, y: 3 }
@@ -69,9 +81,7 @@ class DungeonScene extends Phaser.Scene {
       }
     } else if (this.state === 'explore' && this.autoMode && this.autoMoveTimer > 0) {
       this.autoMoveTimer -= dt;
-      if (this.autoMoveTimer <= 0) {
-        this._autoMove();
-      }
+      if (this.autoMoveTimer <= 0) this._autoMove();
     }
     this._drawAll();
     this._updateFloats(dt);
@@ -82,42 +92,22 @@ class DungeonScene extends Phaser.Scene {
   // =========================================================
   _generateRooms() {
     const gs = window.gameState;
-    const rooms = [];
-    const bossCol = DCOLS - 1;
-    const bossRow = 0;
-
-    for (let r = 0; r < DROWS; r++) {
-      for (let c = 0; c < DCOLS; c++) {
-        const isBoss = c === bossCol && r === bossRow;
-        const isEmpty = Math.random() < 0.15 && !isBoss;
-        let monster = null;
-
-        if (!isEmpty) {
-          const isForcedRare = isBoss || (c === DCOLS - 1);
-          const base = isForcedRare
-            ? this._pickRareMonster(gs.journey.area)
-            : D.pickMonster(gs.journey.area, gs.guild?.id);
-          monster = gs.scaleMonster({
-            ...base,
-            hp: Math.floor(base.hp * (1 + this.floorNum * 0.1)),
-            atk: Math.floor(base.atk * (1 + this.floorNum * 0.08)),
-          });
-        }
-
-        rooms.push({
-          col: c, row: r,
-          isBoss,
-          monster,
-          cleared: false,
-          // connections
-          right: c < DCOLS - 1,
-          down:  r < DROWS - 1,
-          up:    r > 0,
-          left:  c > 0,
+    return DMAP_ROOMS.map(tmpl => {
+      const isStart = tmpl.id === 0;
+      const isEmpty = isStart || (!tmpl.isBoss && Math.random() < 0.15);
+      let monster = null;
+      if (!isEmpty) {
+        const base = tmpl.isBoss
+          ? this._pickRareMonster(gs.journey.area)
+          : D.pickMonster(gs.journey.area, gs.guild?.id);
+        monster = gs.scaleMonster({
+          ...base,
+          hp:  Math.floor(base.hp  * (1 + this.floorNum * 0.1)),
+          atk: Math.floor(base.atk * (1 + this.floorNum * 0.08)),
         });
       }
-    }
-    return rooms;
+      return { ...tmpl, monster, cleared: false };
+    });
   }
 
   _pickRareMonster(area) {
@@ -125,19 +115,12 @@ class DungeonScene extends Phaser.Scene {
       (m.rarity === 'rare' || m.rarity === 'legendary') &&
       (!m.areas || m.areas.includes(area))
     );
-    if (rareMonsters.length === 0) {
-      return Object.values(D.MONSTERS).filter(m => m.rarity === 'rare')[0];
-    }
+    if (rareMonsters.length === 0) return Object.values(D.MONSTERS).filter(m => m.rarity === 'rare')[0];
     return rareMonsters[Math.floor(Math.random() * rareMonsters.length)];
   }
 
-  _getRoom(col, row) {
-    return this.rooms.find(r => r.col === col && r.row === row);
-  }
-
-  _currentRoom() {
-    return this._getRoom(this.playerCell.col, this.playerCell.row);
-  }
+  _getRoom(id) { return this.rooms.find(r => r.id === id); }
+  _currentRoom() { return this._getRoom(this.playerRoomId); }
 
   // =========================================================
   //  ROOM LOGIC
@@ -147,17 +130,14 @@ class DungeonScene extends Phaser.Scene {
     if (!room) return;
 
     if (room.cleared || !room.monster) {
-      // Empty / already cleared
       this.state = 'explore';
       this._showMoveButtons();
     } else {
-      // Start battle
       this.state = 'battle';
       this.battleMonster = room.monster;
       this.battleMonsterHp = room.monster.hp;
       this.battleDmgTimer = 1.5;
-      const gs = window.gameState;
-      gs.addLog(`⚔️ ${room.monster.name}が待ち構えていた！`);
+      window.gameState.addLog(`⚔️ ${room.monster.name}が待ち構えていた！`);
       this._hideMoveButtons();
     }
   }
@@ -166,7 +146,6 @@ class DungeonScene extends Phaser.Scene {
     const room = this._currentRoom();
     if (!room) return;
 
-    // Check if all rooms cleared
     if (this.rooms.every(r => r.cleared || !r.monster)) {
       this._allClear();
       return;
@@ -175,83 +154,58 @@ class DungeonScene extends Phaser.Scene {
     this._clearMoveButtons();
 
     if (this.autoMode) {
-      // Auto mode: start timer and move automatically
       this.autoMoveTimer = 1.2;
       return;
     }
 
-    // Manual mode: show direction buttons
-    const dirs = [
-      { label: '→', col: 1,  row: 0,  x: CANVAS_W / 2 + 80, y: CANVAS_H - 52 },
-      { label: '←', col: -1, row: 0,  x: CANVAS_W / 2 - 80, y: CANVAS_H - 52 },
-      { label: '↑', col: 0,  row: -1, x: CANVAS_W / 2,       y: CANVAS_H - 80 },
-      { label: '↓', col: 0,  row: 1,  x: CANVAS_W / 2,       y: CANVAS_H - 28 },
-    ];
-
+    // Manual: clickable zones at each neighbor room node
     this.moveButtons = [];
-    for (const d of dirs) {
-      const nc = this.playerCell.col + d.col;
-      const nr = this.playerCell.row + d.row;
-      if (nc < 0 || nc >= DCOLS || nr < 0 || nr >= DROWS) continue;
+    for (const nid of room.neighbors) {
+      const nr = this._getRoom(nid);
+      if (!nr) continue;
 
-      const adj = this._getRoom(nc, nr);
-      const hasMonster = adj && !adj.cleared && adj.monster;
-      const btn = this.add.text(d.x, d.y, d.label, {
-        fontSize: '20px', color: hasMonster ? '#ff8888' : '#ffd700',
-        stroke: '#000', strokeThickness: 3,
-        backgroundColor: '#1a1a3a', padding: { x: 10, y: 4 }
-      }).setOrigin(0.5).setInteractive({ useHandCursor: true });
+      const hasMonster = !nr.cleared && nr.monster;
+      const zone = this.add.zone(nr.x, nr.y, (DNODE_R + 8) * 2, (DNODE_R + 8) * 2)
+        .setInteractive({ useHandCursor: true });
 
-      btn.on('pointerdown', () => {
+      const label = this.add.text(nr.x, nr.y + DNODE_R + 14, nr.name, {
+        fontSize: '10px', color: hasMonster ? '#ff8888' : '#88ff88',
+        stroke: '#000', strokeThickness: 2
+      }).setOrigin(0.5);
+
+      zone.on('pointerdown', () => {
         window.playSE?.();
-        this.playerCell.col = nc;
-        this.playerCell.row = nr;
+        this.playerRoomId = nid;
         this._clearMoveButtons();
         this._enterRoom();
       });
-      this.moveButtons.push(btn);
+
+      this.moveButtons.push(zone, label);
     }
   }
 
   _autoMove() {
     this.autoMoveTimer = 0;
 
-    // BFS to find nearest uncleared room and move one step toward it
-    const start = this.playerCell;
-    const visited = new Set([`${start.col},${start.row}`]);
-    const queue = [{ col: start.col, row: start.row, firstStep: null }];
-    const dirs = [
-      { col: 1, row: 0 },
-      { col: 0, row: -1 },
-      { col: -1, row: 0 },
-      { col: 0, row: 1 },
-    ];
+    const visited = new Set([this.playerRoomId]);
+    const queue = [{ id: this.playerRoomId, firstStep: null }];
 
     while (queue.length > 0) {
       const cur = queue.shift();
-      for (const d of dirs) {
-        const nc = cur.col + d.col;
-        const nr = cur.row + d.row;
-        if (nc < 0 || nc >= DCOLS || nr < 0 || nr >= DROWS) continue;
-        const key = `${nc},${nr}`;
-        if (visited.has(key)) continue;
-        visited.add(key);
-
-        const firstStep = cur.firstStep || { col: nc, row: nr };
-        const adj = this._getRoom(nc, nr);
-
+      const room = this._getRoom(cur.id);
+      for (const nid of room.neighbors) {
+        if (visited.has(nid)) continue;
+        visited.add(nid);
+        const firstStep = cur.firstStep ?? nid;
+        const adj = this._getRoom(nid);
         if (adj && !adj.cleared && adj.monster) {
-          // Found an uncleared room — move one step toward it
-          this.playerCell.col = firstStep.col;
-          this.playerCell.row = firstStep.row;
+          this.playerRoomId = firstStep;
           this._enterRoom();
           return;
         }
-        queue.push({ col: nc, row: nr, firstStep });
+        queue.push({ id: nid, firstStep });
       }
     }
-
-    // No uncleared rooms reachable — trigger all-clear
     this._showMoveButtons();
   }
 
@@ -259,13 +213,10 @@ class DungeonScene extends Phaser.Scene {
     this.autoMode = !this.autoMode;
     localStorage.setItem('dungeon_auto', this.autoMode ? 'true' : 'false');
     this._updateToggleBtn();
-
     if (!this.autoMode) {
-      // Switched to manual: cancel pending auto-move and show buttons
       this.autoMoveTimer = 0;
       if (this.state === 'explore') this._showMoveButtons();
     } else {
-      // Switched to auto: hide manual buttons and start auto timer
       this._clearMoveButtons();
       if (this.state === 'explore') this.autoMoveTimer = 0.5;
     }
@@ -282,9 +233,7 @@ class DungeonScene extends Phaser.Scene {
     }
   }
 
-  _hideMoveButtons() {
-    this._clearMoveButtons();
-  }
+  _hideMoveButtons() { this._clearMoveButtons(); }
 
   _clearMoveButtons() {
     if (this.moveButtons) {
@@ -301,12 +250,10 @@ class DungeonScene extends Phaser.Scene {
     const pStats = gs.getStats();
     const m = this.battleMonster;
 
-    // Player attacks
     const pDmg = Math.max(1, pStats.atk - m.def);
     this.battleMonsterHp -= pDmg;
     this._addFloat(CANVAS_W / 2 + 80, CANVAS_H / 2 - 40, `-${pDmg}`, '#ff4444');
 
-    // Monster attacks
     if (this.battleMonsterHp > 0) {
       const mDmg = Math.max(1, m.atk - pStats.def);
       gs.player.hp = Math.max(0, gs.player.hp - mDmg);
@@ -336,7 +283,6 @@ class DungeonScene extends Phaser.Scene {
     gs.stats.killCount[m.id] = (gs.stats.killCount[m.id] || 0) + 1;
     gs.updateQuestProgress(m.id);
 
-    // Drop (higher chance in dungeon)
     const dropChance = 0.25 + (m.rarity === 'rare' ? 0.2 : 0) + (m.rarity === 'legendary' ? 0.4 : 0)
                      + (gs.guild?.id === 'thieves' ? 0.15 : 0);
     if (m.drop && Math.random() < dropChance) {
@@ -349,10 +295,7 @@ class DungeonScene extends Phaser.Scene {
     }
 
     gs.addLog(`⚔️ ${m.name}を倒した！ EXP+${gained} 💰+${goldGained}`);
-
-    if (room.isBoss) {
-      gs.addLog(`👑 ダンジョンボスを討伐！`, 'legendary');
-    }
+    if (room.isBoss) gs.addLog(`👑 ダンジョンボスを討伐！`, 'legendary');
 
     this.state = 'explore';
     this.battleMonster = null;
@@ -371,21 +314,17 @@ class DungeonScene extends Phaser.Scene {
     const gs = window.gameState;
     gs.stats.dungeonsCleared++;
     gs.addLog(`🏆 ダンジョン踏破！ 全ての魔物を倒した！`, 'legendary');
-    // Bonus reward
     const bonusExp = 500 * this.floorNum;
     const bonusGold = 200 * this.floorNum;
     gs.gainExp(bonusExp);
     gs.gainGold(bonusGold);
     gs.addLog(`✨ 踏破ボーナス: EXP+${bonusExp} Gold+${bonusGold}`, 'success');
-
-    // Guaranteed rare drop
     const rareDrops = Object.values(D.EQUIPMENT).filter(e => e.rarity === 'rare');
     const drop = rareDrops[Math.floor(Math.random() * rareDrops.length)];
     if (drop && gs.addItem(drop)) {
       gs.addLog(`💎 踏破報酬「${drop.name}」を入手！`, 'rare');
       showItemModal(drop);
     }
-
     this._exitDungeon(true);
   }
 
@@ -405,66 +344,83 @@ class DungeonScene extends Phaser.Scene {
     const g = this.mapGfx;
     g.clear();
 
-    // Background
-    g.fillStyle(0x050510, 1);
+    // Semi-transparent overlay
+    g.fillStyle(0x050510, 0.45);
     g.fillRect(0, 44, CANVAS_W, CANVAS_H - 44);
 
-    // Rooms
+    // Corridors (draw edges once per pair)
+    for (const room of this.rooms) {
+      for (const nid of room.neighbors) {
+        if (nid > room.id) {
+          const nr = this._getRoom(nid);
+          g.lineStyle(5, 0x2a1a08, 0.75);
+          g.lineBetween(room.x, room.y, nr.x, nr.y);
+          g.lineStyle(2, 0x8a6438, 0.5);
+          g.lineBetween(room.x, room.y, nr.x, nr.y);
+        }
+      }
+    }
+
+    // Room nodes
     for (const room of this.rooms) {
       this._drawRoom(g, room);
     }
 
-    // Characters
+    // Characters and HP (battle)
     const cg = this.charGfx;
     cg.clear();
     this._drawDungeonChars(cg);
 
-    // HP bars
     const hg = this.hpGfx;
     hg.clear();
-    if (this.state === 'battle') {
-      this._drawDungeonHpBars(hg);
-    }
+    if (this.state === 'battle') this._drawDungeonHpBars(hg);
   }
 
   _drawRoom(g, room) {
-    const x = DOFF_X + room.col * DCELL;
-    const y = DOFF_Y + room.row * DCELL;
+    const { x, y } = room;
+    const isPlayer   = room.id === this.playerRoomId;
+    const isNeighbor = this.state === 'explore' && !this.autoMode &&
+                       (this._currentRoom()?.neighbors.includes(room.id) ?? false);
+    const R = DNODE_R;
 
-    let fillCol = 0x101020;
-    if (room.col === this.playerCell.col && room.row === this.playerCell.row) {
-      fillCol = 0x1a1a40;
-    } else if (room.cleared || !room.monster) {
-      fillCol = 0x0a180a;
-    } else if (room.isBoss) {
-      fillCol = 0x200010;
+    // Fill
+    let fillCol, alpha;
+    if (isPlayer)                        { fillCol = 0x2244aa; alpha = 0.90; }
+    else if (room.cleared || !room.monster) { fillCol = 0x1a3a1a; alpha = 0.75; }
+    else if (room.isBoss)                { fillCol = 0x440010; alpha = 0.92; }
+    else                                 { fillCol = 0x1a0a22; alpha = 0.80; }
+
+    g.fillStyle(fillCol, alpha);
+    g.fillCircle(x, y, R);
+
+    // Border
+    const borderCol = room.isBoss ? 0xcc2244 : (isPlayer ? 0x6699ff : 0x6a4a1e);
+    g.lineStyle(2, borderCol, 1);
+    g.strokeCircle(x, y, R);
+
+    // Clickable neighbor highlight
+    if (isNeighbor) {
+      g.lineStyle(2, 0xffdd44, 0.85);
+      g.strokeCircle(x, y, R + 5);
     }
 
-    g.fillStyle(fillCol, 1);
-    g.fillRect(x + 2, y + 2, DCELL - 4, DCELL - 4);
-    g.lineStyle(1, room.isBoss ? 0xaa2244 : 0x2a2a4a, 1);
-    g.strokeRect(x + 2, y + 2, DCELL - 4, DCELL - 4);
-
-    // Icon
+    // Monster dot / crown
     if (!room.cleared && room.monster) {
-      const cx = x + DCELL / 2;
-      const cy = y + DCELL / 2;
-      g.fillStyle(room.isBoss ? 0xaa2244 : (room.monster.color || 0x884444), 1);
-      g.fillCircle(cx, cy, room.isBoss ? 12 : 8);
-
+      g.fillStyle(room.isBoss ? 0xff4466 : (room.monster.color || 0xff4444), 0.9);
+      g.fillCircle(x, y, room.isBoss ? 10 : 7);
       if (room.isBoss) {
         g.fillStyle(0xffd700, 1);
-        g.fillTriangle(cx - 8, cy + 6, cx, cy - 10, cx + 8, cy + 6);
+        g.fillTriangle(x - 6, y + 5, x, y - 8, x + 6, y + 5);
       }
-    } else if (room.cleared || !room.monster) {
-      g.fillStyle(0x224422, 0.5);
-      g.fillRect(x + DCELL / 2 - 6, y + DCELL / 2 - 6, 12, 12);
+    } else if (room.cleared) {
+      g.fillStyle(0x44ff88, 0.6);
+      g.fillCircle(x, y, 5);
     }
 
-    // Player marker
-    if (room.col === this.playerCell.col && room.row === this.playerCell.row) {
-      g.fillStyle(0x4488ff, 1);
-      g.fillCircle(x + 12, y + 12, 5);
+    // Player dot
+    if (isPlayer) {
+      g.fillStyle(0xaaccff, 1);
+      g.fillCircle(x, y - R + 7, 5);
     }
   }
 
@@ -474,21 +430,16 @@ class DungeonScene extends Phaser.Scene {
     const cx = CANVAS_W / 2;
     const by = CANVAS_H - 140;
 
-    // Player
     g.fillStyle(0x5566ff, 1);
     g.fillCircle(cx - 90, by - 20, 10);
     g.fillRect(cx - 99, by - 10, 18, 22);
     g.fillRect(cx - 99, by + 12, 7, 14);
     g.fillRect(cx - 90, by + 12, 7, 14);
 
-    // Monster
     const flash = this.state === 'battle' && Math.sin(this.battleFlashT) < -0.5;
     g.fillStyle(flash ? 0xffffff : (this.battleMonster.color || 0xcc2222), 1);
     g.fillCircle(cx + 90, by - 20, 14);
     g.fillRect(cx + 76, by - 6, 28, 25);
-
-    // VS text
-    this.charGfx.fillStyle ? null : null;
   }
 
   _drawDungeonHpBars(g) {
@@ -497,14 +448,12 @@ class DungeonScene extends Phaser.Scene {
     const cx = CANVAS_W / 2;
     const by = CANVAS_H - 160;
 
-    // Player HP
     const pPct = gs.player.hp / stats.maxHp;
     g.fillStyle(0x220000, 1);
     g.fillRect(cx - 160, by, 100, 8);
     g.fillStyle(0xcc2222, 1);
     g.fillRect(cx - 160, by, Math.floor(100 * pPct), 8);
 
-    // Monster HP
     if (this.battleMonster) {
       const mPct = Math.max(0, this.battleMonsterHp / this.battleMonster.hp);
       g.fillStyle(0x220000, 1);

@@ -4,6 +4,7 @@ class BootScene extends Phaser.Scene {
   constructor() { super({ key: 'BootScene' }); }
 
   preload() {
+    this.load.image('dungeon_bg',  'assets/dungeon_bg.png');
     this.load.image('hero',        'images/characters/hero.png');
     this.load.image('ern',         'images/characters/ern.png');
     this.load.image('saria',       'images/characters/saria.png');
