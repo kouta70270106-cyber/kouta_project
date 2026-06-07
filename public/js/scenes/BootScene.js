@@ -5,7 +5,13 @@ class BootScene extends Phaser.Scene {
 
   preload() {
     this.load.image('dungeon_bg',  'assets/dungeon_bg.png');
-    this.load.image('boss_bg',     'assets/boss_bg.png');
+    this.load.image('boss_bg',          'images/bg/boss_bg.png');
+    this.load.image('boss_bg_inferno',  'images/bg/フラメル.png');
+    this.load.image('boss_bg_frost',    'images/bg/グラシア.png');
+    this.load.image('boss_bg_shadow',   'images/bg/シャルテン.png');
+    this.load.image('boss_bg_storm',    'images/bg/ヴィルト.png');
+    this.load.image('boss_bg_plague',   'images/bg/ゼスト.png');
+    this.load.image('boss_bg_void',     'images/bg/ヴォイド.png');
     this.load.image('boss_inferno','images/characters/boss_inferno.png');
     this.load.image('boss_frost',  'images/characters/boss_frost.png');
     this.load.image('boss_shadow', 'images/characters/boss_shadow.png');

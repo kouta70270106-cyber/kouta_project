@@ -21,19 +21,24 @@ class BossScene extends Phaser.Scene {
     this.bgAnimT = 0;
     window.heroTP = 0; // ボス戦開始時にTPリセット
 
-    // 背景画像
-    this.add.image(CANVAS_W / 2, CANVAS_H / 2, 'boss_bg').setDisplaySize(CANVAS_W, CANVAS_H);
+    // 背景画像（ボスごとに専用背景）
+    const bgKey = 'boss_bg_' + boss.id;
+    const bgTexKey = this.textures.exists(bgKey) ? bgKey : 'boss_bg';
+    this.add.image(CANVAS_W / 2, CANVAS_H / 2, bgTexKey).setDisplaySize(CANVAS_W, CANVAS_H);
 
     // ヒーロー画像
     this.heroImg = this.add.image(CANVAS_W / 2 - 140, CANVAS_H - 110, 'hero')
       .setOrigin(0.5, 1)
-      .setScale(0.18);
+      .setScale(0.18)
+      .setDepth(10);
 
     // ボス画像
-    this._bossBaseScale = 0.22;
+    this._bossBaseScale = 0.30;
     this.bossImg = this.add.image(CANVAS_W / 2 + 140, CANVAS_H - 110, 'boss_' + boss.id)
       .setOrigin(0.5, 1)
-      .setScale(this._bossBaseScale);
+      .setScale(this._bossBaseScale)
+      .setDepth(5);
+    this.bossImg.postFX.addGlow(0x000000, 4, 0, false, 0.1, 20);
 
     // Graphics（ボス画像より上のレイヤー）
     this.bgGfx   = this.add.graphics();
