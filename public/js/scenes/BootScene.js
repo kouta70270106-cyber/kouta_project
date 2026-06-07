@@ -5,6 +5,13 @@ class BootScene extends Phaser.Scene {
 
   preload() {
     this.load.image('dungeon_bg',  'assets/dungeon_bg.png');
+    this.load.image('boss_bg',     'assets/boss_bg.png');
+    this.load.image('boss_inferno','images/characters/boss_inferno.png');
+    this.load.image('boss_frost',  'images/characters/boss_frost.png');
+    this.load.image('boss_shadow', 'images/characters/boss_shadow.png');
+    this.load.image('boss_storm',  'images/characters/boss_storm.png');
+    this.load.image('boss_plague', 'images/characters/boss_plague.png');
+    this.load.image('boss_void',   'images/characters/boss_void.png');
     this.load.image('hero',        'images/characters/hero.png');
     this.load.image('ern',         'images/characters/ern.png');
     this.load.image('saria',       'images/characters/saria.png');
@@ -165,6 +172,15 @@ class BootScene extends Phaser.Scene {
         gs.addItem(D.EQUIPMENT.cloth_robe);
         gs.player.hp = gs.player.maxHp;
         this._startGame();
+      } else if (params.has('boss')) {
+        // デバッグ用: ?boss=inferno でボス戦に直接ジャンプ
+        document.getElementById('name-modal').style.display = 'none';
+        gs.player.name = '勇者';
+        gs.addItem(D.EQUIPMENT.wooden_sword);
+        gs.addItem(D.EQUIPMENT.cloth_robe);
+        gs.player.hp = gs.player.maxHp;
+        gs.guild = D.GUILDS['warriors'];
+        this.scene.start('JourneyScene');
       } else {
         const modal = document.getElementById('name-modal');
         modal.style.display = 'flex';

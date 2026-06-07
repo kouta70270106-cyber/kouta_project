@@ -637,7 +637,8 @@ function createGameSprites(scene) {
     'orc', 'harpy', 'lizardman', 'skeleton_mage', 'troll',
     'cave_guard', 'dark_elf', 'frost_knight', 'fire_imp',
     'minotaur', 'wyvern', 'vampire', 'golem', 'frost_dragon', 'demon_knight',
-    'gold_slime', 'silver_slime', 'dragon', 'lich', 'chimera'
+    'gold_slime', 'silver_slime', 'dragon', 'lich', 'chimera',
+    'boss_inferno', 'boss_frost', 'boss_shadow', 'boss_storm', 'boss_plague', 'boss_void'
   ];
   pngKeys.forEach(key => {
     const tex = scene.textures.get(key);

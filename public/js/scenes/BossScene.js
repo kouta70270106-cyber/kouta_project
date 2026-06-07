@@ -19,8 +19,23 @@ class BossScene extends Phaser.Scene {
     this.flashT = 0;
     this.floatTexts = [];
     this.bgAnimT = 0;
+    window.heroTP = 0; // ボス戦開始時にTPリセット
 
-    // Graphics
+    // 背景画像
+    this.add.image(CANVAS_W / 2, CANVAS_H / 2, 'boss_bg').setDisplaySize(CANVAS_W, CANVAS_H);
+
+    // ヒーロー画像
+    this.heroImg = this.add.image(CANVAS_W / 2 - 140, CANVAS_H - 110, 'hero')
+      .setOrigin(0.5, 1)
+      .setScale(0.18);
+
+    // ボス画像
+    this._bossBaseScale = 0.22;
+    this.bossImg = this.add.image(CANVAS_W / 2 + 140, CANVAS_H - 110, 'boss_' + boss.id)
+      .setOrigin(0.5, 1)
+      .setScale(this._bossBaseScale);
+
+    // Graphics（ボス画像より上のレイヤー）
     this.bgGfx   = this.add.graphics();
     this.charGfx = this.add.graphics();
     this.hpGfx   = this.add.graphics();
@@ -73,7 +88,7 @@ class BossScene extends Phaser.Scene {
     const pStats = gs.getStats();
     const boss = this.bossData;
 
-    // 必殺技チェック（ボス戦はプレイヤーのみ）
+    // 必殺技チェック（TP満タン時に発動）
     if ((window.heroTP || 0) >= 100) {
       this._doBossSpecialAttack();
       return;
@@ -92,13 +107,13 @@ class BossScene extends Phaser.Scene {
     // Player attacks boss
     const pDmg = Math.max(1, Math.floor(pStats.atk - boss.def * phaseDefMult));
     this.bossHp -= pDmg;
-    this._addFloat(CANVAS_W / 2 + 120, CANVAS_H / 2 - 40, `-${pDmg}`, '#ff4444');
+    this._playHeroAttack(pDmg);
 
     // Boss attacks player
     if (this.bossHp > 0) {
       const bDmg = Math.max(1, Math.floor(boss.atk * phaseAtkMult - pStats.def));
       gs.player.hp = Math.max(0, gs.player.hp - bDmg);
-      this._addFloat(CANVAS_W / 2 - 120, CANVAS_H / 2 - 40, `-${bDmg}`, '#ff0000');
+      this._playBossAttack(bDmg);
     }
 
     // TP蓄積
@@ -117,6 +132,8 @@ class BossScene extends Phaser.Scene {
     const pStats = gs.getStats();
 
     window.heroTP = 0;
+    this.state = 'special'; // 演出中はバトルタイマーを止める
+
     const sp = { name: '⚡ 天空斬！', color: '#ffd700', mult: 5.0 };
     const dmg = Math.max(1, Math.floor(pStats.atk * sp.mult));
 
@@ -155,7 +172,15 @@ class BossScene extends Phaser.Scene {
       this.cameras.main.shake(300, 0.007);
       gs.addLog(`${sp.name} ${dmg}ダメージ！！`, 'legendary');
 
-      if (this.bossHp <= 0) this._onVictory();
+      if (this.bossHp <= 0) {
+        this._onVictory();
+      } else {
+        // 演出終了後にバトル再開（タイマーもリセット）
+        this.time.delayedCall(800, () => {
+          this.state = 'battle';
+          this.battleDmgTimer = 1.0;
+        });
+      }
       updateUI();
     });
   }
@@ -238,38 +263,26 @@ class BossScene extends Phaser.Scene {
 
     const pulse = 0.5 + 0.5 * Math.sin(this.bgAnimT * 1.5);
     const boss = this.bossData;
-
-    // Dark background with color tint based on boss
-    g.fillStyle(0x020208, 1);
-    g.fillRect(0, 0, CANVAS_W, CANVAS_H);
-
-    // Glowing floor
     const bossColor = boss.color || 0xff2200;
-    const alpha = 0.06 + pulse * 0.04;
-    g.fillStyle(bossColor, alpha);
-    g.fillRect(0, CANVAS_H - 120, CANVAS_W, 120);
 
-    // Beam from boss
+    // 第2形態：ボス周囲に放射線エフェクト
     const fx = this.fxGfx;
     fx.clear();
     if (this.state === 'battle' && this.phase === 2) {
-      fx.lineStyle(2, bossColor, 0.2 + pulse * 0.2);
-      for (let i = 0; i < 6; i++) {
-        const a = (i / 6) * Math.PI * 2 + this.bgAnimT * 0.5;
+      fx.lineStyle(2, bossColor, 0.25 + pulse * 0.25);
+      for (let i = 0; i < 8; i++) {
+        const a = (i / 8) * Math.PI * 2 + this.bgAnimT * 0.5;
         fx.lineBetween(
           CANVAS_W / 2 + 140,
           CANVAS_H / 2 - 30,
-          CANVAS_W / 2 + 140 + Math.cos(a) * 80,
-          CANVAS_H / 2 - 30 + Math.sin(a) * 80
+          CANVAS_W / 2 + 140 + Math.cos(a) * 100,
+          CANVAS_H / 2 - 30 + Math.sin(a) * 100
         );
       }
+      // 第2形態：画面全体に薄い赤のオーバーレイ
+      g.fillStyle(bossColor, 0.04 + pulse * 0.03);
+      g.fillRect(0, 0, CANVAS_W, CANVAS_H);
     }
-
-    // Ground line
-    g.fillStyle(0x1a0a0a, 1);
-    g.fillRect(0, CANVAS_H - 100, CANVAS_W, 100);
-    g.lineStyle(1, bossColor, 0.3);
-    g.lineBetween(0, CANVAS_H - 100, CANVAS_W, CANVAS_H - 100);
   }
 
   _drawChars() {
@@ -279,50 +292,103 @@ class BossScene extends Phaser.Scene {
 
     const by = CANVAS_H - 110;
 
-    // Player (left side)
-    const pFlash = this.state === 'battle' && Math.sin(this.flashT) > 0.5;
-    g.fillStyle(pFlash ? 0x8888ff : 0x5566ff, 1);
+    // ヒーロー画像 — フラッシュ
     const px = CANVAS_W / 2 - 140;
-    g.fillCircle(px, by - 30, 12);
-    g.fillRect(px - 11, by - 18, 22, 25);
-    g.fillRect(px - 11, by + 7, 8, 18);
-    g.fillRect(px + 3, by + 7, 8, 18);
-    // Weapon swing
-    g.fillStyle(0xcccc66, 1);
-    g.fillRect(px + 12, by - 35, 5, 35);
-    // HP bar indicator
+    const pFlash = this.state === 'battle' && Math.sin(this.flashT) > 0.5;
+    if (pFlash) { this.heroImg.setTint(0xffffff); } else { this.heroImg.clearTint(); }
+
+    // プレイヤーHPバー（画像の上に配置）
     const pPct = gs.player.hp / gs.getStats().maxHp;
+    const pBarY = by - this.heroImg.displayHeight - 10;
     g.fillStyle(0x220000, 1);
-    g.fillRect(px - 35, by - 55, 70, 8);
+    g.fillRect(px - 35, pBarY, 70, 8);
     g.fillStyle(pPct > 0.5 ? 0x22cc22 : pPct > 0.25 ? 0xcccc22 : 0xcc2222, 1);
-    g.fillRect(px - 35, by - 55, Math.floor(70 * pPct), 8);
+    g.fillRect(px - 35, pBarY, Math.floor(70 * pPct), 8);
 
-    // Boss (right side)
-    const boss = this.bossData;
+    // ボス画像 — フラッシュとフェーズ2拡大
     const bFlash = this.state === 'battle' && Math.sin(this.flashT) < -0.5;
-    const bCol = bFlash ? 0xffffff : (boss.color || 0xff2200);
+    const bScale = this._bossBaseScale * (this.phase === 2 ? 1.3 : 1.0);
+    this.bossImg.setScale(bScale);
+    if (bFlash) { this.bossImg.setTint(0xffffff); } else { this.bossImg.clearTint(); }
+
+    // ボスHPバー（画像の上に配置）
     const bx = CANVAS_W / 2 + 140;
-    const bScale = this.phase === 2 ? 1.5 : 1.2;
-    const bs = bScale;
-
-    g.fillStyle(bCol, 1);
-    g.fillCircle(bx, by - 40 * bs, 18 * bs);
-    g.fillRect(bx - 16 * bs, by - 22 * bs, 32 * bs, 30 * bs);
-    g.fillRect(bx - 16 * bs, by + 8 * bs, 12 * bs, 20 * bs);
-    g.fillRect(bx + 4 * bs, by + 8 * bs, 12 * bs, 20 * bs);
-
-    // Boss crown
-    g.fillStyle(0xffd700, 1);
-    g.fillTriangle(bx - 15, by - 56 * bs, bx - 10, by - 45 * bs, bx - 5, by - 56 * bs);
-    g.fillTriangle(bx - 3, by - 58 * bs, bx + 2, by - 47 * bs, bx + 7, by - 58 * bs);
-    g.fillTriangle(bx + 9, by - 55 * bs, bx + 14, by - 44 * bs, bx + 19, by - 55 * bs);
-
-    // Boss HP bar
     const bPct = Math.max(0, this.bossHp / this.bossMaxHp);
+    const barY = by - this.bossImg.displayHeight - 10;
     g.fillStyle(0x220000, 1);
-    g.fillRect(bx - 60, by - 82 * bs, 120, 10);
+    g.fillRect(bx - 60, barY, 120, 10);
     g.fillStyle(bPct > 0.5 ? 0xcc2222 : 0xff0000, 1);
-    g.fillRect(bx - 60, by - 82 * bs, Math.floor(120 * bPct), 10);
+    g.fillRect(bx - 60, barY, Math.floor(120 * bPct), 10);
+  }
+
+  _playHeroAttack(dmg) {
+    const px = CANVAS_W / 2 - 140;
+    const bx = CANVAS_W / 2 + 140;
+    const by = CANVAS_H - 110;
+
+    // 前進
+    this.heroImg.setTexture('hero_atk1');
+    this.tweens.add({ targets: this.heroImg, x: px + 55, duration: 160, ease: 'Quad.Out' });
+
+    // 斬撃 + ダメージ表示
+    this.time.delayedCall(160, () => {
+      if (this.state !== 'battle' && this.state !== 'victory') return;
+      this.heroImg.setTexture('hero_atk2');
+      this._showSlashFx(bx - 30, by - 90);
+      window.playAttackSE?.('sword');
+      this._addFloat(bx + 20, by - 120, `-${dmg}`, '#ff4444');
+    });
+
+    // フォロースルー
+    this.time.delayedCall(320, () => {
+      if (!this.heroImg?.active) return;
+      this.heroImg.setTexture('hero_atk3');
+      this.tweens.add({ targets: this.heroImg, x: px, duration: 160, ease: 'Quad.In' });
+    });
+
+    // 通常に戻す
+    this.time.delayedCall(520, () => {
+      if (!this.heroImg?.active) return;
+      this.heroImg.setTexture('hero');
+      this.heroImg.x = px;
+    });
+  }
+
+  _playBossAttack(dmg) {
+    const bx = CANVAS_W / 2 + 140;
+    const px = CANVAS_W / 2 - 140;
+    const by = CANVAS_H - 110;
+
+    // ボスが左へ突進
+    this.tweens.add({ targets: this.bossImg, x: bx - 70, duration: 160, ease: 'Quad.Out' });
+
+    // ヒット
+    this.time.delayedCall(160, () => {
+      if (!this.bossImg?.active) return;
+      this._addFloat(px - 20, by - 120, `-${dmg}`, '#ff2222');
+      this.cameras.main.shake(120, 0.004);
+    });
+
+    // ボスが戻る
+    this.time.delayedCall(320, () => {
+      if (!this.bossImg?.active) return;
+      this.tweens.add({ targets: this.bossImg, x: bx, duration: 160, ease: 'Quad.In' });
+    });
+  }
+
+  _showSlashFx(x, y) {
+    const g = this.add.graphics().setDepth(15);
+    const col = 0xffffff;
+    g.lineStyle(3, col, 0.9);
+    g.lineBetween(x - 30, y - 30, x + 30, y + 30);
+    g.lineBetween(x + 30, y - 30, x - 30, y + 30);
+    g.lineStyle(2, 0xffdd88, 0.7);
+    g.lineBetween(x - 20, y - 35, x + 35, y + 20);
+    this.tweens.add({
+      targets: g, alpha: 0, scaleX: 1.5, scaleY: 1.5,
+      duration: 280, ease: 'Quad.In',
+      onComplete: () => g.destroy()
+    });
   }
 
   _drawHpBars() {

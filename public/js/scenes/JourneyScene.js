@@ -125,6 +125,18 @@ class JourneyScene extends Phaser.Scene {
 
     // 旅BGM再生（タイトルBGMから切り替え）
     window.bgmManager.play('bgm_journey');
+
+    // デバッグ: ?boss=inferno でボス戦に直接ジャンプ
+    const _bossDebug = new URLSearchParams(location.search).get('boss');
+    if (_bossDebug) {
+      this.time.delayedCall(400, () => {
+        const idx = D.BOSSES.findIndex(b => b.id === _bossDebug);
+        const boss = idx >= 0 ? D.BOSSES[idx] : D.BOSSES[0];
+        this.state = 'boss_enter';
+        this.scene.pause('JourneyScene');
+        this.scene.launch('BossScene', { boss });
+      });
+    }
   }
 
   // =========================================================
